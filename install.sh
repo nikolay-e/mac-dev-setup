@@ -67,72 +67,89 @@ setup_python() {
   PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
   
   # Find latest patch version for the specified major.minor
-  local latest_version
-  latest_version=$(pyenv install --list | grep -E "^  ${PYTHON_VERSION}\.[0-9]+$" | tail -1 | xargs)
-  if [[ -n "$latest_version" ]]; then
-    PYTHON_VERSION="$latest_version"
-    echo "Using latest Python ${PYTHON_VERSION}"
+  if command -v pyenv &> /dev/null; then
+    local latest_version
+    latest_version=$(pyenv install --list | grep -E "^  ${PYTHON_VERSION}\.[0-9]+$" | tail -1 | xargs)
+    if [[ -n "$latest_version" ]]; then
+      PYTHON_VERSION="$latest_version"
+      echo "Using latest Python ${PYTHON_VERSION}"
+    else
+      echo "Warning: Could not find Python ${PYTHON_VERSION}, using default"
+      PYTHON_VERSION="3.12.4"  # Fallback
+    fi
   else
-    echo "Warning: Could not find Python ${PYTHON_VERSION}, using default"
-    PYTHON_VERSION="3.12.4"  # Fallback
+    echo "pyenv not available (dry-run mode), using default Python ${PYTHON_VERSION}"
+    PYTHON_VERSION="3.12.4"  # Fallback for dry-run
   fi
   
-  if ! pyenv versions --bare | grep -q "^$PYTHON_VERSION$"; then
-    run pyenv install "$PYTHON_VERSION"
+  if command -v pyenv &> /dev/null; then
+    if ! pyenv versions --bare | grep -q "^$PYTHON_VERSION$"; then
+      run pyenv install "$PYTHON_VERSION"
+    else
+      echo "Python $PYTHON_VERSION is already installed. Skipping."
+    fi
+    run pyenv global "$PYTHON_VERSION"
   else
-    echo "Python $PYTHON_VERSION is already installed. Skipping."
+    echo "pyenv not available, skipping Python installation"
   fi
-  run pyenv global "$PYTHON_VERSION"
   
   info "Installing Python CLI tools via pipx..."
   # Ensure pipx path is set up (only if not already done)
-  if ! echo "$PATH" | grep -q "\.local/bin"; then
-    run pipx ensurepath
+  if command -v pipx &> /dev/null; then
+    if ! echo "$PATH" | grep -q "\.local/bin"; then
+      run pipx ensurepath
+    else
+      echo "pipx path already configured"
+    fi
   else
-    echo "pipx path already configured"
+    echo "pipx not available, skipping path setup"
   fi
   
   local dir
   dir=$(pwd)
   
   # Install packages from requirements.txt
-  while IFS= read -r package || [ -n "$package" ]; do
-    # Skip empty lines and comments
-    [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
-    
-    # Extract package name (handle comments on same line)
-    package_line=$(echo "$package" | sed 's/[[:space:]]*#.*//' | xargs)
-    [[ -z "$package_line" ]] && continue
-    
-    # Extract the actual package name for checking if installed
-    if [[ "$package_line" =~ git\+ ]]; then
-      # For git URLs, extract the subdirectory name or repo name
-      if [[ "$package_line" =~ subdirectory=([^/]+) ]]; then
+  if command -v pipx &> /dev/null; then
+    while IFS= read -r package || [ -n "$package" ]; do
+      # Skip empty lines and comments
+      [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
+      
+      # Extract package name (handle comments on same line)
+      package_line=$(echo "$package" | sed 's/[[:space:]]*#.*//' | xargs)
+      [[ -z "$package_line" ]] && continue
+      
+      # Extract the actual package name for checking if installed
+      if [[ "$package_line" =~ git\+ ]]; then
+        # For git URLs, extract the subdirectory name or repo name
+        if [[ "$package_line" =~ subdirectory=([^/]+) ]]; then
+          package_name="${BASH_REMATCH[1]}"
+        else
+          package_name=$(echo "$package_line" | sed 's|.*/||' | sed 's|\.git.*||')
+        fi
+      elif [[ "$package_line" =~ ^\./(.+) ]]; then
+        # For local packages, use the directory name
         package_name="${BASH_REMATCH[1]}"
+        # Convert relative path to absolute
+        package_line="$dir/$package_line"
       else
-        package_name=$(echo "$package_line" | sed 's|.*/||' | sed 's|\.git.*||')
+        package_name="$package_line"
       fi
-    elif [[ "$package_line" =~ ^\./(.+) ]]; then
-      # For local packages, use the directory name
-      package_name="${BASH_REMATCH[1]}"
-      # Convert relative path to absolute
-      package_line="$dir/$package_line"
-    else
-      package_name="$package_line"
-    fi
-    
-    # Check if already installed to avoid duplicates
-    if pipx list | grep -q -E "(^  |package )$package_name"; then
-      echo "$package_name is already installed via pipx. Skipping."
-    else
-      echo "Installing $package_name via pipx..."
-      if run pipx install "$package_line"; then
-        echo "OK Successfully installed $package_name"
+      
+      # Check if already installed to avoid duplicates
+      if pipx list | grep -q -E "(^  |package )$package_name"; then
+        echo "$package_name is already installed via pipx. Skipping."
       else
-        echo "WARNING  Failed to install $package_name"
+        echo "Installing $package_name via pipx..."
+        if run pipx install "$package_line"; then
+          echo "OK Successfully installed $package_name"
+        else
+          echo "WARNING  Failed to install $package_name"
+        fi
       fi
-    fi
-  done < "$dir/requirements.txt"
+    done < "$dir/requirements.txt"
+  else
+    echo "pipx not available, skipping Python package installations"
+  fi
 }
 
 setup_nodejs() {
