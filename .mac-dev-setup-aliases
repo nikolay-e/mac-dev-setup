@@ -1,11 +1,22 @@
 # --------------------------------------------------------------------
-##  General & Navigation
+##  Modern CLI Replacements & Aliases
 # --------------------------------------------------------------------
-alias ls='ls -G'
-alias l='ls -lFh'
-alias la='ls -lAFh'
-alias ll='ls -l'
-alias lsd='ls -lFh | grep --color=never "^d"'
+# Use modern alternatives for core commands
+alias cat='bat --paging=never' # Use bat, but don't pipe to a pager by default
+alias find='fd'
+alias grep='rg'
+
+# Aliases for eza (the modern replacement for ls)
+alias ls='eza --icons'         # ls shows icons
+alias l='eza -l --icons'       # Long format
+alias ll='eza -l --icons'      # Same as l
+alias la='eza -la --icons'     # Show hidden files
+alias lt='eza -T --level=2'    # Show a tree view, 2 levels deep
+alias l.='eza -la | grep "^\."' # List only dotfiles
+
+# --------------------------------------------------------------------
+##  Navigation & Zsh
+# --------------------------------------------------------------------
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -55,15 +66,6 @@ alias gdc='git diff --cached'
 # Standardize python and pip commands to the pyenv global version
 alias python='python3'
 alias pip='pip3'
-
-# --------------------------------------------------------------------
-## 🚀 Modern CLI Tool Replacements
-# --------------------------------------------------------------------
-# Use modern alternatives when available
-alias cat='bat'
-alias ls='eza'
-alias find='fd'
-alias grep='rg'
 
 # --------------------------------------------------------------------
 ## 🛠️ Utilities

@@ -1,0 +1,12 @@
+# plugins.toml
+# This file is managed by Sheldon, the Zsh plugin manager.
+
+[plugins]
+
+# Provides command auto-suggestions based on your history
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+
+# Provides command syntax highlighting in the terminal
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"

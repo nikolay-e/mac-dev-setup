@@ -16,6 +16,7 @@ brew "pyenv"
 brew "pipx"
 brew "starship" # Modern prompt
 brew "zellij"   # Modern multiplexer
+brew "sheldon"  # Fast Zsh plugin manager
 brew "ripgrep"  # Better grep
 brew "bat"      # Better cat
 brew "eza"      # Better ls
