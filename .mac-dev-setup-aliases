@@ -4,88 +4,86 @@
 ## Modern CLI Replacements & Aliases
 # --------------------------------------------------------------------
 # Use modern alternatives for core commands
-alias cat='bat --paging=never' # View file contents with syntax highlighting
-alias find='fd' # Fast file search by name or pattern
-alias grep='rg' # Fast text search within files
+alias cat='bat --paging=never' # Modern file viewer with syntax highlighting for code files
 
-# Aliases for eza (the modern replacement for ls)
-alias ls='eza'                 # List directory contents
-alias l='eza'                # List files (basic format)
-alias ll='eza -l'              # List files in long format
-alias la='eza -la'             # List all files including hidden ones
-alias lt='eza -T --level=2'    # Show directory tree (2 levels deep)
-alias l.='eza -la | grep "^\."' # List only hidden dotfiles
-alias ltr='eza -la --sort=modified' # List files sorted by modification time
-alias lsd='eza -la | grep "^d"' # Show only directories
-alias lss='eza -la --sort=size' # List files sorted by size
+# File listing with modern tool (colorized output with icons and git status)
+alias ls='eza'                 # Basic file listing with colors and icons
+alias l='eza'                # Quick file listing
+alias ll='eza -l'              # Detailed view: permissions, size, date, owner
+alias la='eza -la'             # Show all files including hidden ones starting with dot
+alias lt='eza -T --level=2'    # Tree view of directory structure (2 levels deep)
+alias l.='eza -la | grep "^\."' # Show only dotfiles (.bashrc, .gitconfig, etc)
+alias ltr='eza -la --sort=modified' # Sort by modification time (newest first)
+alias lsd='eza -la | grep "^d"' # Show only directories (folders)
+alias lss='eza -la --sort=size' # Sort by file size (largest first)
 
 # --------------------------------------------------------------------
 ## Navigation & Zsh
 # --------------------------------------------------------------------
-alias ..='cd ..' # Go up one directory
-alias ...='cd ../..' # Go up two directories
-alias ....='cd ../../..' # Go up three directories
-alias .....='cd ../../../..' # Go up four directories
-alias ......='cd ../../../../..' # Go up five directories
-alias cd..='cd ..' # Common typo correction
-alias ~='cd ~' # Quick home directory access
-alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs' # Navigate to iCloud Drive
-alias ccode='cd ~/code' # Navigate to code directory
-alias dev='cd ~/Development' # Common development directory
-alias dl='cd ~/Downloads' # Quick downloads access
-alias zshconfig='nvim ~/.zshrc' # Edit zsh configuration file
-alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit and reload zsh config
-alias reload='source ~/.zshrc' # Reload shell configuration
-alias hosts='sudo nvim /etc/hosts' # Edit system hosts file
+alias ..='cd ..' # Navigate up one directory level
+alias ...='cd ../..' # Navigate up two directory levels
+alias ....='cd ../../..' # Navigate up three directory levels
+alias .....='cd ../../../..' # Navigate up four directory levels
+alias ......='cd ../../../../..' # Navigate up five directory levels
+alias cd..='cd ..' # Fix common typing mistake (missing space)
+alias ~='cd ~' # Jump to home directory quickly
+alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs' # Jump to iCloud Drive folder
+alias ccode='cd ~/code' # Jump to main coding projects folder
+alias dev='cd ~/Development' # Jump to development projects folder
+alias dl='cd ~/Downloads' # Jump to downloads folder
+alias zshconfig='nvim ~/.zshrc' # Edit shell configuration file
+alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit config file and apply changes immediately
+alias reload='source ~/.zshrc' # Apply shell config changes without restarting terminal
+alias hosts='sudo nvim /etc/hosts' # Edit system hosts file (requires admin password)
 
 # --------------------------------------------------------------------
 ## Tree & Clipboard
 # --------------------------------------------------------------------
-alias tree='tree -C' # Display directory structure with colors
-alias treex='tree -C -I "node_modules|*.pyc|__pycache__"' # Tree excluding common dev files
-alias c='clear' # Clear terminal screen
-alias p='pbpaste' # Paste from clipboard
+alias tree='tree -C' # Show directory structure as a visual tree with colors
+alias treex='tree -C -I "node_modules|*.pyc|__pycache__"' # Clean tree view without build artifacts
+alias c='clear' # Clear terminal screen (clean slate)
+alias p='pbpaste' # Paste text from system clipboard to terminal
 alias copypwd='pwd | pbcopy' # Copy current directory path to clipboard
 
 # --------------------------------------------------------------------
 ## Neovim (nvim)
 # --------------------------------------------------------------------
-alias v='nvim' # Open Neovim editor
-alias vi='nvim' # Open Neovim (vi shortcut)
-alias vim='nvim' # Open Neovim (vim shortcut)
-alias e='nvim' # Quick editor access
-alias oldvim='/usr/bin/vim'  # Open original system Vim
+alias v='nvim' # Launch modern text editor
+alias vi='nvim' # Classic editor command with modern features
+alias vim='nvim' # Enhanced version of traditional editor
+alias e='nvim' # Quick editor launcher
+alias oldvim='/usr/bin/vim'  # Original system editor (fallback)
 
 # --------------------------------------------------------------------
 ## Git
 # --------------------------------------------------------------------
-alias g='git' # Git command shortcut
-alias gs='git status -s' # Show short git status
-alias ga='git add' # Stage files for commit
-alias gaa='git add --all' # Stage all changes
-alias gc='git commit -m' # Commit with message
-alias gca='git commit --amend --no-edit' # Amend last commit without editing message
-alias gb='git branch' # List or create branches
-alias gco='git checkout' # Switch branches or restore files
-alias gcb='git checkout -b' # Create and switch to new branch
-alias gp='git push' # Push commits to remote
-alias gpf='git push --force-with-lease' # Force push safely
-alias gpom='git push origin main' # Push to origin main
-alias gpod='git push origin develop' # Push to origin develop
-alias gl='git pull' # Pull changes from remote
-alias glog='git log --oneline --decorate --graph --all' # Show pretty git log graph
-alias gd='git diff' # Show unstaged changes
-alias gdc='git diff --cached' # Show staged changes
-alias gst='git status' # Common shorthand for git status (oh-my-zsh style)
-alias gba='git branch -a' # List all branches including remotes
-alias gcam='git commit -a -m' # Commit all tracked changes with message
-alias lg='lazygit'    # Open LazyGit terminal UI
+alias g='git' # Version control system command shortcut
+alias gs='git status -s' # Quick overview of file changes (compact format)
+alias ga='git add' # Stage specific files for next commit
+alias gaa='git add --all' # Stage all changed files for commit
+alias gc='git commit -m' # Save changes with descriptive message
+alias gca='git commit --amend --no-edit' # Fix last commit without changing message
+alias gb='git branch' # List existing branches or create new ones
+alias gco='git checkout' # Switch between branches or restore files
+alias gcb='git checkout -b' # Create new branch and switch to it
+alias gp='git push' # Upload local commits to remote repository
+alias gpf='git push --force-with-lease' # Force upload with safety check
+alias gpom='git push origin main' # Upload to main branch
+alias gpod='git push origin develop' # Upload to development branch
+alias gl='git pull' # Download latest changes from remote
+alias glog='git log --oneline --decorate --graph --all' # Visual commit history with branches
+alias gd='git diff' # Show what changed in files (not staged)
+alias gdc='git diff --cached' # Show what's staged for next commit
+alias gst='git status' # Full status of repository changes
+alias gba='git branch -a' # List all branches including remote ones
+alias gcam='git commit -a -m' # Stage and commit all tracked changes at once
+alias lg='lazygit'    # Visual git interface with mouse support
 
 # Enhanced Git workflows
-alias gwip='git add -A && git commit -m "WIP" --no-verify' # Quick work-in-progress commit
-alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1' # Undo last WIP commit
-alias gundo='git reset --soft HEAD~1' # Undo last commit keeping changes staged
-alias gundo-hard='git reset --hard HEAD~1'  # Undo last commit discarding all changes
+alias gwip='git add -A && git commit -m "WIP" --no-verify' # Quick save work in progress (skip hooks)
+alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1' # Undo work-in-progress save
+alias gundo='git reset --soft HEAD~1' # Undo last commit but keep changes ready
+alias gundo-hard='git reset --hard HEAD~1'  # Undo last commit and destroy all changes
 
 # Destructive operations with safety prompts
 gpristine() {
@@ -94,78 +92,78 @@ gpristine() {
   read -r
   git reset --hard && git clean -dffx
 }
-alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d' # Delete merged branches
+alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d' # Clean up old branches that were already merged
 
 # Advanced Git operations
-alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit' # Colored git log
-alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)' # Sync current branch with origin
-alias gfix='git commit --fixup' # Create fixup commit for later squashing
-alias gsquash='git rebase -i --autosquash' # Interactive rebase with autosquash
-alias gstash='git stash push -m' # Stash changes with message
-alias gsh='git stash' # Quick stash
-alias gsp='git stash pop' # Apply and remove latest stash
+alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit' # Beautiful commit history with colors and graph
+alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)' # Update branch with latest remote changes
+alias gfix='git commit --fixup' # Create commit to fix earlier commit (for squashing)
+alias gsquash='git rebase -i --autosquash' # Combine multiple commits into cleaner history
+alias gstash='git stash push -m' # Temporarily save changes with description
+alias gsh='git stash' # Quick temporary save of current changes
+alias gsp='git stash pop' # Restore and remove most recent temporary save
 
 # GitHub CLI shortcuts
-alias prc='gh pr create --fill' # Create GitHub pull request
-alias prv='gh pr view' # View current pull request
-alias prs='gh pr status' # Show PR status
-alias prchecks='gh pr checks' # Show PR CI check status
-alias prco='gh pr checkout' # Checkout a pull request locally
+alias prc='gh pr create --fill' # Create pull request with auto-filled details
+alias prv='gh pr view' # View pull request details in terminal
+alias prs='gh pr status' # Check status of your pull requests
+alias prchecks='gh pr checks' # View automated test results
+alias prco='gh pr checkout' # Download someone else's pull request to test
 
 # --------------------------------------------------------------------
 ## Kubernetes (Enhanced with ahmetb-style aliases)
 # --------------------------------------------------------------------
-alias k='kubectl' # Kubernetes CLI shortcut
-alias kg='kubectl get' # Get resources shortcut
+alias k='kubectl' # Container orchestration system command
+alias kg='kubectl get' # Retrieve information about cluster resources
 
-# Get commands (inspired by ahmetb/kubectl-aliases)
-alias kgp='kubectl get pods' # List all pods
-alias kgpo='kubectl get pods -o wide' # List pods with node info
-alias kgpw='kubectl get pods --watch' # Watch pod changes live
-alias kgs='kubectl get services' # List all services
-alias kgso='kubectl get services -o wide' # List services with details
-alias kgd='kubectl get deployments' # List all deployments
-alias kgdo='kubectl get deployments -o wide' # List deployments with details
-alias kgn='kubectl get nodes' # List cluster nodes
-alias kgno='kubectl get nodes -o wide' # List nodes with details
-alias kgns='kubectl get namespaces' # List all namespaces
-alias kgcm='kubectl get configmaps' # List all configmaps
-alias kgsec='kubectl get secrets' # List all secrets
-alias kgall='kubectl get all' # List all resources
+# Get commands (retrieve cluster information)
+alias kgp='kubectl get pods' # List running application containers
+alias kgpo='kubectl get pods -o wide' # List containers with node placement info
+alias kgpw='kubectl get pods --watch' # Monitor container status changes in real-time
+alias kgs='kubectl get services' # List network endpoints for applications
+alias kgso='kubectl get services -o wide' # List network services with IP details
+alias kgd='kubectl get deployments' # List application deployment configurations
+alias kgdo='kubectl get deployments -o wide' # List deployments with replica details
+alias kgn='kubectl get nodes' # List cluster worker machines
+alias kgno='kubectl get nodes -o wide' # List worker machines with system info
+alias kgns='kubectl get namespaces' # List isolated environments in cluster
+alias kgcm='kubectl get configmaps' # List configuration data storage objects
+alias kgsec='kubectl get secrets' # List encrypted credential storage objects
+alias kgall='kubectl get all' # List all major resources in current namespace
 
-# Describe commands
-alias kdp='kubectl describe pod'
-alias kds='kubectl describe service'
-alias kdd='kubectl describe deployment'
-alias kdn='kubectl describe node'
+# Describe commands (detailed information)
+alias kdp='kubectl describe pod' # Get detailed container information and events
+alias kds='kubectl describe service' # Get detailed network service configuration
+alias kdd='kubectl describe deployment' # Get detailed application deployment info
+alias kdn='kubectl describe node' # Get detailed worker machine information
 
-# Logs and exec
-alias klogs='kubectl logs'
-alias klogf='kubectl logs -f'
-alias klogt='kubectl logs --tail=100'
-alias klogft='kubectl logs -f --tail=100'
-alias kexec='kubectl exec -it'
+# Logs and exec (debugging and monitoring)
+alias klogs='kubectl logs' # View application output and error messages
+alias klogf='kubectl logs -f' # Stream live application logs
+alias klogt='kubectl logs --tail=100' # View last 100 lines of application output
+alias klogft='kubectl logs -f --tail=100' # Stream last 100 lines and continue
+alias kexec='kubectl exec -it' # Connect to running container for debugging
 
-# Apply and delete
-alias kapp='kubectl apply -f'
-alias kdel='kubectl delete'
-alias kdelp='kubectl delete pod'
-alias kdels='kubectl delete service'
-alias kdeld='kubectl delete deployment'
+# Apply and delete (resource management)
+alias kapp='kubectl apply -f' # Deploy configuration from YAML file
+alias kdel='kubectl delete' # Remove resources from cluster
+alias kdelp='kubectl delete pod' # Remove specific application container
+alias kdels='kubectl delete service' # Remove network service endpoint
+alias kdeld='kubectl delete deployment' # Remove application deployment
 
-# Port forwarding and proxy
-alias kpf='kubectl port-forward'    # Usage: kpf svc/myapp 8080:80
-alias kproxy='kubectl proxy'
+# Port forwarding and proxy (network access)
+alias kpf='kubectl port-forward'    # Access cluster applications locally (Usage: kpf svc/myapp 8080:80)
+alias kproxy='kubectl proxy' # Create local gateway to cluster API
 
-# Context and namespace management
-alias kctx='kubectx'               # Switch contexts
-alias kns='kubens'                 # Switch namespaces
-alias kgc='kubectl config get-contexts'
-alias kcc='kubectl config current-context'
+# Context and namespace management (cluster switching)
+alias kctx='kubectx'               # Switch between different clusters
+alias kns='kubens'                 # Switch between isolated environments
+alias kgc='kubectl config get-contexts' # List all available clusters
+alias kcc='kubectl config current-context' # Show which cluster you're connected to
 
 # Advanced tools
-alias kstern='stern'               # Multi-pod log tailing
-alias k9='k9s'                     # Kubernetes cluster TUI
+alias kstern='stern'               # View logs from multiple containers simultaneously
+alias k9='k9s'                     # Visual cluster management interface
 
 # Quick utilities
 kdebug() {
@@ -224,20 +222,20 @@ helm-status() {
 # --------------------------------------------------------------------
 ## Docker & Container Management
 # --------------------------------------------------------------------
-alias d='docker'               # Base Docker command
-alias dc='docker compose'      # Docker Compose (v2+)
-alias dps='docker ps'          # List running containers
-alias dpsa='docker ps -a'      # List all containers (including stopped)
-alias di='docker images'       # List images
-alias drm='docker rm'          # Remove containers
-alias drmi='docker rmi'        # Remove images
-alias db='docker build'        # Build image from Dockerfile
-alias dr='docker run -it --rm' # Run interactive container (with removal)
-alias dexec='docker exec -it'  # Exec into running container
-alias dlogs='docker logs -f'   # Follow container logs
-alias dcu='docker compose up -d' # Start Compose services detached
-alias dcd='docker compose down'  # Stop and remove Compose services
-alias dprune='docker system prune -f' # Prune unused resources (images, containers, etc.)
+alias d='docker'               # Container platform command
+alias dc='docker compose'      # Multi-container application orchestrator
+alias dps='docker ps'          # List currently running isolated environments
+alias dpsa='docker ps -a'      # List all environments (running and stopped)
+alias di='docker images'       # List available application templates
+alias drm='docker rm'          # Remove stopped container environments
+alias drmi='docker rmi'        # Remove application template images
+alias db='docker build'        # Create application template from instructions
+alias dr='docker run -it --rm' # Start temporary interactive container session
+alias dexec='docker exec -it'  # Connect to running container for debugging
+alias dlogs='docker logs -f'   # Stream application output from container
+alias dcu='docker compose up -d' # Start multi-service application in background
+alias dcd='docker compose down'  # Stop and cleanup multi-service application
+alias dprune='docker system prune -f' # Clean up unused containers and images
 
 # Enhanced Docker functions
 docker-clean() {
@@ -251,27 +249,27 @@ docker-bash() {
     echo "Usage: docker-bash <container_id_or_name>"
     return 1
   fi
-  docker exec -it "$1" /bin/bash || docker exec -it "$1" /bin/sh  # Exec bash into container (fallback to sh if needed)
+  docker exec -it "$1" /bin/bash || docker exec -it "$1" /bin/sh  # Open shell in running container for debugging
 }
 
 docker-stats() {
-  docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"  # Formatted stats
+  docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"  # Monitor container resource usage
 }
 
 # --------------------------------------------------------------------
 ## Terraform & Infrastructure as Code
 # --------------------------------------------------------------------
-alias tf='terraform'
-alias tfi='terraform init'
-alias tfp='terraform plan'
-alias tfa='terraform apply'
-alias tfd='terraform destroy'
-alias tfv='terraform validate'
-alias tff='terraform fmt -recursive'
-alias tfs='terraform show'
-alias tfr='terraform refresh'
-alias tfo='terraform output'
-alias tfws='terraform workspace'
+alias tf='terraform' # Infrastructure provisioning tool
+alias tfi='terraform init' # Initialize project and download provider plugins
+alias tfp='terraform plan' # Preview infrastructure changes before applying
+alias tfa='terraform apply' # Create or update cloud infrastructure
+alias tfd='terraform destroy' # Delete all managed cloud resources
+alias tfv='terraform validate' # Check configuration syntax and logic
+alias tff='terraform fmt -recursive' # Format code for consistent style
+alias tfs='terraform show' # Display current infrastructure state
+alias tfr='terraform refresh' # Update state with real infrastructure
+alias tfo='terraform output' # Display infrastructure output values
+alias tfws='terraform workspace' # Manage isolated infrastructure environments
 
 # Modern Terraform workflow functions (using tenv for version management)
 tfapply() {
@@ -297,7 +295,7 @@ tfwswitch() {
 }
 
 tfsec() {
-  trivy config . --severity HIGH,CRITICAL
+  trivy config . --severity HIGH,CRITICAL # Scan infrastructure code for security issues
 }
 
 tfcost() {
@@ -317,15 +315,15 @@ alias tfinstall='tenv install terraform'
 # --------------------------------------------------------------------
 ## AWS CLI
 # --------------------------------------------------------------------
-alias aw='aws'                 # Base AWS command
-alias awls='aws ec2 describe-instances --query "Reservations[*].Instances[*].[InstanceId,State.Name,InstanceType,Tags[?Key==`Name`].Value|[0]]" --output table'  # List EC2 instances in table
-alias awstop='aws ec2 stop-instances --instance-ids'  # Stop EC2 instance(s)
-alias awstart='aws ec2 start-instances --instance-ids'  # Start EC2 instance(s)
-alias aws3ls='aws s3 ls'       # List S3 buckets
-alias aws3cp='aws s3 cp'       # Copy files to/from S3
-alias awlambda='aws lambda list-functions --query "Functions[*].[FunctionName,Runtime]" --output table'  # List Lambda functions
-alias awlogin='aws sso login'  # SSO login (if using AWS SSO)
-alias awprofile='export AWS_PROFILE='  # Set AWS profile (usage: awprofile myprofile)
+alias aw='aws'                 # Amazon Web Services cloud platform command
+alias awls='aws ec2 describe-instances --query "Reservations[*].Instances[*].[InstanceId,State.Name,InstanceType,Tags[?Key==`Name`].Value|[0]]" --output table'  # List cloud virtual machines in table format
+alias awstop='aws ec2 stop-instances --instance-ids'  # Shutdown cloud virtual machines
+alias awstart='aws ec2 start-instances --instance-ids'  # Power on cloud virtual machines
+alias aws3ls='aws s3 ls'       # List cloud storage buckets
+alias aws3cp='aws s3 cp'       # Transfer files to/from cloud storage
+alias awlambda='aws lambda list-functions --query "Functions[*].[FunctionName,Runtime]" --output table'  # List serverless function deployments
+alias awlogin='aws sso login'  # Authenticate with single sign-on
+alias awprofile='export AWS_PROFILE='  # Switch between cloud account configurations
 
 # AWS functions for common tasks
 aws-ec2-ip() {
@@ -333,7 +331,7 @@ aws-ec2-ip() {
     echo "Usage: aws-ec2-ip <instance_id>"
     return 1
   fi
-  aws ec2 describe-instances --instance-ids "$1" --query "Reservations[*].Instances[*].PublicIpAddress" --output text
+  aws ec2 describe-instances --instance-ids "$1" --query "Reservations[*].Instances[*].PublicIpAddress" --output text # Get public IP of virtual machine
 }
 
 aws-s3-size() {
@@ -341,43 +339,34 @@ aws-s3-size() {
     echo "Usage: aws-s3-size <bucket_name>"
     return 1
   fi
-  aws s3 ls --summarize --human-readable --recursive "s3://$1" | tail -1
+  aws s3 ls --summarize --human-readable --recursive "s3://$1" | tail -1 # Calculate total storage bucket size
 }
-
-# --------------------------------------------------------------------
-## Python
-# --------------------------------------------------------------------
-# Pyenv is used to manage Python versions.
-# The 'python' and 'pip' commands will automatically point to the
-# version set by `pyenv global` or `pyenv local`.
-alias python='python3' # Ensure python command uses Python 3
-alias pip='pip3' # Ensure pip uses Python 3 pip
 
 # --------------------------------------------------------------------
 ## Homebrew (macOS Package Management)
 # --------------------------------------------------------------------
-alias brew-update='brew update && brew upgrade && brew cleanup' # Update all brew packages
-alias bru='brew update && brew upgrade' # Quick brew update
-alias bri='brew install' # Install package
-alias brs='brew search' # Search packages
-alias brl='brew list' # List installed packages
-alias brr='brew remove' # Remove package
-alias brc='brew cleanup' # Clean old versions
+alias brew-update='brew update && brew upgrade && brew cleanup' # Update all macOS software packages
+alias bru='brew update && brew upgrade' # Quick system software update
+alias bri='brew install' # Install new software package
+alias brs='brew search' # Find available software packages
+alias brl='brew list' # Show installed software packages
+alias brr='brew remove' # Uninstall software package
+alias brc='brew cleanup' # Remove old software versions to save space
 
 # --------------------------------------------------------------------
 ## NPM & Yarn (Node.js Package Management)
 # --------------------------------------------------------------------
-alias ni='npm install'         # Install packages
-alias nid='npm install -D'     # Install dev dependencies
-alias nr='npm run'             # Run npm scripts
-alias nt='npm test'            # Run tests
-alias ns='npm start'           # Start app
-alias nb='npm run build'       # Build app
-alias yi='yarn install'        # Yarn install
-alias ya='yarn add'            # Add package
-alias yr='yarn run'            # Run yarn scripts
-alias ys='yarn start'          # Start with Yarn
-alias yt='yarn test'           # Test with Yarn
+alias ni='npm install'         # Install JavaScript/Node.js project dependencies
+alias nid='npm install -D'     # Install development-only dependencies
+alias nr='npm run'             # Execute project scripts (build, test, start)
+alias nt='npm test'            # Run automated test suite
+alias ns='npm start'           # Launch application in development mode
+alias nb='npm run build'       # Compile application for production
+alias yi='yarn install'        # Install dependencies using alternative package manager
+alias ya='yarn add'            # Add new dependency to project
+alias yr='yarn run'            # Execute project scripts with yarn
+alias ys='yarn start'          # Launch application using yarn
+alias yt='yarn test'           # Run tests using yarn
 
 # Function to detect and use the right package manager
 pm-run() {
@@ -399,38 +388,33 @@ alias zz='z -'              # Go back to previous directory
 alias zi='zi'               # Interactive directory selection
 
 # Quick file operations
-alias mkd='mkdir -p'        # Create directory with parents
+alias mkd='mkdir -p'        # Create directory and any missing parent directories
 
 # Make directory and change into it (80% of dotfiles have this)
 mcd() {
-  mkdir -p "$1" && cd "$1" || return
+  mkdir -p "$1" && cd "$1" || return # Create directory and navigate to it in one command
 }
 
 # Quick backup function
 backup() {
-  cp "$1"{,.bak}
+  cp "$1"{,.bak} # Create backup copy with .bak extension
 }
-alias duh='du -h -d 1 | sort -h'  # Human-readable directory sizes
-alias df='df -h' # Human-readable disk usage
-alias hist='history' # Show command history (h conflicts with helm)
-alias j='jobs -l' # List background jobs
+alias duh='du -h -d 1 | sort -h'  # Show folder sizes in current directory (sorted)
+alias df='df -h' # Show disk space usage in readable format
+alias hist='history' # Show previously executed commands
+alias j='jobs -l' # List running background processes
 
-# Safe file operations (with confirmation prompts)
-alias rm='rm -i'            # Prompt before removal
-alias cp='cp -i'            # Prompt before overwrite
-alias mv='mv -i'            # Prompt before overwrite
-alias cls='clear'           # Windows-style clear
 
 # Process management
-alias psg='ps aux | grep -v grep | grep -i'  # Search processes
-alias psmem='ps auxf | sort -nr -k 4'  # Memory-sorted process list
-alias pscpu='ps auxf | sort -nr -k 3'  # CPU-sorted process list
+alias psg='ps aux | grep -v grep | grep -i'  # Find running programs by name
+alias psmem='ps auxf | sort -nr -k 4'  # List programs sorted by memory usage
+alias pscpu='ps auxf | sort -nr -k 3'  # List programs sorted by CPU usage
 killport() {
   if [ -z "$1" ]; then
     echo "Usage: killport <port_number>"
     return 1
   fi
-  lsof -ti:"$1" | xargs kill -9
+  lsof -ti:"$1" | xargs kill -9 # Force stop program using specific network port
 }
 
 # Archive extraction helper
@@ -452,32 +436,32 @@ extract() {
     esac
   else
     echo "'$1' is not a valid file"
-  fi
+  fi # Universal archive extractor - handles zip, tar, rar, 7z, etc.
 }
 
 # --------------------------------------------------------------------
 ## Utilities
 # --------------------------------------------------------------------
-alias myip='curl ifconfig.me' # Show public IP address
-alias localip='ipconfig getifaddr en0' # Show local network IP
-alias serve='python3 -m http.server' # Start HTTP server in current directory
-alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder' # Clear DNS cache
-alias zj='zellij' # Launch Zellij terminal multiplexer
-alias help='tldr'           # Show command examples with tldr
-alias weather='curl wttr.in'  # Quick weather check
-alias please='sudo'           # Polite way to run sudo
-alias copykey='pbcopy < ~/.ssh/id_rsa.pub' # Copy SSH public key to clipboard
-alias copykey-ed='pbcopy < ~/.ssh/id_ed25519.pub' # Copy modern SSH key to clipboard
+alias myip='curl ifconfig.me' # Show your internet-facing IP address
+alias localip='ipconfig getifaddr en0' # Show your local network IP address
+alias serve='python3 -m http.server' # Start local web server for current folder
+alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder' # Clear DNS cache to fix network issues
+alias zj='zellij' # Launch terminal multiplexer (multiple terminal sessions)
+alias help='tldr'           # Show practical command examples and usage
+alias weather='curl wttr.in'  # Check weather forecast from terminal
+alias please='sudo'           # Polite way to run commands with admin privileges
+alias copykey='pbcopy < ~/.ssh/id_rsa.pub' # Copy SSH public key for server access
+alias copykey-ed='pbcopy < ~/.ssh/id_ed25519.pub' # Copy modern SSH key for secure connections
 
 # Modern shell automation with jc (CLI to JSON conversion)
-alias psj='ps aux | jc --ps'               # Process list as JSON
-alias lsj='eza -la | jc --ls'               # File listing as JSON
-alias dfj='df -h | jc --df'                # Disk usage as JSON
-alias digj='dig +short | jc --dig'         # DNS lookup as JSON
+alias psj='ps aux | jc --ps'               # Convert process list to structured JSON data
+alias lsj='eza -la | jc --ls'               # Convert file listing to structured JSON data
+alias dfj='df -h | jc --df'                # Convert disk usage to structured JSON data
+alias digj='dig +short | jc --dig'         # Convert DNS lookup to structured JSON data
 
 # JSON processing with jq (colorized output)
-alias jq='jq -C'               # Colorize JSON output
-alias jqs='jq -S'              # Sort JSON keys
+alias jq='jq -C'               # Pretty-print JSON with colors for readability
+alias jqs='jq -S'              # Sort JSON object keys alphabetically
 
 # Quick epoch time converter
 epoch() {
@@ -489,7 +473,7 @@ epoch() {
 }
 
 # Git hooks and quality gates
-alias precommit='pre-commit run --all-files'  # Run all pre-commit hooks
+alias precommit='pre-commit run --all-files'  # Run code quality checks before committing
 
 # --------------------------------------------------------------------
 ## Data Streaming & Kafka
@@ -504,7 +488,7 @@ kcatp() {
     echo "Example: export KAFKA_BROKERS='localhost:9092'"
     return 1
   fi
-  kcat -P -b "$KAFKA_BROKERS" -t "$@"
+  kcat -P -b "$KAFKA_BROKERS" -t "$@" # Send messages to data streaming topic
 }
 
 kcatc() {
@@ -513,7 +497,7 @@ kcatc() {
     echo "Example: export KAFKA_BROKERS='localhost:9092'"
     return 1
   fi
-  kcat -C -b "$KAFKA_BROKERS" -t "$@"
+  kcat -C -b "$KAFKA_BROKERS" -t "$@" # Read messages from data streaming topic
 }
 
 kcatl() {
@@ -522,7 +506,7 @@ kcatl() {
     echo "Example: export KAFKA_BROKERS='localhost:9092'"
     return 1
   fi
-  kcat -L -b "$KAFKA_BROKERS" "$@"
+  kcat -L -b "$KAFKA_BROKERS" "$@" # List available streaming topics and partitions
 }
 
 # Kafka topic helpers
@@ -531,7 +515,7 @@ kcat-tail() {
     echo "Usage: kcat-tail <topic> [partition]"
     return 1
   fi
-  kcat -C -b "$KAFKA_BROKERS" -t "$1" -o -10 "$@"
+  kcat -C -b "$KAFKA_BROKERS" -t "$1" -o -10 "$@" # Show last 10 messages from streaming topic
 }
 
 kcat-produce-json() {
@@ -540,5 +524,5 @@ kcat-produce-json() {
     echo "Then input JSON messages (Ctrl+D to end)"
     return 1
   fi
-  kcat -P -b "$KAFKA_BROKERS" -t "$1" -T
+  kcat -P -b "$KAFKA_BROKERS" -t "$1" -T # Send JSON messages to streaming topic interactively
 }

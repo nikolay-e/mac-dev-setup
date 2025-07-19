@@ -6,11 +6,11 @@ CLI tools, shell configuration, and automated dependency management for macOS de
 
 ## Why mac-dev-setup?
 
-✅ **Modern Tools**: Replace traditional tools with faster alternatives  
-✅ **Cross-Architecture**: Works on both Intel and Apple Silicon Macs  
-✅ **Automated Updates**: Dependencies update automatically via Dependabot  
-✅ **Safe & Idempotent**: Run multiple times without breaking your setup  
-✅ **Backup System**: Preserves your existing configurations  
+✅ **Modern Tools**: Replace traditional tools with faster alternatives
+✅ **Cross-Architecture**: Works on both Intel and Apple Silicon Macs
+✅ **Automated Updates**: Dependencies update automatically via Dependabot
+✅ **Safe & Idempotent**: Run multiple times without breaking your setup
+✅ **Backup System**: Preserves your existing configurations
 
 ## Quick Start
 
@@ -28,7 +28,7 @@ The script validates the installation and prompts you to restart your terminal.
 ```bash
 # Before              # After
 ls                  →   eza                # Modern file listings
-cat file.txt        →   bat file.txt       # Syntax highlighted output  
+cat file.txt        →   bat file.txt       # Syntax highlighted output
 find . -name "*.js" →   fd "*.js"          # Fast file search
 grep "TODO"         →   rg "TODO"          # Fast text search
 cd ~/projects       →   z projects         # Smart directory jumping
@@ -43,7 +43,7 @@ gc "fix bug"    # git commit with message
 gp              # git push
 glog            # commit history
 
-# Development shortcuts  
+# Development shortcuts
 serve           # HTTP server (current directory)
 update          # Update all tools (brew + python + plugins)
 zj              # Launch terminal multiplexer
@@ -63,7 +63,7 @@ klogft          # Follow logs with tail
 kexec pod bash  # Quick pod shell access
 kdebug          # Spin up debug pod
 k9              # Kubernetes cluster TUI (k9s)
-kctx            # Switch Kubernetes contexts  
+kctx            # Switch Kubernetes contexts
 
 # Infrastructure as Code (2025 Edition)
 tf              # Terraform shorthand
@@ -111,7 +111,7 @@ serve
 ```bash
 # Quick status check
 gs                # Short status
-gss               # Full status  
+gss               # Full status
 gstat             # Verbose status
 
 # Interactive Git operations with TUI
@@ -152,7 +152,7 @@ kstern -l app=myservice
 
 # Advanced debugging (with kubectl plugins)
 kdebug            # Spin up netshoot debug pod
-ktree deploy app  # Visualize object hierarchy  
+ktree deploy app  # Visualize object hierarchy
 kneat get pod     # Clean YAML output
 kaccess           # Check RBAC permissions
 
@@ -204,7 +204,7 @@ export KAFKA_BROKERS="localhost:9092"
 echo '{"user": "alice"}' | kcatp user-events
 kcatc user-events
 
-# Tail recent messages with JSON formatting  
+# Tail recent messages with JSON formatting
 kcat-tail user-events | jq .
 
 # Inspect cluster metadata
@@ -253,7 +253,7 @@ The install script automatically:
 1. **Detects your Mac architecture** (Intel/Apple Silicon)
 2. **Installs 40+ CLI tools** via Homebrew
 3. **Configures Python 3.12** with pyenv and Node.js LTS with nvm
-4. **Sets up mise** for runtime version management  
+4. **Sets up mise** for runtime version management
 5. **Creates 600+ aliases** and workflows (Git, K8s, IaC, data streaming)
 6. **Validates all installations** with ✅/❌ indicators
 7. **Prompts for terminal restart** to activate everything
@@ -274,7 +274,7 @@ brew outdated && pipx list --outdated
 ## Automated Dependency Updates
 
 Dependencies update automatically via GitHub's Dependabot:
-- ✅ Shell plugins (zsh-autosuggestions, zsh-syntax-highlighting)  
+- ✅ Shell plugins (zsh-autosuggestions, zsh-syntax-highlighting)
 - ✅ Python packages (treemapper, tldr.py, yq, jq)
 - ✅ GitHub Actions (checkout, shellcheck, bats)
 

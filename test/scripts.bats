@@ -2,9 +2,10 @@
 
 setup() {
     # Create temp directory for testing
-    export TEST_DIR=$(mktemp -d)
+    TEST_DIR=$(mktemp -d)
+    export TEST_DIR
     export HOME="$TEST_DIR"
-    cd "$BATS_TEST_DIRNAME/.."
+    cd "$BATS_TEST_DIRNAME/.." || exit
 }
 
 teardown() {

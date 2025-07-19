@@ -30,15 +30,15 @@ info() {
 # --- Main Logic Functions ---
 setup_homebrew() {
   info "Checking Homebrew & Installing packages from Brewfile..."
-  
+
   # Detect architecture and set Homebrew prefix
   BREW_PREFIX=$(uname -m | grep -q arm64 && echo /opt/homebrew || echo /usr/local)
-  
+
   if ! command -v brew &> /dev/null; then
     echo "Homebrew not found. Installing..."
     run /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
-  
+
   # Only add to .zprofile if not already present
   if ! grep -q "$BREW_PREFIX/bin/brew shellenv" ~/.zprofile 2>/dev/null; then
     if [[ $DRY_RUN -eq 1 ]]; then
@@ -48,14 +48,14 @@ setup_homebrew() {
     fi
   fi
   eval "$("$BREW_PREFIX"/bin/brew shellenv)"
-  
+
   run brew update
   run brew bundle
-  
+
   # Upgrade any outdated packages to prevent warnings
   echo "Upgrading any outdated packages..."
   run brew upgrade || echo "Warning: Some packages failed to upgrade"
-  
+
   # Install fzf shell integration idempotently
   if [ -d "$BREW_PREFIX/opt/fzf" ]; then
     run "$BREW_PREFIX/opt/fzf/install" --no-update-rc --key-bindings --completion
@@ -65,7 +65,7 @@ setup_homebrew() {
 setup_python() {
   info "Setting up Global Python Environment..."
   PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
-  
+
   # Find latest patch version for the specified major.minor
   if command -v pyenv &> /dev/null; then
     local latest_version
@@ -81,7 +81,7 @@ setup_python() {
     echo "pyenv not available (dry-run mode), using default Python ${PYTHON_VERSION}"
     PYTHON_VERSION="3.12.4"  # Fallback for dry-run
   fi
-  
+
   if command -v pyenv &> /dev/null; then
     if ! pyenv versions --bare | grep -q "^$PYTHON_VERSION$"; then
       run pyenv install "$PYTHON_VERSION"
@@ -92,7 +92,7 @@ setup_python() {
   else
     echo "pyenv not available, skipping Python installation"
   fi
-  
+
   info "Installing Python CLI tools via pipx..."
   # Ensure pipx path is set up (only if not already done)
   if command -v pipx &> /dev/null; then
@@ -104,20 +104,20 @@ setup_python() {
   else
     echo "pipx not available, skipping path setup"
   fi
-  
+
   local dir
   dir=$(pwd)
-  
+
   # Install packages from requirements.txt
   if command -v pipx &> /dev/null; then
     while IFS= read -r package || [ -n "$package" ]; do
       # Skip empty lines and comments
       [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
-      
+
       # Extract package name (handle comments on same line)
       package_line=$(echo "$package" | sed 's/[[:space:]]*#.*//' | xargs)
       [[ -z "$package_line" ]] && continue
-      
+
       # Extract the actual package name for checking if installed
       if [[ "$package_line" =~ git\+ ]]; then
         # For git URLs, extract the subdirectory name or repo name
@@ -134,10 +134,20 @@ setup_python() {
       else
         package_name="$package_line"
       fi
-      
-      # Check if already installed to avoid duplicates
+
+      # Check if already installed
       if pipx list | grep -q -E "(^  |package )$package_name"; then
-        echo "$package_name is already installed via pipx. Skipping."
+        # For local packages, reinstall to get updates
+        if [[ "$package_line" =~ ^\./(.+) || "$package_line" =~ ^/ ]]; then
+          echo "$package_name is installed but local package may have updates. Reinstalling..."
+          if run pipx install --force "$package_line"; then
+            echo "OK Successfully reinstalled $package_name"
+          else
+            echo "WARNING  Failed to reinstall $package_name"
+          fi
+        else
+          echo "$package_name is already installed via pipx. Skipping."
+        fi
       else
         echo "Installing $package_name via pipx..."
         if run pipx install "$package_line"; then
@@ -154,16 +164,16 @@ setup_python() {
 
 setup_nodejs() {
   info "Setting up Node.js via nvm..."
-  
+
   # Use the same BREW_PREFIX from setup_homebrew
   BREW_PREFIX=$(uname -m | grep -q arm64 && echo /opt/homebrew || echo /usr/local)
-  
+
   # Source nvm if available
   export NVM_DIR="$HOME/.nvm"
   if [ -f "$BREW_PREFIX/opt/nvm/nvm.sh" ]; then
     # shellcheck disable=SC1091
     source "$BREW_PREFIX/opt/nvm/nvm.sh"
-    
+
     # Install latest LTS Node.js
     run nvm install --lts
     run nvm use --lts
@@ -211,7 +221,7 @@ link_dotfiles() {
   fi
   run ln -sfn "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
   echo "Linked Sheldon plugins config"
-  
+
 }
 
 configure_shell() {
@@ -235,18 +245,18 @@ generate_plugins_config() {
   info "Generating plugins.toml from package.json..."
   local dir
   dir=$(pwd)
-  
+
   if [ ! -f "$dir/package.json" ]; then
     echo "ERROR: package.json not found. Cannot generate plugins.toml."
     echo "This is required for shell plugin management."
     exit 1
   fi
-  
+
   # Check if jq is available for JSON parsing
   if ! command -v jq &> /dev/null; then
     echo "ERROR: jq not found and is required to parse package.json."
     echo "Please install jq: brew install jq"
-    
+
     # Check if plugins.toml exists and is newer than package.json
     if [ -f "$dir/plugins.toml" ]; then
       if [ "$dir/plugins.toml" -nt "$dir/package.json" ]; then
@@ -262,7 +272,7 @@ generate_plugins_config() {
       exit 1
     fi
   fi
-  
+
   # Generate plugins.toml from package.json dependencies
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "+ cat > '$dir/plugins.toml' << 'EOF'..."
@@ -278,12 +288,12 @@ shell = "zsh"
 
 EOF
   fi
-  
+
   # Parse dependencies from package.json and generate TOML entries
   jq -r '.dependencies | to_entries[] | select(.value | startswith("git+https://github.com/")) | "\(.key) \(.value)"' "$dir/package.json" | while read -r name url; do
     # Extract GitHub repo from git URL
     github_repo=$(echo "$url" | sed 's|git+https://github.com/||' | sed 's|\.git#.*||')
-    
+
     # Add to plugins.toml
     if [[ $DRY_RUN -eq 1 ]]; then
       echo "+ cat >> '$dir/plugins.toml' << EOF..."
@@ -296,13 +306,13 @@ github = "$github_repo"
 EOF
     fi
   done
-  
+
   echo "Generated plugins.toml from package.json dependencies"
 }
 
 configure_git() {
   info "Configuring Git to use Delta for diffs..."
-  
+
   # Only configure delta if it's installed
   if command -v delta &> /dev/null; then
     run git config --global core.pager delta
@@ -321,13 +331,13 @@ configure_git() {
 
 install_krew_plugins() {
   info "Installing essential kubectl plugins via krew..."
-  
+
   # Check if kubectl is available
   if ! command -v kubectl &> /dev/null; then
     echo "kubectl not found, skipping krew plugins"
     return
   fi
-  
+
   # Install krew if not available
   if ! command -v krew &> /dev/null; then
     echo "Installing krew (kubectl plugin manager)..."
@@ -347,10 +357,10 @@ install_krew_plugins() {
         ./"${KREW}" install krew
       )
     fi
-    
+
     # Add krew to PATH for current session
     export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-    
+
     # Verify krew installation
     if ! command -v krew &> /dev/null; then
       echo "Warning: krew installation failed, skipping plugins"
@@ -358,7 +368,7 @@ install_krew_plugins() {
     fi
     echo "krew installed successfully"
   fi
-  
+
   # Install essential plugins
   local plugins=("neat" "tree" "access-matrix")
   for plugin in "${plugins[@]}"; do
@@ -369,14 +379,14 @@ install_krew_plugins() {
       run kubectl krew install "$plugin" || echo "Failed to install $plugin"
     fi
   done
-  
+
   echo "krew plugins installation complete"
 }
 
 validate_installation() {
   info "Validating installation..."
   local failed=0
-  
+
   # Test key CLI tools
   local tools=("bat" "eza" "fd" "rg" "zoxide" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs" "learn-aliases")
   for tool in "${tools[@]}"; do
@@ -387,7 +397,7 @@ validate_installation() {
       failed=1
     fi
   done
-  
+
   # Test krew separately since it needs special PATH handling
   if command -v krew &> /dev/null || [ -f "${KREW_ROOT:-$HOME/.krew}/bin/krew" ]; then
     if command -v krew &> /dev/null; then
@@ -399,7 +409,7 @@ validate_installation() {
     printf "ERROR %s: not found\n" "krew"
     failed=1
   fi
-  
+
   # Test symlinks
   if [ -L ~/.mac-dev-setup-aliases ] && [ -f ~/.mac-dev-setup-aliases ]; then
     echo "OK Aliases: symlinked correctly"
@@ -407,14 +417,14 @@ validate_installation() {
     echo "ERROR Aliases: symlink failed"
     failed=1
   fi
-  
+
   if [ -L ~/.zsh_config.sh ] && [ -f ~/.zsh_config.sh ]; then
     echo "OK Zsh config: symlinked correctly"
   else
     echo "ERROR Zsh config: symlink failed"
     failed=1
   fi
-  
+
   # Test Python environment
   if command -v python &> /dev/null && python --version | grep -q "3.12"; then
     echo "OK Python: $(python --version)"
@@ -422,7 +432,7 @@ validate_installation() {
     echo "ERROR Python: wrong version or not found"
     failed=1
   fi
-  
+
   # Test Node.js
   if command -v node &> /dev/null; then
     echo "OK Node.js: $(node --version)"
@@ -430,7 +440,7 @@ validate_installation() {
     echo "ERROR Node.js: not found"
     failed=1
   fi
-  
+
   if [ $failed -eq 0 ]; then
     echo ""
     printf "DONE All components installed successfully!\n"
@@ -458,7 +468,7 @@ prompt_terminal_restart() {
     echo "Non-interactive mode - skipping prompt"
     choice="2"
   fi
-  
+
   case $choice in
     1|"")
       echo ""
@@ -480,7 +490,7 @@ prompt_terminal_restart() {
       echo "OK Setup complete! Please restart your terminal to see all changes."
       echo ""
       echo "Preview of new commands (after restart):"
-      echo "  • eza          # Better ls with icons" 
+      echo "  • eza          # Better ls with icons"
       echo "  • bat README.md # Syntax highlighted cat"
       echo "  • z <dir>      # Smart directory jumping"
       echo "  • rg <pattern> # Super fast search"
@@ -536,7 +546,7 @@ if validate_installation; then
   echo ""
   info "ACTIVATING Configuration"
   echo "Loading new shell configuration and aliases..."
-  
+
   # Source the main zsh configuration which will load everything
   if [ -f ~/.zshrc ]; then
     if [[ $DRY_RUN -eq 0 ]]; then

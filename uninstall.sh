@@ -17,11 +17,11 @@ remove_shell_config() {
   info "Removing shell configuration..."
   local ZSHRC_SOURCE_LINE="source ~/.zsh_config.sh"
   local ZSHRC_COMMENT="# Load mac-dev-setup configuration"
-  
+
   if grep -q "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
     # Create backup before modifying
     cp ~/.zshrc ~/.zshrc.backup."$(date +%Y%m%d_%H%M%S)"
-    
+
     # Remove the source line and comment (portable sed)
     if sed --version >/dev/null 2>&1; then
       # GNU sed (Linux)
@@ -40,31 +40,31 @@ remove_shell_config() {
 
 remove_symlinks() {
   info "Removing symlinks..."
-  
+
   # Remove alias symlink
   if [ -h ~/.mac-dev-setup-aliases ]; then
     rm ~/.mac-dev-setup-aliases
     echo "Removed ~/.mac-dev-setup-aliases symlink"
   fi
-  
+
   # Remove zsh_config symlink
   if [ -h ~/.zsh_config.sh ]; then
     rm ~/.zsh_config.sh
     echo "Removed ~/.zsh_config.sh symlink"
   fi
-  
+
   # Remove Sheldon config symlink
   if [ -h ~/.config/sheldon/plugins.toml ]; then
     rm ~/.config/sheldon/plugins.toml
     echo "Removed Sheldon config symlink"
   fi
-  
+
 }
 
 restore_backups() {
   info "Checking for backups to restore..."
   local backup_dir=~/.dotfiles_backup
-  
+
   if [ -d "$backup_dir" ]; then
     echo "Found backup directory: $backup_dir"
     echo "You can manually restore files from this directory if needed."

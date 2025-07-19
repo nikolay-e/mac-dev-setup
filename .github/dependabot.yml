@@ -13,7 +13,7 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-      
+
   # NPM dependencies (shell plugins as Git dependencies only)
   - package-ecosystem: "npm"
     directory: "/"
@@ -27,7 +27,7 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    
+
   # Python dependencies
   - package-ecosystem: "pip"
     directory: "/"
@@ -41,4 +41,3 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-      
