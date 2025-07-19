@@ -12,10 +12,9 @@ fi
 (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-echo "Updating Homebrew and installing tools..."
+echo "Updating Homebrew and installing tools from Brewfile..."
 brew update
-brew install git gh tree wget htop jq fzf nvm pyenv
-brew install --cask visual-studio-code iterm2 rectangle alfred docker google-chrome slack postman font-hack-nerd-font
+brew bundle --no-lock
 $(brew --prefix)/opt/fzf/install --all
 
 # --------------------------------------------------------------------
@@ -68,6 +67,9 @@ export NVM_DIR="$HOME/.nvm"
 
 # FZF (Fuzzy Finder)
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Starship Prompt
+if command -v starship 1>/dev/null 2>&1; then eval "$(starship init zsh)"; fi
 # --- End Mac Dev Setup Configuration ---
 EOF
   echo "Configuration added."

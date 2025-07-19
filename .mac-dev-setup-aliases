@@ -57,6 +57,15 @@ alias python='python3'
 alias pip='pip3'
 
 # --------------------------------------------------------------------
+## 🚀 Modern CLI Tool Replacements
+# --------------------------------------------------------------------
+# Use modern alternatives when available
+alias cat='bat'
+alias ls='eza'
+alias find='fd'
+alias grep='rg'
+
+# --------------------------------------------------------------------
 ## 🛠️ Utilities
 # --------------------------------------------------------------------
 alias update='brew update && brew upgrade && brew cleanup'
@@ -64,3 +73,4 @@ alias myip='curl ifconfig.me'
 alias localip='ipconfig getifaddr en0'
 alias serve='python3 -m http.server'
 alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
+alias zj='zellij'
