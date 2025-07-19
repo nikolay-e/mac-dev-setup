@@ -50,6 +50,13 @@ alias gd='git diff'
 alias gdc='git diff --cached'
 
 # --------------------------------------------------------------------
+## 🐍 Python
+# --------------------------------------------------------------------
+# Standardize python and pip commands to the pyenv global version
+alias python='python3'
+alias pip='pip3'
+
+# --------------------------------------------------------------------
 ## 🛠️ Utilities
 # --------------------------------------------------------------------
 alias update='brew update && brew upgrade && brew cleanup'
