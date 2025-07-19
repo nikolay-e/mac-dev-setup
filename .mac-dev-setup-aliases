@@ -10,7 +10,7 @@ alias grep='rg' # Fast text search within files
 
 # Aliases for eza (the modern replacement for ls)
 alias ls='eza'                 # List directory contents
-alias l='eza -l'               # List files in long format with details
+alias l='eza'                # List files (names only, no extra details)
 alias ll='eza -l'              # List files in long format (same as l)
 alias la='eza -la'             # List all files including hidden ones
 alias lt='eza -T --level=2'    # Show directory tree (2 levels deep)
@@ -22,6 +22,8 @@ alias l.='eza -la | grep "^\."' # List only hidden dotfiles
 alias ..='cd ..' # Go up one directory
 alias ...='cd ../..' # Go up two directories
 alias ....='cd ../../..' # Go up three directories
+alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs' # Navigate to iCloud Drive
+alias code='cd ~/code' # Navigate to code directory
 alias zshconfig='nvim ~/.zshrc' # Edit zsh configuration file
 alias zshsource='source ~/.zshrc' # Reload zsh configuration
 alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit and reload zsh config
@@ -32,7 +34,7 @@ alias hosts='sudo nvim /etc/hosts' # Edit system hosts file
 # --------------------------------------------------------------------
 alias tree='tree -C' # Display directory structure with colors
 alias treex='tree -C -I "node_modules|*.pyc|__pycache__"' # Tree excluding common dev files
-alias c='pbcopy' # Copy to clipboard
+alias c='clear' # Clear terminal screen
 alias p='pbpaste' # Paste from clipboard
 alias copypwd='pwd | pbcopy' # Copy current directory path to clipboard
 

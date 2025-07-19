@@ -28,7 +28,7 @@ brew "dive"      # Docker image layer analysis
 brew "kubectx"   # Fast Kubernetes context switching
 brew "k9s"       # Kubernetes cluster management TUI
 brew "stern"     # Multi-pod log tailing for Kubernetes
-brew "krew"      # kubectl plugin manager
+# Note: krew is installed separately via script (not available via Homebrew)
 brew "kcat"      # Apache Kafka CLI (netcat for Kafka)
 brew "tenv"      # Unified Terraform/OpenTofu version manager
 brew "mise"      # Fast runtime version manager (replaces asdf)

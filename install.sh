@@ -29,6 +29,10 @@ setup_homebrew() {
   brew update
   brew bundle
   
+  # Upgrade any outdated packages to prevent warnings
+  echo "Upgrading any outdated packages..."
+  brew upgrade || echo "Warning: Some packages failed to upgrade"
+  
   # Install fzf shell integration idempotently
   if [ -d "$BREW_PREFIX/opt/fzf" ]; then
     "$BREW_PREFIX/opt/fzf/install" --no-update-rc --key-bindings --completion
@@ -261,21 +265,40 @@ configure_git() {
 install_krew_plugins() {
   info "Installing essential kubectl plugins via krew..."
   
-  # Check if kubectl and krew are available
+  # Check if kubectl is available
   if ! command -v kubectl &> /dev/null; then
     echo "kubectl not found, skipping krew plugins"
     return
   fi
   
+  # Install krew if not available
   if ! command -v krew &> /dev/null; then
-    echo "krew not found, skipping plugins"
-    return
+    echo "Installing krew (kubectl plugin manager)..."
+    (
+      set -x; cd "$(mktemp -d)" &&
+      OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+      ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+      KREW="krew-${OS}_${ARCH}" &&
+      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+      tar zxvf "${KREW}.tar.gz" &&
+      ./"${KREW}" install krew
+    )
+    
+    # Add krew to PATH for current session
+    export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+    
+    # Verify krew installation
+    if ! command -v krew &> /dev/null; then
+      echo "Warning: krew installation failed, skipping plugins"
+      return
+    fi
+    echo "krew installed successfully"
   fi
   
   # Install essential plugins
   local plugins=("neat" "tree" "access-matrix")
   for plugin in "${plugins[@]}"; do
-    if kubectl krew list | grep -q "^$plugin"; then
+    if kubectl krew list 2>/dev/null | grep -q "^$plugin"; then
       echo "$plugin already installed"
     else
       echo "Installing kubectl-$plugin..."
@@ -291,7 +314,7 @@ validate_installation() {
   local failed=0
   
   # Test key CLI tools
-  local tools=("bat" "eza" "fd" "rg" "zoxide" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "krew" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs" "learn-aliases")
+  local tools=("bat" "eza" "fd" "rg" "zoxide" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs" "learn-aliases")
   for tool in "${tools[@]}"; do
     if command -v "$tool" &> /dev/null; then
       printf "OK %s: %s\n" "$tool" "$(command -v "$tool")"
@@ -300,6 +323,18 @@ validate_installation() {
       failed=1
     fi
   done
+  
+  # Test krew separately since it needs special PATH handling
+  if command -v krew &> /dev/null || [ -f "${KREW_ROOT:-$HOME/.krew}/bin/krew" ]; then
+    if command -v krew &> /dev/null; then
+      printf "OK %s: %s\n" "krew" "$(command -v krew)"
+    else
+      printf "OK %s: %s\n" "krew" "${KREW_ROOT:-$HOME/.krew}/bin/krew"
+    fi
+  else
+    printf "ERROR %s: not found\n" "krew"
+    failed=1
+  fi
   
   # Test symlinks
   if [ -L ~/.mac-dev-setup-aliases ] && [ -f ~/.mac-dev-setup-aliases ]; then
@@ -409,11 +444,36 @@ link_dotfiles
 configure_shell
 install_krew_plugins
 
-brew cleanup
+# Clean up Homebrew cache and old versions
+info "Cleaning up Homebrew..."
+brew cleanup --prune=all 2>/dev/null || echo "Warning: Cleanup had some issues, continuing..."
+brew autoremove 2>/dev/null || echo "Warning: Autoremove had some issues, continuing..."
 
-# Validate installation and prompt for terminal restart
+# Validate installation and activate configuration
 if validate_installation; then
-  prompt_terminal_restart
+  echo ""
+  info "ACTIVATING Configuration"
+  echo "Loading new shell configuration and aliases..."
+  
+  # Source the main zsh configuration which will load everything
+  if [ -f ~/.zshrc ]; then
+    # shellcheck disable=SC1091
+    source ~/.zshrc
+    echo "OK Configuration loaded successfully"
+    echo ""
+    echo "READY New configuration is now active!"
+    echo ""
+    echo "Try these new commands:"
+    echo "  • code         # Navigate to ~/code directory"
+    echo "  • eza          # Better ls with icons"
+    echo "  • bat README.md # Syntax highlighted cat"
+    echo "  • z <dir>      # Smart directory jumping"
+    echo "  • rg <pattern> # Super fast search"
+    echo "  • lg           # LazyGit terminal UI"
+    echo ""
+  else
+    echo "Warning: ~/.zshrc not found, please restart terminal to activate changes"
+  fi
 else
   echo ""
   echo "ERROR Installation completed with issues. Please check the errors above."
