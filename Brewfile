@@ -4,7 +4,7 @@
 
 # Core CLI
 brew "git"
-brew "git-delta"  # Beautiful git diffs
+brew "git-delta"  # Enhanced git diffs
 brew "gh"
 brew "wget"
 brew "htop"

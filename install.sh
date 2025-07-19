@@ -3,7 +3,26 @@
 # Stop on first error, undefined variables, and pipe failures
 set -euo pipefail
 
+# --- Command Line Options ---
+DRY_RUN=0
+NON_INTERACTIVE=0
+
+while getopts ":n" opt; do
+  case $opt in
+    n) DRY_RUN=1; NON_INTERACTIVE=1 ;;
+    \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND-1))
+
 # --- Helper Functions ---
+run() {
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "+ $*"
+  else
+    "$@"
+  fi
+}
 info() {
   printf "\n%s\n" "$1"
 }
@@ -17,25 +36,29 @@ setup_homebrew() {
   
   if ! command -v brew &> /dev/null; then
     echo "Homebrew not found. Installing..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    run /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   
   # Only add to .zprofile if not already present
   if ! grep -q "$BREW_PREFIX/bin/brew shellenv" ~/.zprofile 2>/dev/null; then
-    (echo; echo "eval \"\$($BREW_PREFIX/bin/brew shellenv)\"") >> ~/.zprofile
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "+ (echo; echo \"eval \\\"\\\$($BREW_PREFIX/bin/brew shellenv)\\\"\") >> ~/.zprofile"
+    else
+      (echo; echo "eval \"\$($BREW_PREFIX/bin/brew shellenv)\"") >> ~/.zprofile
+    fi
   fi
   eval "$("$BREW_PREFIX"/bin/brew shellenv)"
   
-  brew update
-  brew bundle
+  run brew update
+  run brew bundle
   
   # Upgrade any outdated packages to prevent warnings
   echo "Upgrading any outdated packages..."
-  brew upgrade || echo "Warning: Some packages failed to upgrade"
+  run brew upgrade || echo "Warning: Some packages failed to upgrade"
   
   # Install fzf shell integration idempotently
   if [ -d "$BREW_PREFIX/opt/fzf" ]; then
-    "$BREW_PREFIX/opt/fzf/install" --no-update-rc --key-bindings --completion
+    run "$BREW_PREFIX/opt/fzf/install" --no-update-rc --key-bindings --completion
   fi
 }
 
@@ -55,14 +78,19 @@ setup_python() {
   fi
   
   if ! pyenv versions --bare | grep -q "^$PYTHON_VERSION$"; then
-    pyenv install "$PYTHON_VERSION"
+    run pyenv install "$PYTHON_VERSION"
   else
     echo "Python $PYTHON_VERSION is already installed. Skipping."
   fi
-  pyenv global "$PYTHON_VERSION"
+  run pyenv global "$PYTHON_VERSION"
   
   info "Installing Python CLI tools via pipx..."
-  pipx ensurepath
+  # Ensure pipx path is set up (only if not already done)
+  if ! echo "$PATH" | grep -q "\.local/bin"; then
+    run pipx ensurepath
+  else
+    echo "pipx path already configured"
+  fi
   
   local dir
   dir=$(pwd)
@@ -98,7 +126,7 @@ setup_python() {
       echo "$package_name is already installed via pipx. Skipping."
     else
       echo "Installing $package_name via pipx..."
-      if pipx install "$package_line"; then
+      if run pipx install "$package_line"; then
         echo "OK Successfully installed $package_name"
       else
         echo "WARNING  Failed to install $package_name"
@@ -120,8 +148,8 @@ setup_nodejs() {
     source "$BREW_PREFIX/opt/nvm/nvm.sh"
     
     # Install latest LTS Node.js
-    nvm install --lts
-    nvm use --lts
+    run nvm install --lts
+    run nvm use --lts
     echo "Node.js LTS installed and activated"
   else
     echo "Warning: nvm not found. Install via Homebrew first."
@@ -135,12 +163,12 @@ link_dotfiles() {
   local olddir="$HOME/.dotfiles_backup"
   local files_to_link=(".mac-dev-setup-aliases" ".zsh_config.sh")
 
-  mkdir -p "$olddir"
+  run mkdir -p "$olddir"
   echo "Backing up existing configs to $olddir"
 
   for file in "${files_to_link[@]}"; do
     if [ -f "$HOME/$file" ] || [ -h "$HOME/$file" ]; then
-      mv "$HOME/$file" "$olddir/"
+      run mv "$HOME/$file" "$olddir/"
     fi
     # For .mac-dev-setup-aliases, the source file has the same name
     # For .zsh_config.sh, the source file is zsh_config.sh (no dot)
@@ -155,16 +183,16 @@ link_dotfiles() {
         local source_file="${file#.}"
         ;;
     esac
-    ln -sfn "$dir/$source_file" "$HOME/$file"
+    run ln -sfn "$dir/$source_file" "$HOME/$file"
     echo "Linked ~/$file"
   done
 
   # Link Sheldon plugins config
-  mkdir -p "$HOME/.config/sheldon"
+  run mkdir -p "$HOME/.config/sheldon"
   if [ -f "$HOME/.config/sheldon/plugins.toml" ] || [ -h "$HOME/.config/sheldon/plugins.toml" ]; then
-    mv "$HOME/.config/sheldon/plugins.toml" "$olddir/"
+    run mv "$HOME/.config/sheldon/plugins.toml" "$olddir/"
   fi
-  ln -sfn "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
+  run ln -sfn "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
   echo "Linked Sheldon plugins config"
   
 }
@@ -176,7 +204,11 @@ configure_shell() {
 
   if ! grep -Fxq "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
     echo "Adding source line to ~/.zshrc..."
-    echo -e "\n# Load mac-dev-setup configuration\n$ZSHRC_SOURCE_LINE" >> ~/.zshrc
+    if [[ $DRY_RUN -eq 1 ]]; then
+      printf "+ printf '\\n# Load mac-dev-setup configuration\\n%%s\\n' '%s' >> ~/.zshrc\\n" "$ZSHRC_SOURCE_LINE"
+    else
+      printf "\n# Load mac-dev-setup configuration\n%s\n" "$ZSHRC_SOURCE_LINE" >> ~/.zshrc
+    fi
   else
     echo "Source line already exists in ~/.zshrc. Skipping."
   fi
@@ -215,7 +247,10 @@ generate_plugins_config() {
   fi
   
   # Generate plugins.toml from package.json dependencies
-  cat > "$dir/plugins.toml" << 'EOF'
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "+ cat > '$dir/plugins.toml' << 'EOF'..."
+  else
+    cat > "$dir/plugins.toml" << 'EOF'
 # plugins.toml
 # This file is AUTO-GENERATED from package.json by install.sh
 # DO NOT EDIT MANUALLY - Edit package.json instead
@@ -225,6 +260,7 @@ shell = "zsh"
 [plugins]
 
 EOF
+  fi
   
   # Parse dependencies from package.json and generate TOML entries
   jq -r '.dependencies | to_entries[] | select(.value | startswith("git+https://github.com/")) | "\(.key) \(.value)"' "$dir/package.json" | while read -r name url; do
@@ -232,12 +268,16 @@ EOF
     github_repo=$(echo "$url" | sed 's|git+https://github.com/||' | sed 's|\.git#.*||')
     
     # Add to plugins.toml
-    cat >> "$dir/plugins.toml" << EOF
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "+ cat >> '$dir/plugins.toml' << EOF..."
+    else
+      cat >> "$dir/plugins.toml" << EOF
 # $(echo "$name" | tr '-' ' ' | sed 's/zsh //' | sed 's/\b\w/\U&/g')
 [plugins.$name]
 github = "$github_repo"
 
 EOF
+    fi
   done
   
   echo "Generated plugins.toml from package.json dependencies"
@@ -248,13 +288,13 @@ configure_git() {
   
   # Only configure delta if it's installed
   if command -v delta &> /dev/null; then
-    git config --global core.pager delta
-    git config --global interactive.diffFilter "delta --color-only"
-    git config --global delta.navigate true
-    git config --global delta.light false # Set to true for light terminal themes
-    git config --global delta.side-by-side true
-    git config --global merge.conflictstyle diff3
-    git config --global diff.colorMoved default
+    run git config --global core.pager delta
+    run git config --global interactive.diffFilter "delta --color-only"
+    run git config --global delta.navigate true
+    run git config --global delta.light false # Set to true for light terminal themes
+    run git config --global delta.side-by-side true
+    run git config --global merge.conflictstyle diff3
+    run git config --global diff.colorMoved default
     echo "Git configured to use delta."
   else
     echo "Warning: delta not found, skipping Git delta configuration"
@@ -274,15 +314,22 @@ install_krew_plugins() {
   # Install krew if not available
   if ! command -v krew &> /dev/null; then
     echo "Installing krew (kubectl plugin manager)..."
-    (
-      set -x; cd "$(mktemp -d)" &&
-      OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-      ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-      KREW="krew-${OS}_${ARCH}" &&
-      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-      tar zxvf "${KREW}.tar.gz" &&
-      ./"${KREW}" install krew
-    )
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "+ Installing krew (kubectl plugin manager)..."
+      echo "+ curl -fsSLO https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-*.tar.gz"
+      echo "+ tar zxvf krew-*.tar.gz"
+      echo "+ ./krew-* install krew"
+    else
+      (
+        set -x; cd "$(mktemp -d)" &&
+        OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+        ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+        KREW="krew-${OS}_${ARCH}" &&
+        curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+        tar zxvf "${KREW}.tar.gz" &&
+        ./"${KREW}" install krew
+      )
+    fi
     
     # Add krew to PATH for current session
     export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
@@ -302,7 +349,7 @@ install_krew_plugins() {
       echo "$plugin already installed"
     else
       echo "Installing kubectl-$plugin..."
-      kubectl krew install "$plugin" || echo "Failed to install $plugin"
+      run kubectl krew install "$plugin" || echo "Failed to install $plugin"
     fi
   done
   
@@ -387,8 +434,13 @@ prompt_terminal_restart() {
   echo "1. Reload shell in current session (exec zsh)"
   echo "2. I'll restart terminal manually later"
   echo ""
-  printf "Choose [1/2]: "
-  read -r choice
+  if [[ $NON_INTERACTIVE -eq 0 ]]; then
+    printf "Choose [1/2]: "
+    read -r choice
+  else
+    echo "Non-interactive mode - skipping prompt"
+    choice="2"
+  fi
   
   case $choice in
     1|"")
@@ -400,7 +452,11 @@ prompt_terminal_restart() {
       echo "  • z <dir>      # Smart directory jumping"
       echo "  • rg <pattern> # Super fast search"
       echo ""
-      exec zsh
+      if [[ $DRY_RUN -eq 0 ]]; then
+        exec zsh
+      else
+        echo "+ exec zsh (skipped in dry-run)"
+      fi
       ;;
     2)
       echo ""
@@ -423,8 +479,13 @@ check_shell() {
   if [[ "$SHELL" != */zsh ]]; then
     echo "WARNING  Warning: Your default shell is not zsh ($SHELL)"
     echo "This setup is optimized for zsh. Consider running: chsh -s $(which zsh)"
-    echo -n "Continue anyway? (y/N): "
-    read -r response
+    if [[ $NON_INTERACTIVE -eq 0 ]]; then
+      echo -n "Continue anyway? (y/N): "
+      read -r response
+    else
+      echo "Non-interactive mode - continuing with non-zsh shell"
+      response="y"
+    fi
     if [[ ! "$response" =~ ^[Yy]$ ]]; then
       echo "Setup cancelled. Please switch to zsh first."
       exit 1
@@ -433,7 +494,11 @@ check_shell() {
 }
 
 # --- Main Execution ---
-info "... Starting robust macOS workstation setup..."
+if [[ $DRY_RUN -eq 1 ]]; then
+  info "... Starting robust macOS workstation setup (DRY RUN)..."
+else
+  info "... Starting robust macOS workstation setup..."
+fi
 check_shell
 setup_homebrew
 setup_python
@@ -446,8 +511,8 @@ install_krew_plugins
 
 # Clean up Homebrew cache and old versions
 info "Cleaning up Homebrew..."
-brew cleanup --prune=all 2>/dev/null || echo "Warning: Cleanup had some issues, continuing..."
-brew autoremove 2>/dev/null || echo "Warning: Autoremove had some issues, continuing..."
+run brew cleanup --prune=all 2>/dev/null || echo "Warning: Cleanup had some issues, continuing..."
+run brew autoremove 2>/dev/null || echo "Warning: Autoremove had some issues, continuing..."
 
 # Validate installation and activate configuration
 if validate_installation; then
@@ -457,8 +522,12 @@ if validate_installation; then
   
   # Source the main zsh configuration which will load everything
   if [ -f ~/.zshrc ]; then
-    # shellcheck disable=SC1091
-    source ~/.zshrc
+    if [[ $DRY_RUN -eq 0 ]]; then
+      # shellcheck source=/dev/null
+      source ~/.zshrc
+    else
+      echo "+ source ~/.zshrc (skipped in dry-run)"
+    fi
     echo "OK Configuration loaded successfully"
     echo ""
     echo "READY New configuration is now active!"

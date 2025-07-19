@@ -74,7 +74,7 @@ def quiz(items: List[Dict[str, str]]):
     print(f"\nYour final score: {score}/{total}")
     
     if score == total:
-        print("Perfect score! You know all your aliases!")
+        print("Full score! You know all your aliases!")
     elif score >= total * 0.8:
         print("Great job! You know most of your aliases.")
     elif score >= total * 0.5:

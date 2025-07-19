@@ -1,2 +1,0 @@
-[console_scripts]
-learn-aliases = learn_aliases.cli:main

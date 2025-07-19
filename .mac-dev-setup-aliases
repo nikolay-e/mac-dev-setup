@@ -10,11 +10,14 @@ alias grep='rg' # Fast text search within files
 
 # Aliases for eza (the modern replacement for ls)
 alias ls='eza'                 # List directory contents
-alias l='eza'                # List files (names only, no extra details)
-alias ll='eza -l'              # List files in long format (same as l)
+alias l='eza'                # List files (basic format)
+alias ll='eza -l'              # List files in long format
 alias la='eza -la'             # List all files including hidden ones
 alias lt='eza -T --level=2'    # Show directory tree (2 levels deep)
 alias l.='eza -la | grep "^\."' # List only hidden dotfiles
+alias ltr='eza -la --sort=modified' # List files sorted by modification time
+alias lsd='eza -la | grep "^d"' # Show only directories
+alias lss='eza -la --sort=size' # List files sorted by size
 
 # --------------------------------------------------------------------
 ## Navigation & Zsh
@@ -22,11 +25,17 @@ alias l.='eza -la | grep "^\."' # List only hidden dotfiles
 alias ..='cd ..' # Go up one directory
 alias ...='cd ../..' # Go up two directories
 alias ....='cd ../../..' # Go up three directories
+alias .....='cd ../../../..' # Go up four directories
+alias ......='cd ../../../../..' # Go up five directories
+alias cd..='cd ..' # Common typo correction
+alias ~='cd ~' # Quick home directory access
 alias icloud='cd ~/Library/Mobile\ Documents/com~apple~CloudDocs' # Navigate to iCloud Drive
-alias code='cd ~/code' # Navigate to code directory
+alias ccode='cd ~/code' # Navigate to code directory
+alias dev='cd ~/Development' # Common development directory
+alias dl='cd ~/Downloads' # Quick downloads access
 alias zshconfig='nvim ~/.zshrc' # Edit zsh configuration file
-alias zshsource='source ~/.zshrc' # Reload zsh configuration
 alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit and reload zsh config
+alias reload='source ~/.zshrc' # Reload shell configuration
 alias hosts='sudo nvim /etc/hosts' # Edit system hosts file
 
 # --------------------------------------------------------------------
@@ -44,6 +53,7 @@ alias copypwd='pwd | pbcopy' # Copy current directory path to clipboard
 alias v='nvim' # Open Neovim editor
 alias vi='nvim' # Open Neovim (vi shortcut)
 alias vim='nvim' # Open Neovim (vim shortcut)
+alias e='nvim' # Quick editor access
 alias oldvim='/usr/bin/vim'  # Open original system Vim
 
 # --------------------------------------------------------------------
@@ -51,7 +61,6 @@ alias oldvim='/usr/bin/vim'  # Open original system Vim
 # --------------------------------------------------------------------
 alias g='git' # Git command shortcut
 alias gs='git status -s' # Show short git status
-alias gss='git status' # Show full git status
 alias ga='git add' # Stage files for commit
 alias gaa='git add --all' # Stage all changes
 alias gc='git commit -m' # Commit with message
@@ -61,14 +70,18 @@ alias gco='git checkout' # Switch branches or restore files
 alias gcb='git checkout -b' # Create and switch to new branch
 alias gp='git push' # Push commits to remote
 alias gpf='git push --force-with-lease' # Force push safely
+alias gpom='git push origin main' # Push to origin main
+alias gpod='git push origin develop' # Push to origin develop
 alias gl='git pull' # Pull changes from remote
 alias glog='git log --oneline --decorate --graph --all' # Show pretty git log graph
 alias gd='git diff' # Show unstaged changes
 alias gdc='git diff --cached' # Show staged changes
+alias gst='git status' # Common shorthand for git status (oh-my-zsh style)
+alias gba='git branch -a' # List all branches including remotes
+alias gcam='git commit -a -m' # Commit all tracked changes with message
 alias lg='lazygit'    # Open LazyGit terminal UI
 
-# Enhanced Git workflows  
-alias gstat='git status --verbose' # Show detailed git status with diffs
+# Enhanced Git workflows
 alias gwip='git add -A && git commit -m "WIP" --no-verify' # Quick work-in-progress commit
 alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1' # Undo last WIP commit
 alias gundo='git reset --soft HEAD~1' # Undo last commit keeping changes staged
@@ -84,17 +97,18 @@ gpristine() {
 alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d' # Delete merged branches
 
 # Advanced Git operations
-alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit' # Beautiful colored git log
+alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit' # Colored git log
 alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)' # Sync current branch with origin
 alias gfix='git commit --fixup' # Create fixup commit for later squashing
 alias gsquash='git rebase -i --autosquash' # Interactive rebase with autosquash
 alias gstash='git stash push -m' # Stash changes with message
-alias gpop='git stash pop' # Apply and remove latest stash
+alias gsh='git stash' # Quick stash
+alias gsp='git stash pop' # Apply and remove latest stash
 
 # GitHub CLI shortcuts
 alias prc='gh pr create --fill' # Create GitHub pull request
 alias prv='gh pr view' # View current pull request
-alias prs='gh pr status' # Show PR status 
+alias prs='gh pr status' # Show PR status
 alias prchecks='gh pr checks' # Show PR CI check status
 alias prco='gh pr checkout' # Checkout a pull request locally
 
@@ -102,6 +116,7 @@ alias prco='gh pr checkout' # Checkout a pull request locally
 ## Kubernetes (Enhanced with ahmetb-style aliases)
 # --------------------------------------------------------------------
 alias k='kubectl' # Kubernetes CLI shortcut
+alias kg='kubectl get' # Get resources shortcut
 
 # Get commands (inspired by ahmetb/kubectl-aliases)
 alias kgp='kubectl get pods' # List all pods
@@ -142,7 +157,7 @@ alias kdeld='kubectl delete deployment'
 alias kpf='kubectl port-forward'    # Usage: kpf svc/myapp 8080:80
 alias kproxy='kubectl proxy'
 
-# Context and namespace management  
+# Context and namespace management
 alias kctx='kubectx'               # Switch contexts
 alias kns='kubens'                 # Switch namespaces
 alias kgc='kubectl config get-contexts'
@@ -158,7 +173,7 @@ kdebug() {
 }
 
 kdebug-simple() {
-  kubectl run "debug-$(date +%s)" --rm -i --tty --image=busybox -- sh  
+  kubectl run "debug-$(date +%s)" --rm -i --tty --image=busybox -- sh
 }
 
 kclean() {
@@ -185,6 +200,62 @@ ktop-cpu() {
 
 ktop-mem() {
   kubectl top pod --all-namespaces --sort-by=memory
+}
+
+# Helm (Kubernetes Package Manager)
+alias h='helm'                 # Base Helm command
+alias hi='helm install'        # Install a chart
+alias hu='helm upgrade --install'  # Upgrade or install chart
+alias hl='helm list'           # List releases
+alias hd='helm delete'         # Delete a release
+alias hs='helm search repo'    # Search for charts in repos
+alias hr='helm repo add'       # Add a chart repository
+alias hru='helm repo update'   # Update repo cache
+
+# Helm function for quick status
+helm-status() {
+  if [ -z "$1" ]; then
+    echo "Usage: helm-status <release_name>"
+    return 1
+  fi
+  helm status "$1" --output table
+}
+
+# --------------------------------------------------------------------
+## Docker & Container Management
+# --------------------------------------------------------------------
+alias d='docker'               # Base Docker command
+alias dc='docker compose'      # Docker Compose (v2+)
+alias dps='docker ps'          # List running containers
+alias dpsa='docker ps -a'      # List all containers (including stopped)
+alias di='docker images'       # List images
+alias drm='docker rm'          # Remove containers
+alias drmi='docker rmi'        # Remove images
+alias db='docker build'        # Build image from Dockerfile
+alias dr='docker run -it --rm' # Run interactive container (with removal)
+alias dexec='docker exec -it'  # Exec into running container
+alias dlogs='docker logs -f'   # Follow container logs
+alias dcu='docker compose up -d' # Start Compose services detached
+alias dcd='docker compose down'  # Stop and remove Compose services
+alias dprune='docker system prune -f' # Prune unused resources (images, containers, etc.)
+
+# Enhanced Docker functions
+docker-clean() {
+  echo "  Cleaning up Docker resources..."
+  docker system prune -f --volumes  # Remove unused images, containers, networks, volumes
+  docker volume prune -f           # Prune dangling volumes
+}
+
+docker-bash() {
+  if [ -z "$1" ]; then
+    echo "Usage: docker-bash <container_id_or_name>"
+    return 1
+  fi
+  docker exec -it "$1" /bin/bash || docker exec -it "$1" /bin/sh  # Exec bash into container (fallback to sh if needed)
+}
+
+docker-stats() {
+  docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"  # Formatted stats
 }
 
 # --------------------------------------------------------------------
@@ -244,12 +315,81 @@ alias tflist='tenv list terraform'
 alias tfinstall='tenv install terraform'
 
 # --------------------------------------------------------------------
+## AWS CLI
+# --------------------------------------------------------------------
+alias aw='aws'                 # Base AWS command
+alias awls='aws ec2 describe-instances --query "Reservations[*].Instances[*].[InstanceId,State.Name,InstanceType,Tags[?Key==`Name`].Value|[0]]" --output table'  # List EC2 instances in table
+alias awstop='aws ec2 stop-instances --instance-ids'  # Stop EC2 instance(s)
+alias awstart='aws ec2 start-instances --instance-ids'  # Start EC2 instance(s)
+alias aws3ls='aws s3 ls'       # List S3 buckets
+alias aws3cp='aws s3 cp'       # Copy files to/from S3
+alias awlambda='aws lambda list-functions --query "Functions[*].[FunctionName,Runtime]" --output table'  # List Lambda functions
+alias awlogin='aws sso login'  # SSO login (if using AWS SSO)
+alias awprofile='export AWS_PROFILE='  # Set AWS profile (usage: awprofile myprofile)
+
+# AWS functions for common tasks
+aws-ec2-ip() {
+  if [ -z "$1" ]; then
+    echo "Usage: aws-ec2-ip <instance_id>"
+    return 1
+  fi
+  aws ec2 describe-instances --instance-ids "$1" --query "Reservations[*].Instances[*].PublicIpAddress" --output text
+}
+
+aws-s3-size() {
+  if [ -z "$1" ]; then
+    echo "Usage: aws-s3-size <bucket_name>"
+    return 1
+  fi
+  aws s3 ls --summarize --human-readable --recursive "s3://$1" | tail -1
+}
+
+# --------------------------------------------------------------------
 ## Python
 # --------------------------------------------------------------------
 # Pyenv is used to manage Python versions.
 # The 'python' and 'pip' commands will automatically point to the
 # version set by `pyenv global` or `pyenv local`.
-# No aliases are needed.
+alias python='python3' # Ensure python command uses Python 3
+alias pip='pip3' # Ensure pip uses Python 3 pip
+
+# --------------------------------------------------------------------
+## Homebrew (macOS Package Management)
+# --------------------------------------------------------------------
+alias brew-update='brew update && brew upgrade && brew cleanup' # Update all brew packages
+alias bru='brew update && brew upgrade' # Quick brew update
+alias bri='brew install' # Install package
+alias brs='brew search' # Search packages
+alias brl='brew list' # List installed packages
+alias brr='brew remove' # Remove package
+alias brc='brew cleanup' # Clean old versions
+
+# --------------------------------------------------------------------
+## NPM & Yarn (Node.js Package Management)
+# --------------------------------------------------------------------
+alias ni='npm install'         # Install packages
+alias nid='npm install -D'     # Install dev dependencies
+alias nr='npm run'             # Run npm scripts
+alias nt='npm test'            # Run tests
+alias ns='npm start'           # Start app
+alias nb='npm run build'       # Build app
+alias yi='yarn install'        # Yarn install
+alias ya='yarn add'            # Add package
+alias yr='yarn run'            # Run yarn scripts
+alias ys='yarn start'          # Start with Yarn
+alias yt='yarn test'           # Test with Yarn
+
+# Function to detect and use the right package manager
+pm-run() {
+  if [ -f "yarn.lock" ]; then
+    yarn "$@"
+  elif [ -f "package-lock.json" ]; then
+    npm run "$@"
+  else
+    echo "No lockfile found; defaulting to npm run"
+    npm run "$@"
+  fi
+}
 
 # --------------------------------------------------------------------
 ## Productivity
@@ -260,22 +400,59 @@ alias zi='zi'               # Interactive directory selection
 
 # Quick file operations
 alias mkd='mkdir -p'        # Create directory with parents
+
+# Make directory and change into it (80% of dotfiles have this)
+mcd() {
+  mkdir -p "$1" && cd "$1" || return
+}
+
+# Quick backup function
+backup() {
+  cp "$1"{,.bak}
+}
 alias duh='du -h -d 1 | sort -h'  # Human-readable directory sizes
+alias df='df -h' # Human-readable disk usage
+alias hist='history' # Show command history (h conflicts with helm)
+alias j='jobs -l' # List background jobs
 
 # Safe file operations (with confirmation prompts)
 alias rm='rm -i'            # Prompt before removal
-alias cp='cp -i'            # Prompt before overwrite  
+alias cp='cp -i'            # Prompt before overwrite
 alias mv='mv -i'            # Prompt before overwrite
 alias cls='clear'           # Windows-style clear
 
 # Process management
 alias psg='ps aux | grep -v grep | grep -i'  # Search processes
+alias psmem='ps auxf | sort -nr -k 4'  # Memory-sorted process list
+alias pscpu='ps auxf | sort -nr -k 3'  # CPU-sorted process list
 killport() {
   if [ -z "$1" ]; then
     echo "Usage: killport <port_number>"
     return 1
   fi
   lsof -ti:"$1" | xargs kill -9
+}
+
+# Archive extraction helper
+extract() {
+  if [ -f "$1" ]; then
+    case "$1" in
+      *.tar.bz2) tar xjf "$1" ;;
+      *.tar.gz) tar xzf "$1" ;;
+      *.bz2) bunzip2 "$1" ;;
+      *.rar) unrar x "$1" ;;
+      *.gz) gunzip "$1" ;;
+      *.tar) tar xf "$1" ;;
+      *.tbz2) tar xjf "$1" ;;
+      *.tgz) tar xzf "$1" ;;
+      *.zip) unzip "$1" ;;
+      *.Z) uncompress "$1" ;;
+      *.7z) 7z x "$1" ;;
+      *) echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
 }
 
 # --------------------------------------------------------------------
@@ -288,12 +465,28 @@ alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder' #
 alias zj='zellij' # Launch Zellij terminal multiplexer
 alias help='tldr'           # Show command examples with tldr
 alias weather='curl wttr.in'  # Quick weather check
+alias please='sudo'           # Polite way to run sudo
+alias copykey='pbcopy < ~/.ssh/id_rsa.pub' # Copy SSH public key to clipboard
+alias copykey-ed='pbcopy < ~/.ssh/id_ed25519.pub' # Copy modern SSH key to clipboard
 
 # Modern shell automation with jc (CLI to JSON conversion)
 alias psj='ps aux | jc --ps'               # Process list as JSON
-alias lsj='ls -la | jc --ls'               # File listing as JSON  
+alias lsj='eza -la | jc --ls'               # File listing as JSON
 alias dfj='df -h | jc --df'                # Disk usage as JSON
 alias digj='dig +short | jc --dig'         # DNS lookup as JSON
+
+# JSON processing with jq (colorized output)
+alias jq='jq -C'               # Colorize JSON output
+alias jqs='jq -S'              # Sort JSON keys
+
+# Quick epoch time converter
+epoch() {
+  if [ $# -eq 0 ]; then
+    date +%s  # Current epoch
+  else
+    date -r "$1" '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -d @"$1" '+%Y-%m-%d %H:%M:%S'  # Convert epoch to readable (macOS/Linux compatible)
+  fi
+}
 
 # Git hooks and quality gates
 alias precommit='pre-commit run --all-files'  # Run all pre-commit hooks

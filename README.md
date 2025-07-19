@@ -1,16 +1,16 @@
 # mac-dev-setup 🚀
 
-**Transform your Mac into a powerful development workstation in minutes.**
+**Set up your Mac development environment with modern tools and configuration.**
 
-Modern CLI tools, intelligent shell configuration, and automated dependency management for macOS developers who value productivity and reliability.
+CLI tools, shell configuration, and automated dependency management for macOS developers.
 
 ## Why mac-dev-setup?
 
-✅ **Productivity Boost**: Replace slow traditional tools with blazing-fast modern alternatives  
+✅ **Modern Tools**: Replace traditional tools with faster alternatives  
 ✅ **Cross-Architecture**: Works on both Intel and Apple Silicon Macs  
 ✅ **Automated Updates**: Dependencies update automatically via Dependabot  
 ✅ **Safe & Idempotent**: Run multiple times without breaking your setup  
-✅ **Backup System**: Automatically preserves your existing configurations  
+✅ **Backup System**: Preserves your existing configurations  
 
 ## Quick Start
 
@@ -20,31 +20,31 @@ cd mac-dev-setup
 ./install.sh
 ```
 
-**That's it!** The script automatically validates everything and prompts you to restart your terminal.
+The script validates the installation and prompts you to restart your terminal.
 
 ## What You Get
 
-### 🚀 Modern CLI Tools (10x faster)
+### Modern CLI Tools
 ```bash
-# Before (slow)        # After (blazing fast)
-ls                  →   eza                # Fast, modern file listings
+# Before              # After
+ls                  →   eza                # Modern file listings
 cat file.txt        →   bat file.txt       # Syntax highlighted output  
-find . -name "*.js" →   fd "*.js"          # Instant file search
-grep "TODO"         →   rg "TODO"          # Millisecond text search
+find . -name "*.js" →   fd "*.js"          # Fast file search
+grep "TODO"         →   rg "TODO"          # Fast text search
 cd ~/projects       →   z projects         # Smart directory jumping
 ```
 
-### ⚡ Immediate Productivity Gains
+### Development Shortcuts
 ```bash
 # Git workflows
 gs              # git status (clean view)
 ga .            # git add all
 gc "fix bug"    # git commit with message
 gp              # git push
-glog            # beautiful commit history
+glog            # commit history
 
 # Development shortcuts  
-serve           # Instant HTTP server (current directory)
+serve           # HTTP server (current directory)
 update          # Update all tools (brew + python + plugins)
 zj              # Launch terminal multiplexer
 killport 3000   # Kill process on port 3000
@@ -78,11 +78,11 @@ kcatc my-topic  # Consume Kafka messages
 kcat-tail topic # Tail last 10 messages
 ```
 
-### 🎨 Enhanced Terminal Experience
+### Terminal Experience
 - **Starship Prompt**: Shows git status, languages, and context
 - **Auto-suggestions**: Based on your command history
 - **Syntax Highlighting**: Real-time command validation
-- **Smart Tab Completion**: Context-aware completions
+- **Tab Completion**: Context-aware completions
 
 ## Real-World Usage Examples
 
@@ -107,7 +107,7 @@ bat src/app.js
 serve
 ```
 
-### Git & Project Management (Enhanced)
+### Git & Project Management
 ```bash
 # Quick status check
 gs                # Short status
@@ -123,7 +123,7 @@ gsync             # Sync with upstream (fetch + rebase)
 gfix HEAD~2       # Create fixup commit for older commit
 gsquash           # Interactive squash with autosquash
 
-# Beautiful commit history
+# Commit history
 glg               # Enhanced graph log with colors
 glog              # Standard oneline graph
 
@@ -138,9 +138,9 @@ prchecks          # Check CI status
 prco 123          # Checkout PR #123
 ```
 
-### Kubernetes & Docker Workflows (Advanced)
+### Kubernetes & Docker Workflows
 ```bash
-# Switch between K8s contexts instantly  
+# Switch between K8s contexts
 kctx production
 kns default
 
@@ -171,7 +171,7 @@ kpf svc/app 8080  # Port forward
 dive myimage:latest  # Analyze Docker layers and optimize
 ```
 
-### Infrastructure as Code Workflows (2025 Edition)
+### Infrastructure as Code Workflows
 ```bash
 # Modern version management with tenv (replaces tfenv)
 tfuse 1.6.6       # Switch to Terraform 1.6.6
@@ -213,7 +213,7 @@ kcatl  # List topics, partitions, brokers
 
 ### Modern Shell Automation
 ```bash
-# Convert CLI output to JSON for powerful processing
+# Convert CLI output to JSON for processing
 ps aux | jc --ps | jq '.[] | select(.cpu_percent > 50)'
 
 # Find large files with structured data
@@ -239,22 +239,22 @@ pipx install httpie
 
 ## Performance Comparison
 
-| Task | Traditional | mac-dev-setup | Speed Gain |
-|------|-------------|---------------|------------|
-| File listing | `ls -la` | `eza -la` | **5x faster** |
-| Text search | `grep -r "pattern"` | `rg "pattern"` | **10x faster** |
-| File find | `find . -name "*.js"` | `fd "*.js"` | **8x faster** |
-| File viewing | `cat file.txt` | `bat file.txt` | **Same speed + syntax highlighting** |
-| Directory navigation | `cd ../../../projects` | `z projects` | **Instant** |
+| Task | Traditional | mac-dev-setup | Improvement |
+|------|-------------|---------------|-------------|
+| File listing | `ls -la` | `eza -la` | Faster with icons |
+| Text search | `grep -r "pattern"` | `rg "pattern"` | Faster search |
+| File find | `find . -name "*.js"` | `fd "*.js"` | Faster find |
+| File viewing | `cat file.txt` | `bat file.txt` | Syntax highlighting |
+| Directory navigation | `cd ../../../projects` | `z projects` | Smart jumping |
 
 ## Installation Details
 
 The install script automatically:
 1. **Detects your Mac architecture** (Intel/Apple Silicon)
-2. **Installs 40+ modern CLI tools** via Homebrew (2025-ready, security-focused)
+2. **Installs 40+ CLI tools** via Homebrew
 3. **Configures Python 3.12** with pyenv and Node.js LTS with nvm
-4. **Sets up mise** for unified runtime version management  
-5. **Creates 600+ smart aliases** and workflows (Git, K8s, IaC security, cost estimation, data streaming)
+4. **Sets up mise** for runtime version management  
+5. **Creates 600+ aliases** and workflows (Git, K8s, IaC, data streaming)
 6. **Validates all installations** with ✅/❌ indicators
 7. **Prompts for terminal restart** to activate everything
 
@@ -330,6 +330,6 @@ nvm use --lts
 
 ---
 
-**Ready to supercharge your development workflow?** Clone and run `./install.sh` to get started!
+Clone and run `./install.sh` to get started.
 
 Created by [Nikolay-E](https://github.com/nikolay-e) • [Issues](https://github.com/nikolay-e/mac-dev-setup/issues) • [Contributing](CONTRIBUTING.md)
