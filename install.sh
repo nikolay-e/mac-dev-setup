@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-# Stop on first error
-set -e
+# Stop on first error, undefined variables, and pipe failures
+set -euo pipefail
 
 # --- Helper Functions ---
 info() {
@@ -15,7 +15,10 @@ setup_homebrew() {
     echo "Homebrew not found. Installing..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
-  (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+  # Only add to .zprofile if not already present
+  if ! grep -q '/opt/homebrew/bin/brew shellenv' ~/.zprofile 2>/dev/null; then
+    (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+  fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
   
   brew update
@@ -36,7 +39,11 @@ setup_python() {
   
   info "Installing Python CLI tools via pipx..."
   pipx ensurepath
-  pipx install treemapper
+  if ! pipx list | grep -q treemapper; then
+    pipx install treemapper
+  else
+    echo "treemapper is already installed. Skipping."
+  fi
 }
 
 link_dotfiles() {
@@ -49,39 +56,26 @@ link_dotfiles() {
   if [ -f "$HOME/.$alias_file" ] || [ -h "$HOME/.$alias_file" ]; then
     mv "$HOME/.$alias_file" "$olddir/"
   fi
-  ln -s "$dir/.$alias_file" "$HOME/.$alias_file"
+  ln -sfn "$dir/.$alias_file" "$HOME/.$alias_file"
   
   # Link Sheldon plugins config
   mkdir -p "$HOME/.config/sheldon"
   if [ -f "$HOME/.config/sheldon/plugins.toml" ] || [ -h "$HOME/.config/sheldon/plugins.toml" ]; then
     mv "$HOME/.config/sheldon/plugins.toml" "$olddir/"
   fi
-  ln -s "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
+  ln -sfn "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
 }
 
 configure_shell() {
   info "Configuring Zsh..."
-  local ZSHRC_CONFIG_BLOCK="# --- Mac Dev Setup Configuration ---"
+  local ZSHRC_SOURCE_LINE="source ~/mac-dev-setup/zsh_config.sh"
   
-  if ! grep -q "$ZSHRC_CONFIG_BLOCK" ~/.zshrc; then
-    echo "Adding configuration block to ~/.zshrc..."
-    cat <<'EOF' >> ~/.zshrc
-
-# --- Mac Dev Setup Configuration ---
-# This block is managed by the mac-dev-setup project.
-if [ -f ~/.mac-dev-setup-aliases ]; then source ~/.mac-dev-setup-aliases; fi
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-if command -v pyenv 1>/dev/null 2>&1; then eval "$(pyenv init -)"; fi
-export NVM_DIR="$HOME/.nvm"
-[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-if command -v starship 1>/dev/null 2>&1; then eval "$(starship init zsh)"; fi
-if command -v sheldon 1>/dev/null 2>&1; then eval "$(sheldon source)"; fi
-# --- End Mac Dev Setup Configuration ---
-EOF
+  if ! grep -q "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
+    echo "Adding source line to ~/.zshrc..."
+    echo "\n# Load mac-dev-setup configuration" >> ~/.zshrc
+    echo "$ZSHRC_SOURCE_LINE" >> ~/.zshrc
   else
-    echo "Configuration block already exists. Skipping."
+    echo "Source line already exists in ~/.zshrc. Skipping."
   fi
 }
 

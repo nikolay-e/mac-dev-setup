@@ -1,0 +1,23 @@
+name: Bug Report
+description: Something isn't working in mac-dev-setup
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Tell us what you were doing and what went wrong.
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …  
+        2. …
+  - type: input
+    attributes:
+      label: macOS version
+      placeholder: e.g. 14.4 (Sonoma)
+  - type: textarea
+    attributes:
+      label: Terminal output
+      description: Please paste any error messages or relevant output
+      render: shell

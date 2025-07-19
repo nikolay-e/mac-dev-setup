@@ -1,0 +1,13 @@
+name: BATS
+
+on: [push, pull_request]
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mig4/setup-bats@v1
+      - name: Run tests
+        run: |
+          bats test
