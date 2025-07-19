@@ -5,7 +5,7 @@ set -euo pipefail
 
 # --- Helper Functions ---
 info() {
-  echo "\n\033[1;34m$1\033[0m"
+  printf "\n\033[1;34m%s\033[0m\n" "$1"
 }
 
 # --- Main Logic Functions ---
@@ -17,13 +17,13 @@ setup_homebrew() {
   fi
   # Only add to .zprofile if not already present
   if ! grep -q '/opt/homebrew/bin/brew shellenv' ~/.zprofile 2>/dev/null; then
-    (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+    (echo; echo "eval \"\$(/opt/homebrew/bin/brew shellenv)\"") >> ~/.zprofile
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
   
   brew update
   brew bundle --no-lock
-  $(brew --prefix)/opt/fzf/install --all
+  "$(brew --prefix)/opt/fzf/install" --all
 }
 
 setup_python() {

@@ -5,11 +5,11 @@ set -euo pipefail
 
 # --- Helper Functions ---
 info() {
-  echo "\n\033[1;34m$1\033[0m"
+  printf "\n\033[1;34m%s\033[0m\n" "$1"
 }
 
 success() {
-  echo "\033[1;32m✓ $1\033[0m"
+  printf "\033[1;32m✓ %s\033[0m\n" "$1"
 }
 
 # --- Update Functions ---
@@ -43,10 +43,10 @@ update_sheldon_plugins() {
 
 check_outdated() {
   info "Checking for outdated packages..."
-  echo "\nOutdated Homebrew packages:"
+  printf "\nOutdated Homebrew packages:\n"
   brew outdated || echo "All packages are up to date!"
   
-  echo "\nOutdated Python packages:"
+  printf "\nOutdated Python packages:\n"
   pipx list --outdated || echo "All Python tools are up to date!"
 }
 
@@ -60,4 +60,4 @@ update_sheldon_plugins
 check_outdated
 
 info "✅ Update complete!"
-echo "\nTip: Run 'brew doctor' to check for any issues"
+printf "\nTip: Run 'brew doctor' to check for any issues\n"

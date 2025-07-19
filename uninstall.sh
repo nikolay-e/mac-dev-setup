@@ -5,11 +5,11 @@ set -euo pipefail
 
 # --- Helper Functions ---
 info() {
-  echo "\n\033[1;34m$1\033[0m"
+  printf "\n\033[1;34m%s\033[0m\n" "$1"
 }
 
 warn() {
-  echo "\n\033[1;33m⚠️  $1\033[0m"
+  printf "\n\033[1;33m⚠️  %s\033[0m\n" "$1"
 }
 
 # --- Main Functions ---
@@ -20,7 +20,7 @@ remove_shell_config() {
   
   if grep -q "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
     # Create backup before modifying
-    cp ~/.zshrc ~/.zshrc.backup.$(date +%Y%m%d_%H%M%S)
+    cp ~/.zshrc ~/.zshrc.backup."$(date +%Y%m%d_%H%M%S)"
     
     # Remove the source line and comment
     sed -i '' "/$ZSHRC_COMMENT/d" ~/.zshrc
@@ -69,7 +69,7 @@ restore_backups() {
 warn "This will remove mac-dev-setup configuration from your system."
 echo "Your installed tools (via Homebrew) will NOT be removed."
 echo -n "Continue? (y/N): "
-read response
+read -r response
 
 if [[ "$response" =~ ^[Yy]$ ]]; then
   info "Starting uninstall process..."
@@ -77,7 +77,7 @@ if [[ "$response" =~ ^[Yy]$ ]]; then
   remove_symlinks
   restore_backups
   info "✅ Uninstall complete! Restart your terminal to apply changes."
-  echo "\nTo remove Homebrew packages, run: brew bundle cleanup --file=./Brewfile"
+  printf "\nTo remove Homebrew packages, run: brew bundle cleanup --file=./Brewfile\n"
 else
   echo "Uninstall cancelled."
 fi
