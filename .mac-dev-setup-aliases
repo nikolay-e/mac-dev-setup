@@ -63,16 +63,42 @@ alias gdc='git diff --cached'
 # --------------------------------------------------------------------
 ## 🐍 Python
 # --------------------------------------------------------------------
-# Standardize python and pip commands to the pyenv global version
-alias python='python3'
-alias pip='pip3'
+# Pyenv is used to manage Python versions.
+# The 'python' and 'pip' commands will automatically point to the
+# version set by `pyenv global` or `pyenv local`.
+# No aliases are needed.
+
+# --------------------------------------------------------------------
+## 🚀 Productivity
+# --------------------------------------------------------------------
+# Quick navigation with zoxide (after it's installed, use 'z' to jump to directories)
+alias zz='z -'              # Go back to previous directory
+alias zi='zi'               # Interactive directory selection
+alias dots='cd ~/mac-dev-setup'  # Quick access to this repo
+
+# Quick file operations
+alias mkd='mkdir -p'        # Create directory with parents
+alias rmrf='rm -rf'         # Remove forcefully (use with caution!)
+alias duh='du -h -d 1 | sort -h'  # Human-readable directory sizes
+
+# Process management
+alias psg='ps aux | grep -v grep | grep -i'  # Search processes
+killport() {
+  if [ -z "$1" ]; then
+    echo "Usage: killport <port_number>"
+    return 1
+  fi
+  lsof -ti:$1 | xargs kill -9
+}
 
 # --------------------------------------------------------------------
 ## 🛠️ Utilities
 # --------------------------------------------------------------------
-alias update='brew update && brew upgrade && brew cleanup'
+alias update='~/mac-dev-setup/update.sh'  # Comprehensive update (brew, pipx, sheldon)
 alias myip='curl ifconfig.me'
 alias localip='ipconfig getifaddr en0'
 alias serve='python3 -m http.server'
 alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 alias zj='zellij'
+alias help='tldr'           # Use tldr for quick command help
+alias weather='curl wttr.in'  # Quick weather check

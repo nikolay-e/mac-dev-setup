@@ -48,41 +48,63 @@ setup_python() {
 
 link_dotfiles() {
   info "Linking dotfiles..."
-  local dir=$(pwd)
-  local olddir=~/.dotfiles_backup
-  local alias_file="mac-dev-setup-aliases"
-  
+  local dir
+  dir=$(pwd)
+  local olddir="$HOME/.dotfiles_backup"
+  local files_to_link=(".mac-dev-setup-aliases" ".zsh_config.sh")
+
   mkdir -p "$olddir"
-  if [ -f "$HOME/.$alias_file" ] || [ -h "$HOME/.$alias_file" ]; then
-    mv "$HOME/.$alias_file" "$olddir/"
-  fi
-  ln -sfn "$dir/.$alias_file" "$HOME/.$alias_file"
-  
+  echo "Backing up existing configs to $olddir"
+
+  for file in "${files_to_link[@]}"; do
+    if [ -f "$HOME/$file" ] || [ -h "$HOME/$file" ]; then
+      mv "$HOME/$file" "$olddir/"
+    fi
+    # Remove leading dot from source file name
+    local source_file="${file#.}"
+    ln -sfn "$dir/$source_file" "$HOME/$file"
+    echo "Linked ~/$file"
+  done
+
   # Link Sheldon plugins config
   mkdir -p "$HOME/.config/sheldon"
   if [ -f "$HOME/.config/sheldon/plugins.toml" ] || [ -h "$HOME/.config/sheldon/plugins.toml" ]; then
     mv "$HOME/.config/sheldon/plugins.toml" "$olddir/"
   fi
   ln -sfn "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
+  echo "Linked Sheldon plugins config"
 }
 
 configure_shell() {
   info "Configuring Zsh..."
-  local ZSHRC_SOURCE_LINE="source ~/mac-dev-setup/zsh_config.sh"
-  
-  if ! grep -q "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
+  # The source path now points to the symlink in the user's home directory
+  local ZSHRC_SOURCE_LINE="source ~/.zsh_config.sh"
+
+  if ! grep -Fxq "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
     echo "Adding source line to ~/.zshrc..."
-    echo "\n# Load mac-dev-setup configuration" >> ~/.zshrc
-    echo "$ZSHRC_SOURCE_LINE" >> ~/.zshrc
+    echo -e "\n# Load mac-dev-setup configuration\n$ZSHRC_SOURCE_LINE" >> ~/.zshrc
   else
     echo "Source line already exists in ~/.zshrc. Skipping."
   fi
+}
+
+configure_git() {
+  info "Configuring Git to use Delta for diffs..."
+  git config --global core.pager delta
+  git config --global interactive.diffFilter "delta --color-only"
+  git config --global delta.navigate true
+  git config --global delta.light false # Set to true for light terminal themes
+  git config --global delta.side-by-side true
+  git config --global merge.conflictstyle diff3
+  git config --global diff.colorMoved default
+  echo "Git configured to use delta."
 }
 
 # --- Main Execution ---
 info "🚀 Starting robust macOS workstation setup..."
 setup_homebrew
 setup_python
+configure_git
 link_dotfiles
 configure_shell
 

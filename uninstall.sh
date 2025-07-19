@@ -15,7 +15,7 @@ warn() {
 # --- Main Functions ---
 remove_shell_config() {
   info "Removing shell configuration..."
-  local ZSHRC_SOURCE_LINE="source ~/mac-dev-setup/zsh_config.sh"
+  local ZSHRC_SOURCE_LINE="source ~/.zsh_config.sh"
   local ZSHRC_COMMENT="# Load mac-dev-setup configuration"
   
   if grep -q "$ZSHRC_SOURCE_LINE" ~/.zshrc; then
@@ -38,6 +38,12 @@ remove_symlinks() {
   if [ -h ~/.mac-dev-setup-aliases ]; then
     rm ~/.mac-dev-setup-aliases
     echo "Removed ~/.mac-dev-setup-aliases symlink"
+  fi
+  
+  # Remove zsh_config symlink
+  if [ -h ~/.zsh_config.sh ]; then
+    rm ~/.zsh_config.sh
+    echo "Removed ~/.zsh_config.sh symlink"
   fi
   
   # Remove Sheldon config symlink
