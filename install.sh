@@ -27,7 +27,7 @@ setup_homebrew() {
   eval "$("$BREW_PREFIX"/bin/brew shellenv)"
   
   brew update
-  brew bundle --no-lock
+  brew bundle
   
   # Install fzf shell integration idempotently
   if [ -d "$BREW_PREFIX/opt/fzf" ]; then
@@ -37,7 +37,18 @@ setup_homebrew() {
 
 setup_python() {
   info "Setting up Global Python Environment..."
-  PYTHON_VERSION="${PYTHON_VERSION:-3.12.4}"
+  PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
+  
+  # Find latest patch version for the specified major.minor
+  local latest_version
+  latest_version=$(pyenv install --list | grep -E "^  ${PYTHON_VERSION}\.[0-9]+$" | tail -1 | xargs)
+  if [[ -n "$latest_version" ]]; then
+    PYTHON_VERSION="$latest_version"
+    echo "Using latest Python ${PYTHON_VERSION}"
+  else
+    echo "Warning: Could not find Python ${PYTHON_VERSION}, using default"
+    PYTHON_VERSION="3.12.4"  # Fallback
+  fi
   
   if ! pyenv versions --bare | grep -q "^$PYTHON_VERSION$"; then
     pyenv install "$PYTHON_VERSION"
@@ -48,11 +59,31 @@ setup_python() {
   
   info "Installing Python CLI tools via pipx..."
   pipx ensurepath
-  if ! pipx list | grep -q treemapper; then
-    pipx install treemapper
-  else
-    echo "treemapper is already installed. Skipping."
-  fi
+  
+  local dir
+  dir=$(pwd)
+  
+  # Install packages from requirements.txt
+  while IFS= read -r package || [ -n "$package" ]; do
+    # Skip empty lines and comments
+    [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
+    
+    # Extract package name (handle comments on same line)
+    package_name=$(echo "$package" | sed 's/[[:space:]]*#.*//' | xargs)
+    [[ -z "$package_name" ]] && continue
+    
+    # Check if already installed to avoid duplicates
+    if pipx list | grep -q "^  package $package_name "; then
+      echo "$package_name is already installed via pipx. Skipping."
+    else
+      echo "Installing $package_name via pipx..."
+      if pipx install "$package_name"; then
+        echo "✅ Successfully installed $package_name"
+      else
+        echo "⚠️  Failed to install $package_name"
+      fi
+    fi
+  done < "$dir/requirements.txt"
 }
 
 setup_nodejs() {
@@ -190,18 +221,165 @@ EOF
 
 configure_git() {
   info "Configuring Git to use Delta for diffs..."
-  git config --global core.pager delta
-  git config --global interactive.diffFilter "delta --color-only"
-  git config --global delta.navigate true
-  git config --global delta.light false # Set to true for light terminal themes
-  git config --global delta.side-by-side true
-  git config --global merge.conflictstyle diff3
-  git config --global diff.colorMoved default
-  echo "Git configured to use delta."
+  
+  # Only configure delta if it's installed
+  if command -v delta &> /dev/null; then
+    git config --global core.pager delta
+    git config --global interactive.diffFilter "delta --color-only"
+    git config --global delta.navigate true
+    git config --global delta.light false # Set to true for light terminal themes
+    git config --global delta.side-by-side true
+    git config --global merge.conflictstyle diff3
+    git config --global diff.colorMoved default
+    echo "Git configured to use delta."
+  else
+    echo "Warning: delta not found, skipping Git delta configuration"
+    echo "Git will use default pager"
+  fi
+}
+
+install_krew_plugins() {
+  info "Installing essential kubectl plugins via krew..."
+  
+  # Check if kubectl and krew are available
+  if ! command -v kubectl &> /dev/null; then
+    echo "kubectl not found, skipping krew plugins"
+    return
+  fi
+  
+  if ! command -v krew &> /dev/null; then
+    echo "krew not found, skipping plugins"
+    return
+  fi
+  
+  # Install essential plugins
+  local plugins=("neat" "tree" "access-matrix")
+  for plugin in "${plugins[@]}"; do
+    if kubectl krew list | grep -q "^$plugin"; then
+      echo "$plugin already installed"
+    else
+      echo "Installing kubectl-$plugin..."
+      kubectl krew install "$plugin" || echo "Failed to install $plugin"
+    fi
+  done
+  
+  echo "krew plugins installation complete"
+}
+
+validate_installation() {
+  info "Validating installation..."
+  local failed=0
+  
+  # Test key CLI tools
+  local tools=("bat" "eza" "fd" "rg" "zoxide" "starship" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "krew" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs")
+  for tool in "${tools[@]}"; do
+    if command -v "$tool" &> /dev/null; then
+      printf "✅ %s: %s\n" "$tool" "$(command -v "$tool")"
+    else
+      printf "❌ %s: not found\n" "$tool"
+      failed=1
+    fi
+  done
+  
+  # Test symlinks
+  if [ -L ~/.mac-dev-setup-aliases ] && [ -f ~/.mac-dev-setup-aliases ]; then
+    echo "✅ Aliases: symlinked correctly"
+  else
+    echo "❌ Aliases: symlink failed"
+    failed=1
+  fi
+  
+  if [ -L ~/.zsh_config.sh ] && [ -f ~/.zsh_config.sh ]; then
+    echo "✅ Zsh config: symlinked correctly"
+  else
+    echo "❌ Zsh config: symlink failed"
+    failed=1
+  fi
+  
+  # Test Python environment
+  if command -v python &> /dev/null && python --version | grep -q "3.12"; then
+    echo "✅ Python: $(python --version)"
+  else
+    echo "❌ Python: wrong version or not found"
+    failed=1
+  fi
+  
+  # Test Node.js
+  if command -v node &> /dev/null; then
+    echo "✅ Node.js: $(node --version)"
+  else
+    echo "❌ Node.js: not found"
+    failed=1
+  fi
+  
+  if [ $failed -eq 0 ]; then
+    echo ""
+    printf "\033[1;32m🎉 All components installed successfully!\033[0m\n"
+    return 0
+  else
+    echo ""
+    printf "\033[1;31m⚠️  Some components failed to install properly.\033[0m\n"
+    return 1
+  fi
+}
+
+prompt_terminal_restart() {
+  echo ""
+  info "🔄 Terminal Restart Required"
+  echo "To activate all new features (modern prompt, aliases, tools), you need to restart your terminal."
+  echo ""
+  echo "Options:"
+  echo "1. Reload shell in current session (exec zsh)"
+  echo "2. I'll restart terminal manually later"
+  echo ""
+  printf "Choose [1/2]: "
+  read -r choice
+  
+  case $choice in
+    1|"")
+      echo ""
+      echo "🚀 Reloading shell configuration..."
+      echo "Try these new commands:"
+      echo "  • eza          # Better ls with icons"
+      echo "  • bat README.md # Syntax highlighted cat"
+      echo "  • z <dir>      # Smart directory jumping"
+      echo "  • rg <pattern> # Super fast search"
+      echo ""
+      exec zsh
+      ;;
+    2)
+      echo ""
+      echo "✅ Setup complete! Please restart your terminal to see all changes."
+      echo ""
+      echo "Preview of new commands (after restart):"
+      echo "  • eza          # Better ls with icons" 
+      echo "  • bat README.md # Syntax highlighted cat"
+      echo "  • z <dir>      # Smart directory jumping"
+      echo "  • rg <pattern> # Super fast search"
+      ;;
+    *)
+      echo "Setup complete! Please restart your terminal to apply changes."
+      ;;
+  esac
+}
+
+# --- Pre-flight Checks ---
+check_shell() {
+  if [[ "$SHELL" != */zsh ]]; then
+    echo "⚠️  Warning: Your default shell is not zsh ($SHELL)"
+    echo "This setup is optimized for zsh. Consider running: chsh -s $(which zsh)"
+    echo -n "Continue anyway? (y/N): "
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      echo "Setup cancelled. Please switch to zsh first."
+      exit 1
+    fi
+  fi
 }
 
 # --- Main Execution ---
 info "🚀 Starting robust macOS workstation setup..."
+check_shell
 setup_homebrew
 setup_python
 setup_nodejs
@@ -209,6 +387,15 @@ configure_git
 generate_plugins_config
 link_dotfiles
 configure_shell
+install_krew_plugins
 
 brew cleanup
-info "✅ Workstation setup complete! Restart your terminal."
+
+# Validate installation and prompt for terminal restart
+if validate_installation; then
+  prompt_terminal_restart
+else
+  echo ""
+  echo "❌ Installation completed with issues. Please check the errors above."
+  echo "You may need to run the script again or manually install missing components."
+fi

@@ -5,6 +5,7 @@
 # Environment Variables
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"  # pipx tools
 export NVM_DIR="$HOME/.nvm"
 
 # Tool Initializations
@@ -19,7 +20,12 @@ BREW_PREFIX=$(uname -m | grep -q arm64 && echo /opt/homebrew || echo /usr/local)
 if command -v starship 1>/dev/null 2>&1; then eval "$(starship init zsh)"; fi
 if command -v sheldon 1>/dev/null 2>&1; then eval "$(sheldon source)"; fi
 if command -v zoxide 1>/dev/null 2>&1; then eval "$(zoxide init zsh)"; fi
+if command -v mise 1>/dev/null 2>&1; then eval "$(mise activate zsh)"; fi
 
 # Source Aliases
 # shellcheck disable=SC1090
 if [ -f ~/.mac-dev-setup-aliases ]; then source ~/.mac-dev-setup-aliases; fi
+
+# Source Personal Overrides (loaded last to override defaults)
+# shellcheck disable=SC1090
+if [ -f ~/.my_aliases ]; then source ~/.my_aliases; fi

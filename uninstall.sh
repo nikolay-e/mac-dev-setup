@@ -22,9 +22,16 @@ remove_shell_config() {
     # Create backup before modifying
     cp ~/.zshrc ~/.zshrc.backup."$(date +%Y%m%d_%H%M%S)"
     
-    # Remove the source line and comment
-    sed -i '' "/$ZSHRC_COMMENT/d" ~/.zshrc
-    sed -i '' "/$ZSHRC_SOURCE_LINE/d" ~/.zshrc
+    # Remove the source line and comment (portable sed)
+    if sed --version >/dev/null 2>&1; then
+      # GNU sed (Linux)
+      sed -i "/$ZSHRC_COMMENT/d" ~/.zshrc
+      sed -i "/$ZSHRC_SOURCE_LINE/d" ~/.zshrc
+    else
+      # BSD sed (macOS)
+      sed -i '' "/$ZSHRC_COMMENT/d" ~/.zshrc
+      sed -i '' "/$ZSHRC_SOURCE_LINE/d" ~/.zshrc
+    fi
     echo "Configuration removed from ~/.zshrc (backup created)"
   else
     echo "No configuration found in ~/.zshrc"

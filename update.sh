@@ -32,6 +32,16 @@ update_python_tools() {
 }
 
 
+update_npm_packages() {
+  info "Updating npm packages (shell plugins)..."
+  if [ -f package.json ]; then
+    npm install --ignore-scripts && npm update
+    success "npm packages updated"
+  else
+    echo "No package.json found, skipping npm update"
+  fi
+}
+
 update_sheldon_plugins() {
   info "Updating Zsh plugins..."
   if command -v sheldon &> /dev/null; then
@@ -39,6 +49,16 @@ update_sheldon_plugins() {
     success "Zsh plugins updated"
   else
     echo "Sheldon not found, skipping plugin update"
+  fi
+}
+
+update_mise_tools() {
+  info "Updating mise runtime tools..."
+  if command -v mise &> /dev/null; then
+    mise upgrade
+    success "mise tools updated"
+  else
+    echo "mise not found, skipping mise update"
   fi
 }
 
@@ -61,7 +81,9 @@ echo "This will update all tools installed by mac-dev-setup"
 
 update_homebrew
 update_python_tools
+update_npm_packages
 update_sheldon_plugins
+update_mise_tools
 check_outdated
 
 info "✅ Update complete!"

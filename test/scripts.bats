@@ -41,3 +41,24 @@ teardown() {
     head -1 update.sh | grep -q "#!/bin/bash"
     head -1 uninstall.sh | grep -q "#!/bin/bash"
 }
+
+@test "shell scripts have no syntax errors" {
+    bash -n install.sh
+    bash -n update.sh  
+    bash -n uninstall.sh
+}
+
+@test "install.sh has required safety checks" {
+    grep -q "set -euo pipefail" install.sh
+    grep -q "command -v" install.sh
+}
+
+@test "destructive functions have safety prompts" {
+    grep -q "gpristine()" .mac-dev-setup-aliases
+    grep -q "Press Ctrl+C to cancel" .mac-dev-setup-aliases
+}
+
+@test "kafka functions check environment" {
+    grep -q "KAFKA_BROKERS" .mac-dev-setup-aliases
+    grep -q "Error: Set KAFKA_BROKERS" .mac-dev-setup-aliases
+}

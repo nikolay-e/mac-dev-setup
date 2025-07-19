@@ -1,3 +1,5 @@
+#!/bin/bash
+# shellcheck shell=bash
 # --------------------------------------------------------------------
 ##  Modern CLI Replacements & Aliases
 # --------------------------------------------------------------------
@@ -22,6 +24,7 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias zshconfig='nvim ~/.zshrc'
 alias zshsource='source ~/.zshrc'
+alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit and reload in one command
 alias hosts='sudo nvim /etc/hosts'
 
 # --------------------------------------------------------------------
@@ -39,13 +42,14 @@ alias copypwd='pwd | pbcopy'
 alias v='nvim'
 alias vi='nvim'
 alias vim='nvim'
+alias oldvim='/usr/bin/vim'  # Fallback to system vim
 
 # --------------------------------------------------------------------
 ## 🐙 Git
 # --------------------------------------------------------------------
 alias g='git'
 alias gs='git status -s'
-alias gst='git status'
+alias gss='git status'
 alias ga='git add'
 alias gaa='git add --all'
 alias gc='git commit -m'
@@ -59,6 +63,183 @@ alias gl='git pull'
 alias glog='git log --oneline --decorate --graph --all'
 alias gd='git diff'
 alias gdc='git diff --cached'
+alias lg='lazygit'    # Terminal UI for Git
+
+# Enhanced Git workflows  
+alias gstat='git status --verbose'
+alias gwip='git add -A && git commit -m "WIP" --no-verify'
+alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1'
+alias gundo='git reset --soft HEAD~1'
+alias gundo-hard='git reset --hard HEAD~1'  # Undo last commit completely
+
+# Destructive operations with safety prompts
+gpristine() {
+  echo "⚠️  DANGER: This will DELETE all uncommitted changes and untracked files!"
+  echo "Press Ctrl+C to cancel, or Enter to continue..."
+  read -r
+  git reset --hard && git clean -dffx
+}
+alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d'
+
+# Advanced Git operations
+alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
+alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)'
+alias gfix='git commit --fixup'
+alias gsquash='git rebase -i --autosquash'
+alias gstash='git stash push -m'
+alias gpop='git stash pop'
+
+# GitHub CLI shortcuts
+alias prc='gh pr create --fill'
+alias prv='gh pr view'
+alias prs='gh pr status' 
+alias prchecks='gh pr checks'
+alias prco='gh pr checkout'
+
+# --------------------------------------------------------------------
+## ☸️ Kubernetes (Enhanced with ahmetb-style aliases)
+# --------------------------------------------------------------------
+alias k='kubectl'
+
+# Get commands (inspired by ahmetb/kubectl-aliases)
+alias kgp='kubectl get pods'
+alias kgpo='kubectl get pods -o wide'
+alias kgpw='kubectl get pods --watch'
+alias kgs='kubectl get services'
+alias kgso='kubectl get services -o wide'
+alias kgd='kubectl get deployments'
+alias kgdo='kubectl get deployments -o wide'
+alias kgn='kubectl get nodes'
+alias kgno='kubectl get nodes -o wide'
+alias kgns='kubectl get namespaces'
+alias kgcm='kubectl get configmaps'
+alias kgsec='kubectl get secrets'
+alias kgall='kubectl get all'
+
+# Describe commands
+alias kdp='kubectl describe pod'
+alias kds='kubectl describe service'
+alias kdd='kubectl describe deployment'
+alias kdn='kubectl describe node'
+
+# Logs and exec
+alias klogs='kubectl logs'
+alias klogf='kubectl logs -f'
+alias klogt='kubectl logs --tail=100'
+alias klogft='kubectl logs -f --tail=100'
+alias kexec='kubectl exec -it'
+
+# Apply and delete
+alias kapp='kubectl apply -f'
+alias kdel='kubectl delete'
+alias kdelp='kubectl delete pod'
+alias kdels='kubectl delete service'
+alias kdeld='kubectl delete deployment'
+
+# Port forwarding and proxy
+alias kpf='kubectl port-forward'    # Usage: kpf svc/myapp 8080:80
+alias kproxy='kubectl proxy'
+
+# Context and namespace management  
+alias kctx='kubectx'               # Switch contexts
+alias kns='kubens'                 # Switch namespaces
+alias kgc='kubectl config get-contexts'
+alias kcc='kubectl config current-context'
+
+# Advanced tools
+alias kstern='stern'               # Multi-pod log tailing
+alias k9='k9s'                     # Kubernetes cluster TUI
+
+# Quick utilities
+kdebug() {
+  kubectl run "debug-$(date +%s)" --rm -i --tty --image=nicolaka/netshoot -- sh
+}
+
+kdebug-simple() {
+  kubectl run "debug-$(date +%s)" --rm -i --tty --image=busybox -- sh  
+}
+
+kclean() {
+  kubectl get pods --field-selector=status.phase=Succeeded -o name | xargs -r kubectl delete
+}
+
+# Advanced debugging with kubectl plugins (requires krew)
+ktree() {
+  kubectl tree "${1:-deployment}" "${2}"
+}
+
+kneat() {
+  kubectl neat get "${1}" "${2}" -o yaml
+}
+
+kaccess() {
+  kubectl access-matrix --sa "${1:-default}"
+}
+
+# Resource analysis
+ktop-cpu() {
+  kubectl top pod --all-namespaces --sort-by=cpu
+}
+
+ktop-mem() {
+  kubectl top pod --all-namespaces --sort-by=memory
+}
+
+# --------------------------------------------------------------------
+## 🏗️ Terraform & Infrastructure as Code
+# --------------------------------------------------------------------
+alias tf='terraform'
+alias tfi='terraform init'
+alias tfp='terraform plan'
+alias tfa='terraform apply'
+alias tfd='terraform destroy'
+alias tfv='terraform validate'
+alias tff='terraform fmt -recursive'
+alias tfs='terraform show'
+alias tfr='terraform refresh'
+alias tfo='terraform output'
+alias tfws='terraform workspace'
+
+# Modern Terraform workflow functions (using tenv for version management)
+tfapply() {
+  terraform plan -out=tfplan && terraform apply tfplan
+}
+
+tfplan() {
+  terraform plan -out=tfplan "$@"
+}
+
+tfdestroy-safe() {
+  terraform plan -destroy -out=destroy.plan && \
+  read -p "Execute destroy plan? (y/N) " -n 1 -r && \
+  echo && \
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    terraform apply "destroy.plan"
+  fi
+}
+
+# Enhanced Terraform workflows
+tfwswitch() {
+  terraform workspace select "$1" && terraform plan -var-file="workspaces/$1.tfvars"
+}
+
+tfsec() {
+  trivy config . --severity HIGH,CRITICAL
+}
+
+tfcost() {
+  infracost breakdown --path . --format table
+}
+
+tfdocs() {
+  terraform-docs markdown table . > README.md
+  echo "Documentation generated in README.md"
+}
+
+# Version management with tenv (replaces tfenv)
+alias tfuse='tenv use terraform'
+alias tflist='tenv list terraform'
+alias tfinstall='tenv install terraform'
 
 # --------------------------------------------------------------------
 ## 🐍 Python
@@ -78,8 +259,13 @@ alias dots='cd ~/mac-dev-setup'  # Quick access to this repo
 
 # Quick file operations
 alias mkd='mkdir -p'        # Create directory with parents
-alias rmrf='rm -rf'         # Remove forcefully (use with caution!)
 alias duh='du -h -d 1 | sort -h'  # Human-readable directory sizes
+
+# Safe file operations (with confirmation prompts)
+alias rm='rm -i'            # Prompt before removal
+alias cp='cp -i'            # Prompt before overwrite  
+alias mv='mv -i'            # Prompt before overwrite
+alias cls='clear'           # Windows-style clear
 
 # Process management
 alias psg='ps aux | grep -v grep | grep -i'  # Search processes
@@ -88,7 +274,7 @@ killport() {
     echo "Usage: killport <port_number>"
     return 1
   fi
-  lsof -ti:$1 | xargs kill -9
+  lsof -ti:"$1" | xargs kill -9
 }
 
 # --------------------------------------------------------------------
@@ -102,3 +288,64 @@ alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 alias zj='zellij'
 alias help='tldr'           # Use tldr for quick command help
 alias weather='curl wttr.in'  # Quick weather check
+
+# Modern shell automation with jc (CLI to JSON conversion)
+alias psj='ps aux | jc --ps'               # Process list as JSON
+alias lsj='ls -la | jc --ls'               # File listing as JSON  
+alias dfj='df -h | jc --df'                # Disk usage as JSON
+alias digj='dig +short | jc --dig'         # DNS lookup as JSON
+
+# Git hooks and quality gates
+alias precommit='pre-commit run --all-files'  # Run all pre-commit hooks
+
+# --------------------------------------------------------------------
+## 📊 Data Streaming & Kafka
+# --------------------------------------------------------------------
+# kcat (Kafka CLI) - requires KAFKA_BROKERS environment variable
+# Usage: export KAFKA_BROKERS="broker1:9092,broker2:9092"
+
+# Safe Kafka aliases with environment checks
+kcatp() {
+  if [[ -z "$KAFKA_BROKERS" ]]; then
+    echo "❌ Error: Set KAFKA_BROKERS environment variable first"
+    echo "Example: export KAFKA_BROKERS='localhost:9092'"
+    return 1
+  fi
+  kcat -P -b "$KAFKA_BROKERS" -t "$@"
+}
+
+kcatc() {
+  if [[ -z "$KAFKA_BROKERS" ]]; then
+    echo "❌ Error: Set KAFKA_BROKERS environment variable first"
+    echo "Example: export KAFKA_BROKERS='localhost:9092'"
+    return 1
+  fi
+  kcat -C -b "$KAFKA_BROKERS" -t "$@"
+}
+
+kcatl() {
+  if [[ -z "$KAFKA_BROKERS" ]]; then
+    echo "❌ Error: Set KAFKA_BROKERS environment variable first"
+    echo "Example: export KAFKA_BROKERS='localhost:9092'"
+    return 1
+  fi
+  kcat -L -b "$KAFKA_BROKERS" "$@"
+}
+
+# Kafka topic helpers
+kcat-tail() {
+  if [ -z "$1" ]; then
+    echo "Usage: kcat-tail <topic> [partition]"
+    return 1
+  fi
+  kcat -C -b "$KAFKA_BROKERS" -t "$1" -o -10 "$@"
+}
+
+kcat-produce-json() {
+  if [ -z "$1" ]; then
+    echo "Usage: kcat-produce-json <topic>"
+    echo "Then input JSON messages (Ctrl+D to end)"
+    return 1
+  fi
+  kcat -P -b "$KAFKA_BROKERS" -t "$1" -T
+}

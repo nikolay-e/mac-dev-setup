@@ -42,16 +42,3 @@ updates:
       prefix: "chore"
       include: "scope"
       
-  # Docker dependencies (if any Dockerfiles exist)
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "nikolay-e"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
