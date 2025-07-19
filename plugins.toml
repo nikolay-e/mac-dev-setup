@@ -13,4 +13,3 @@ github = "zsh-users/zsh-autosuggestions"
 # syntax highlighting
 [plugins.zsh-syntax-highlighting]
 github = "zsh-users/zsh-syntax-highlighting"
-
