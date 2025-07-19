@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # Stop on first error, undefined variables, and pipe failures
 set -euo pipefail

@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # This file is sourced by ~/.zshrc and managed by mac-dev-setup.
 

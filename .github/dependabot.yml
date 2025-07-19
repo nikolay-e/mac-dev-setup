@@ -1,6 +1,43 @@
 version: 2
 updates:
+  # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "nikolay-e"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nikolay-e"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+      
+  # Docker dependencies (if any Dockerfiles exist)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nikolay-e"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
