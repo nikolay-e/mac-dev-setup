@@ -1,83 +1,84 @@
 #!/bin/zsh
 
-echo "🚀 Starting complete macOS workstation setup..."
+echo "🚀 Starting robust macOS workstation setup..."
 
 # --------------------------------------------------------------------
-# Homebrew Installation
+# Homebrew & Tool Installation (Idempotent)
 # --------------------------------------------------------------------
 if test ! $(which brew); then
   echo "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# Add Homebrew to your shell path
+# Add Homebrew to your shell path if not already configured
 (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-echo "Updating Homebrew and formulae..."
+echo "Updating Homebrew and installing tools..."
 brew update
+brew install git gh tree wget htop jq fzf nvm pyenv go
+brew install --cask visual-studio-code iterm2 rectangle alfred docker google-chrome slack postman font-hack-nerd-font
+$(brew --prefix)/opt/fzf/install --all # Post-install for fzf, --all avoids prompts
 
 # --------------------------------------------------------------------
-# Core Command-Line Tools
+# Symlink the Project-Specific Alias File
 # --------------------------------------------------------------------
-echo "Installing essential CLI tools..."
-brew install git
-brew install gh           # GitHub CLI
-brew install tree
-brew install wget
-brew install htop         # Process viewer
-brew install jq           # JSON processor
-brew install fzf          # Command-line fuzzy finder
-$(brew --prefix)/opt/fzf/install # Post-install step for fzf
+dir=$(pwd)
+olddir=~/.dotfiles_backup
+alias_file="mac-dev-setup-aliases"
 
-# --------------------------------------------------------------------
-# Development Environments
-# --------------------------------------------------------------------
-echo "Installing development runtimes..."
-brew install nvm          # Node Version Manager
-brew install pyenv        # Python Version Manager
-brew install go           # Go language
-
-# --------------------------------------------------------------------
-# GUI Applications (Casks)
-# --------------------------------------------------------------------
-echo "Installing GUI applications..."
-brew install --cask visual-studio-code
-brew install --cask iterm2
-brew install --cask rectangle         # Window management
-brew install --cask alfred            # Productivity app launcher
-brew install --cask docker            # Containerization
-brew install --cask google-chrome
-brew install --cask slack
-brew install --cask postman           # API client
-
-# --------------------------------------------------------------------
-# Fonts for a better terminal experience
-# --------------------------------------------------------------------
-echo "Installing developer fonts..."
-brew tap homebrew/cask-fonts
-brew install --cask font-hack-nerd-font
-
-# --------------------------------------------------------------------
-# Symlinking Configuration Files
-# --------------------------------------------------------------------
-dir=$(pwd)                               # This repository's directory
-olddir=~/.dotfiles_backup                # Backup directory
-files="zshrc aliases"
-
-echo "\nCreating backup directory and symlinking config files..."
+echo "\nCreating backup directory..."
 mkdir -p $olddir
 
-for file in $files; do
-    if [ -f ~/.$file ] || [ -h ~/.$file ]; then
-        mv ~/.$file $olddir/
-    fi
-    echo "Creating symlink for .$file in home directory."
-    ln -s $dir/$file ~/.$file
-done
+echo "Symlinking project alias file..."
+# If an old alias file exists, back it up before creating the new symlink
+if [ -f ~/.$alias_file ] || [ -h ~/.$alias_file ]; then
+    mv ~/.$alias_file $olddir/
+fi
+ln -s "$dir/.$alias_file" "$HOME/.$alias_file"
 
 # --------------------------------------------------------------------
-# Final Cleanup
+# Dynamically Add Configuration to ~/.zshrc
+# --------------------------------------------------------------------
+ZSHRC_CONFIG_BLOCK="# --- Mac Dev Setup Configuration ---"
+
+# Check if our configuration block already exists in ~/.zshrc
+if ! grep -q "$ZSHRC_CONFIG_BLOCK" ~/.zshrc; then
+  echo "Adding mac-dev-setup configuration to ~/.zshrc..."
+  # Append the entire configuration block to ~/.zshrc
+  cat <<'EOF' >> ~/.zshrc
+
+# --- Mac Dev Setup Configuration ---
+# This block is managed by the mac-dev-setup project.
+
+# Source project-specific aliases
+if [ -f ~/.mac-dev-setup-aliases ]; then
+    source ~/.mac-dev-setup-aliases
+fi
+
+# NVM (Node Version Manager)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"
+
+# Pyenv (Python Version Manager)
+if command -v pyenv 1>/dev/null 2>&1; then
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+fi
+
+# FZF (Fuzzy Finder)
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# --- End Mac Dev Setup Configuration ---
+EOF
+  echo "Configuration added."
+else
+  echo "Configuration block already exists in ~/.zshrc. Skipping."
+fi
+
+# --------------------------------------------------------------------
+# Final Steps
 # --------------------------------------------------------------------
 brew cleanup
-echo "\n✅ Workstation setup complete! Some changes may require a restart to take effect."
+echo "\n✅ Robust setup complete! Restart your terminal to apply changes."
