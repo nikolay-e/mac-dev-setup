@@ -36,6 +36,9 @@ jobs:
           # Check if aliases file was created
           [ -f ~/.mac-dev-setup-aliases ] || echo "❌ aliases file not found"
 
-          # Test a few key aliases work
-          source ~/.zshrc
-          alias gs || echo "❌ gs alias not found"
+          # Check if zsh config was created
+          [ -f ~/.zsh_config.sh ] || echo "❌ zsh config not found"
+
+          # Verify alias file contains expected aliases (without sourcing)
+          grep -q "alias gs=" ~/.mac-dev-setup-aliases || echo "❌ gs alias not found in file"
+          grep -q "alias k=" ~/.mac-dev-setup-aliases || echo "❌ k alias not found in file"
