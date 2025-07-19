@@ -1,0 +1,37 @@
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+__MACOSX
+
+# Project Specific
+# Ignore the output from the TreeMapper tool
+directory_tree.*
+
+# Backups
+# Ignore the backup directory created by the install script
+.dotfiles_backup/
+
+# Editor & IDE Directories
+.vscode/
+.idea/
+
+# Swap & Temporary Files
+*.swp
+*.swo
+*.tmp
+*.log
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Node Cache
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
