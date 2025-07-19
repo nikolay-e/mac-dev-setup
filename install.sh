@@ -7,6 +7,11 @@ set -euo pipefail
 DRY_RUN=0
 NON_INTERACTIVE=0
 
+# Auto-detect CI environments and enable non-interactive mode
+if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" || -n "${TRAVIS:-}" || -n "${CIRCLECI:-}" ]]; then
+  NON_INTERACTIVE=1
+fi
+
 while getopts ":n" opt; do
   case $opt in
     n)
