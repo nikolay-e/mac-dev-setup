@@ -4,7 +4,7 @@
   "private": true,
   "description": "Manages Zsh plugins using NPM/Git for Dependabot compatibility.",
   "dependencies": {
-    "zsh-autosuggestions": "git+https://github.com/zsh-users/zsh-autosuggestions.git#v0.7.0",
+    "zsh-autosuggestions": "git+https://github.com/zsh-users/zsh-autosuggestions.git#v0.7.1",
     "zsh-syntax-highlighting": "git+https://github.com/zsh-users/zsh-syntax-highlighting.git#0.8.0"
   },
   "devDependencies": {},
