@@ -9,11 +9,17 @@ NON_INTERACTIVE=0
 
 while getopts ":n" opt; do
   case $opt in
-    n) DRY_RUN=1; NON_INTERACTIVE=1 ;;
-    \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
+    n)
+      DRY_RUN=1
+      NON_INTERACTIVE=1
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
   esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 # --- Helper Functions ---
 run() {
@@ -34,7 +40,7 @@ setup_homebrew() {
   # Detect architecture and set Homebrew prefix
   BREW_PREFIX=$(uname -m | grep -q arm64 && echo /opt/homebrew || echo /usr/local)
 
-  if ! command -v brew &> /dev/null; then
+  if ! command -v brew &>/dev/null; then
     echo "Homebrew not found. Installing..."
     run /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
@@ -44,7 +50,10 @@ setup_homebrew() {
     if [[ $DRY_RUN -eq 1 ]]; then
       echo "+ (echo; echo \"eval \\\"\\\$($BREW_PREFIX/bin/brew shellenv)\\\"\") >> ~/.zprofile"
     else
-      (echo; echo "eval \"\$($BREW_PREFIX/bin/brew shellenv)\"") >> ~/.zprofile
+      (
+        echo
+        echo "eval \"\$($BREW_PREFIX/bin/brew shellenv)\""
+      ) >>~/.zprofile
     fi
   fi
   eval "$("$BREW_PREFIX"/bin/brew shellenv)"
@@ -67,7 +76,7 @@ setup_python() {
   PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
 
   # Find latest patch version for the specified major.minor
-  if command -v pyenv &> /dev/null; then
+  if command -v pyenv &>/dev/null; then
     local latest_version
     latest_version=$(pyenv install --list | grep -E "^  ${PYTHON_VERSION}\.[0-9]+$" | tail -1 | xargs)
     if [[ -n "$latest_version" ]]; then
@@ -75,14 +84,14 @@ setup_python() {
       echo "Using latest Python ${PYTHON_VERSION}"
     else
       echo "Warning: Could not find Python ${PYTHON_VERSION}, using default"
-      PYTHON_VERSION="3.12.4"  # Fallback
+      PYTHON_VERSION="3.12.4" # Fallback
     fi
   else
     echo "pyenv not available (dry-run mode), using default Python ${PYTHON_VERSION}"
-    PYTHON_VERSION="3.12.4"  # Fallback for dry-run
+    PYTHON_VERSION="3.12.4" # Fallback for dry-run
   fi
 
-  if command -v pyenv &> /dev/null; then
+  if command -v pyenv &>/dev/null; then
     if ! pyenv versions --bare | grep -q "^$PYTHON_VERSION$"; then
       run pyenv install "$PYTHON_VERSION"
     else
@@ -95,7 +104,7 @@ setup_python() {
 
   info "Installing Python CLI tools via pipx..."
   # Ensure pipx path is set up (only if not already done)
-  if command -v pipx &> /dev/null; then
+  if command -v pipx &>/dev/null; then
     if ! echo "$PATH" | grep -q "\.local/bin"; then
       run pipx ensurepath
     else
@@ -109,7 +118,7 @@ setup_python() {
   dir=$(pwd)
 
   # Install packages from requirements.txt
-  if command -v pipx &> /dev/null; then
+  if command -v pipx &>/dev/null; then
     while IFS= read -r package || [ -n "$package" ]; do
       # Skip empty lines and comments
       [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
@@ -156,7 +165,7 @@ setup_python() {
           echo "WARNING  Failed to install $package_name"
         fi
       fi
-    done < "$dir/requirements.txt"
+    done <"$dir/requirements.txt"
   else
     echo "pipx not available, skipping Python package installations"
   fi
@@ -234,7 +243,7 @@ configure_shell() {
     if [[ $DRY_RUN -eq 1 ]]; then
       printf "+ printf '\\n# Load mac-dev-setup configuration\\n%%s\\n' '%s' >> ~/.zshrc\\n" "$ZSHRC_SOURCE_LINE"
     else
-      printf "\n# Load mac-dev-setup configuration\n%s\n" "$ZSHRC_SOURCE_LINE" >> ~/.zshrc
+      printf "\n# Load mac-dev-setup configuration\n%s\n" "$ZSHRC_SOURCE_LINE" >>~/.zshrc
     fi
   else
     echo "Source line already exists in ~/.zshrc. Skipping."
@@ -253,7 +262,7 @@ generate_plugins_config() {
   fi
 
   # Check if jq is available for JSON parsing
-  if ! command -v jq &> /dev/null; then
+  if ! command -v jq &>/dev/null; then
     echo "ERROR: jq not found and is required to parse package.json."
     echo "Please install jq: brew install jq"
 
@@ -277,7 +286,7 @@ generate_plugins_config() {
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "+ cat > '$dir/plugins.toml' << 'EOF'..."
   else
-    cat > "$dir/plugins.toml" << 'EOF'
+    cat >"$dir/plugins.toml" <<'EOF'
 # plugins.toml
 # This file is AUTO-GENERATED from package.json by install.sh
 # DO NOT EDIT MANUALLY - Edit package.json instead
@@ -298,7 +307,7 @@ EOF
     if [[ $DRY_RUN -eq 1 ]]; then
       echo "+ cat >> '$dir/plugins.toml' << EOF..."
     else
-      cat >> "$dir/plugins.toml" << EOF
+      cat >>"$dir/plugins.toml" <<EOF
 # $(echo "$name" | tr '-' ' ' | sed 's/zsh //' | sed 's/\b\w/\U&/g')
 [plugins.$name]
 github = "$github_repo"
@@ -314,7 +323,7 @@ configure_git() {
   info "Configuring Git to use Delta for diffs..."
 
   # Only configure delta if it's installed
-  if command -v delta &> /dev/null; then
+  if command -v delta &>/dev/null; then
     run git config --global core.pager delta
     run git config --global interactive.diffFilter "delta --color-only"
     run git config --global delta.navigate true
@@ -333,13 +342,13 @@ install_krew_plugins() {
   info "Installing essential kubectl plugins via krew..."
 
   # Check if kubectl is available
-  if ! command -v kubectl &> /dev/null; then
+  if ! command -v kubectl &>/dev/null; then
     echo "kubectl not found, skipping krew plugins"
     return
   fi
 
   # Install krew if not available
-  if ! command -v krew &> /dev/null; then
+  if ! command -v krew &>/dev/null; then
     echo "Installing krew (kubectl plugin manager)..."
     if [[ $DRY_RUN -eq 1 ]]; then
       echo "+ Installing krew (kubectl plugin manager)..."
@@ -348,13 +357,14 @@ install_krew_plugins() {
       echo "+ ./krew-* install krew"
     else
       (
-        set -x; cd "$(mktemp -d)" &&
-        OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-        ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-        KREW="krew-${OS}_${ARCH}" &&
-        curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-        tar zxvf "${KREW}.tar.gz" &&
-        ./"${KREW}" install krew
+        set -x
+        cd "$(mktemp -d)" &&
+          OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+          ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+          KREW="krew-${OS}_${ARCH}" &&
+          curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+          tar zxvf "${KREW}.tar.gz" &&
+          ./"${KREW}" install krew
       )
     fi
 
@@ -362,7 +372,7 @@ install_krew_plugins() {
     export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
     # Verify krew installation
-    if ! command -v krew &> /dev/null; then
+    if ! command -v krew &>/dev/null; then
       echo "Warning: krew installation failed, skipping plugins"
       return
     fi
@@ -390,7 +400,7 @@ validate_installation() {
   # Test key CLI tools
   local tools=("bat" "eza" "fd" "rg" "zoxide" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs" "learn-aliases")
   for tool in "${tools[@]}"; do
-    if command -v "$tool" &> /dev/null; then
+    if command -v "$tool" &>/dev/null; then
       printf "OK %s: %s\n" "$tool" "$(command -v "$tool")"
     else
       printf "ERROR %s: not found\n" "$tool"
@@ -399,8 +409,8 @@ validate_installation() {
   done
 
   # Test krew separately since it needs special PATH handling
-  if command -v krew &> /dev/null || [ -f "${KREW_ROOT:-$HOME/.krew}/bin/krew" ]; then
-    if command -v krew &> /dev/null; then
+  if command -v krew &>/dev/null || [ -f "${KREW_ROOT:-$HOME/.krew}/bin/krew" ]; then
+    if command -v krew &>/dev/null; then
       printf "OK %s: %s\n" "krew" "$(command -v krew)"
     else
       printf "OK %s: %s\n" "krew" "${KREW_ROOT:-$HOME/.krew}/bin/krew"
@@ -426,7 +436,7 @@ validate_installation() {
   fi
 
   # Test Python environment
-  if command -v python &> /dev/null && python --version | grep -q "3.12"; then
+  if command -v python &>/dev/null && python --version | grep -q "3.12"; then
     echo "OK Python: $(python --version)"
   else
     echo "ERROR Python: wrong version or not found"
@@ -434,7 +444,7 @@ validate_installation() {
   fi
 
   # Test Node.js
-  if command -v node &> /dev/null; then
+  if command -v node &>/dev/null; then
     echo "OK Node.js: $(node --version)"
   else
     echo "ERROR Node.js: not found"
@@ -470,7 +480,7 @@ prompt_terminal_restart() {
   fi
 
   case $choice in
-    1|"")
+    1 | "")
       echo ""
       echo "... Reloading shell configuration..."
       echo "Try these new commands:"
