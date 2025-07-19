@@ -1,5 +1,5 @@
-#!/bin/bash
-
+# shellcheck shell=bash
+# zsh_config.sh
 # This file is sourced by ~/.zshrc and managed by mac-dev-setup.
 
 # Environment Variables
@@ -10,7 +10,9 @@ export NVM_DIR="$HOME/.nvm"
 # Tool Initializations
 if command -v pyenv 1>/dev/null 2>&1; then eval "$(pyenv init -)"; fi
 # shellcheck disable=SC1091
-[ -s "$(brew --prefix nvm)/nvm.sh" ] && \. "$(brew --prefix nvm)/nvm.sh"
+BREW_PREFIX=$(uname -m | grep -q arm64 && echo /opt/homebrew || echo /usr/local)
+# shellcheck disable=SC1091
+[ -s "$BREW_PREFIX/opt/nvm/nvm.sh" ] && \. "$BREW_PREFIX/opt/nvm/nvm.sh"
 # shellcheck disable=SC1090
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 

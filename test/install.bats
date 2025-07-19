@@ -20,7 +20,7 @@ teardown() {
 @test "Brewfile exists and has basic packages" {
     [ -f "Brewfile" ]
     grep -q "brew \"git\"" Brewfile
-    grep -q "brew \"neovim\"" Brewfile
+    grep -q "brew \"gh\"" Brewfile
 }
 
 @test "alias file has required aliases" {
@@ -37,7 +37,7 @@ teardown() {
 }
 
 @test "scripts use proper shebang" {
-    head -1 install.sh | grep -q "#!/bin/zsh"
-    head -1 update.sh | grep -q "#!/bin/zsh"
-    head -1 uninstall.sh | grep -q "#!/bin/zsh"
+    head -1 install.sh | grep -q "#!/bin/bash"
+    head -1 update.sh | grep -q "#!/bin/bash"
+    head -1 uninstall.sh | grep -q "#!/bin/bash"
 }

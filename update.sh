@@ -31,6 +31,7 @@ update_python_tools() {
   fi
 }
 
+
 update_sheldon_plugins() {
   info "Updating Zsh plugins..."
   if command -v sheldon &> /dev/null; then
@@ -47,7 +48,11 @@ check_outdated() {
   brew outdated || echo "All packages are up to date!"
   
   printf "\nOutdated Python packages:\n"
-  pipx list --outdated || echo "All Python tools are up to date!"
+  if command -v pipx &> /dev/null; then
+    pipx list --outdated || echo "All Python tools are up to date!"
+  else
+    echo "pipx not installed"
+  fi
 }
 
 # --- Main Execution ---

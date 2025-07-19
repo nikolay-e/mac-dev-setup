@@ -1,12 +1,14 @@
 # plugins.toml
-# This file is managed by Sheldon, the Zsh plugin manager.
+# This file is AUTO-GENERATED from package.json by install.sh
+# DO NOT EDIT MANUALLY - Edit package.json instead
 
 [plugins]
 
-# Provides command auto-suggestions based on your history
+# Autosuggestions
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
 
-# Provides command syntax highlighting in the terminal
+# Syntax Highlighting
 [plugins.zsh-syntax-highlighting]
 github = "zsh-users/zsh-syntax-highlighting"
+

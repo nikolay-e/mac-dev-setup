@@ -4,7 +4,10 @@ on: [push, pull_request]
 
 jobs:
   bats:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest, macos-13]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: mig4/setup-bats@v1
