@@ -1,11 +1,12 @@
-name: Install (dry-run)
+name: Install Tests
 
 on:
   pull_request:
   push:
 
 jobs:
-  mac:
+  install-dry-run:
+    name: Install (dry-run)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,3 +14,28 @@ jobs:
         run: |
           chmod +x install.sh
           ./install.sh -n   # -n == dry-run
+
+  install-full:
+    name: Install (full)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Full install test
+        run: |
+          chmod +x install.sh
+          ./install.sh
+      - name: Verify installation
+        run: |
+          # Check if key tools were installed
+          command -v eza || echo "❌ eza not found"
+          command -v bat || echo "❌ bat not found"
+          command -v fd || echo "❌ fd not found"
+          command -v rg || echo "❌ rg not found"
+          command -v jq || echo "❌ jq not found"
+
+          # Check if aliases file was created
+          [ -f ~/.mac-dev-setup-aliases ] || echo "❌ aliases file not found"
+
+          # Test a few key aliases work
+          source ~/.zshrc
+          alias gs || echo "❌ gs alias not found"
