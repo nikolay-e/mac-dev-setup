@@ -5,7 +5,7 @@ set -euo pipefail
 
 # --- Helper Functions ---
 info() {
-  printf "\n\033[1;34m%s\033[0m\n" "$1"
+  printf "\n%s\n" "$1"
 }
 
 # --- Main Logic Functions ---
@@ -69,18 +69,35 @@ setup_python() {
     [[ -z "$package" || "$package" =~ ^[[:space:]]*# ]] && continue
     
     # Extract package name (handle comments on same line)
-    package_name=$(echo "$package" | sed 's/[[:space:]]*#.*//' | xargs)
-    [[ -z "$package_name" ]] && continue
+    package_line=$(echo "$package" | sed 's/[[:space:]]*#.*//' | xargs)
+    [[ -z "$package_line" ]] && continue
+    
+    # Extract the actual package name for checking if installed
+    if [[ "$package_line" =~ git\+ ]]; then
+      # For git URLs, extract the subdirectory name or repo name
+      if [[ "$package_line" =~ subdirectory=([^/]+) ]]; then
+        package_name="${BASH_REMATCH[1]}"
+      else
+        package_name=$(echo "$package_line" | sed 's|.*/||' | sed 's|\.git.*||')
+      fi
+    elif [[ "$package_line" =~ ^\./(.+) ]]; then
+      # For local packages, use the directory name
+      package_name="${BASH_REMATCH[1]}"
+      # Convert relative path to absolute
+      package_line="$dir/$package_line"
+    else
+      package_name="$package_line"
+    fi
     
     # Check if already installed to avoid duplicates
-    if pipx list | grep -q "^  package $package_name "; then
+    if pipx list | grep -q -E "(^  |package )$package_name"; then
       echo "$package_name is already installed via pipx. Skipping."
     else
       echo "Installing $package_name via pipx..."
-      if pipx install "$package_name"; then
-        echo "✅ Successfully installed $package_name"
+      if pipx install "$package_line"; then
+        echo "OK Successfully installed $package_name"
       else
-        echo "⚠️  Failed to install $package_name"
+        echo "WARNING  Failed to install $package_name"
       fi
     fi
   done < "$dir/requirements.txt"
@@ -145,6 +162,7 @@ link_dotfiles() {
   fi
   ln -sfn "$dir/plugins.toml" "$HOME/.config/sheldon/plugins.toml"
   echo "Linked Sheldon plugins config"
+  
 }
 
 configure_shell() {
@@ -197,6 +215,8 @@ generate_plugins_config() {
 # plugins.toml
 # This file is AUTO-GENERATED from package.json by install.sh
 # DO NOT EDIT MANUALLY - Edit package.json instead
+
+shell = "zsh"
 
 [plugins]
 
@@ -271,61 +291,61 @@ validate_installation() {
   local failed=0
   
   # Test key CLI tools
-  local tools=("bat" "eza" "fd" "rg" "zoxide" "starship" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "krew" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs")
+  local tools=("bat" "eza" "fd" "rg" "zoxide" "jq" "jc" "yq" "nvim" "tldr" "lazygit" "dive" "kubectx" "k9s" "stern" "krew" "kcat" "tenv" "mise" "trivy" "infracost" "terraform-docs" "learn-aliases")
   for tool in "${tools[@]}"; do
     if command -v "$tool" &> /dev/null; then
-      printf "✅ %s: %s\n" "$tool" "$(command -v "$tool")"
+      printf "OK %s: %s\n" "$tool" "$(command -v "$tool")"
     else
-      printf "❌ %s: not found\n" "$tool"
+      printf "ERROR %s: not found\n" "$tool"
       failed=1
     fi
   done
   
   # Test symlinks
   if [ -L ~/.mac-dev-setup-aliases ] && [ -f ~/.mac-dev-setup-aliases ]; then
-    echo "✅ Aliases: symlinked correctly"
+    echo "OK Aliases: symlinked correctly"
   else
-    echo "❌ Aliases: symlink failed"
+    echo "ERROR Aliases: symlink failed"
     failed=1
   fi
   
   if [ -L ~/.zsh_config.sh ] && [ -f ~/.zsh_config.sh ]; then
-    echo "✅ Zsh config: symlinked correctly"
+    echo "OK Zsh config: symlinked correctly"
   else
-    echo "❌ Zsh config: symlink failed"
+    echo "ERROR Zsh config: symlink failed"
     failed=1
   fi
   
   # Test Python environment
   if command -v python &> /dev/null && python --version | grep -q "3.12"; then
-    echo "✅ Python: $(python --version)"
+    echo "OK Python: $(python --version)"
   else
-    echo "❌ Python: wrong version or not found"
+    echo "ERROR Python: wrong version or not found"
     failed=1
   fi
   
   # Test Node.js
   if command -v node &> /dev/null; then
-    echo "✅ Node.js: $(node --version)"
+    echo "OK Node.js: $(node --version)"
   else
-    echo "❌ Node.js: not found"
+    echo "ERROR Node.js: not found"
     failed=1
   fi
   
   if [ $failed -eq 0 ]; then
     echo ""
-    printf "\033[1;32m🎉 All components installed successfully!\033[0m\n"
+    printf "DONE All components installed successfully!\n"
     return 0
   else
     echo ""
-    printf "\033[1;31m⚠️  Some components failed to install properly.\033[0m\n"
+    printf "WARNING  Some components failed to install properly.\n"
     return 1
   fi
 }
 
 prompt_terminal_restart() {
   echo ""
-  info "🔄 Terminal Restart Required"
+  info "RESTART Terminal Restart Required"
   echo "To activate all new features (modern prompt, aliases, tools), you need to restart your terminal."
   echo ""
   echo "Options:"
@@ -338,9 +358,9 @@ prompt_terminal_restart() {
   case $choice in
     1|"")
       echo ""
-      echo "🚀 Reloading shell configuration..."
+      echo "... Reloading shell configuration..."
       echo "Try these new commands:"
-      echo "  • eza          # Better ls with icons"
+      echo "  • eza          # Better ls"
       echo "  • bat README.md # Syntax highlighted cat"
       echo "  • z <dir>      # Smart directory jumping"
       echo "  • rg <pattern> # Super fast search"
@@ -349,7 +369,7 @@ prompt_terminal_restart() {
       ;;
     2)
       echo ""
-      echo "✅ Setup complete! Please restart your terminal to see all changes."
+      echo "OK Setup complete! Please restart your terminal to see all changes."
       echo ""
       echo "Preview of new commands (after restart):"
       echo "  • eza          # Better ls with icons" 
@@ -366,7 +386,7 @@ prompt_terminal_restart() {
 # --- Pre-flight Checks ---
 check_shell() {
   if [[ "$SHELL" != */zsh ]]; then
-    echo "⚠️  Warning: Your default shell is not zsh ($SHELL)"
+    echo "WARNING  Warning: Your default shell is not zsh ($SHELL)"
     echo "This setup is optimized for zsh. Consider running: chsh -s $(which zsh)"
     echo -n "Continue anyway? (y/N): "
     read -r response
@@ -378,7 +398,7 @@ check_shell() {
 }
 
 # --- Main Execution ---
-info "🚀 Starting robust macOS workstation setup..."
+info "... Starting robust macOS workstation setup..."
 check_shell
 setup_homebrew
 setup_python
@@ -396,6 +416,6 @@ if validate_installation; then
   prompt_terminal_restart
 else
   echo ""
-  echo "❌ Installation completed with issues. Please check the errors above."
+  echo "ERROR Installation completed with issues. Please check the errors above."
   echo "You may need to run the script again or manually install missing components."
 fi

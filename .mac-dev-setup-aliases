@@ -1,120 +1,120 @@
 #!/bin/bash
 # shellcheck shell=bash
 # --------------------------------------------------------------------
-##  Modern CLI Replacements & Aliases
+## Modern CLI Replacements & Aliases
 # --------------------------------------------------------------------
 # Use modern alternatives for core commands
-alias cat='bat --paging=never' # Use bat, but don't pipe to a pager by default
-alias find='fd'
-alias grep='rg'
+alias cat='bat --paging=never' # View file contents with syntax highlighting
+alias find='fd' # Fast file search by name or pattern
+alias grep='rg' # Fast text search within files
 
 # Aliases for eza (the modern replacement for ls)
-alias ls='eza --icons'         # ls shows icons
-alias l='eza -l --icons'       # Long format
-alias ll='eza -l --icons'      # Same as l
-alias la='eza -la --icons'     # Show hidden files
-alias lt='eza -T --level=2'    # Show a tree view, 2 levels deep
-alias l.='eza -la | grep "^\."' # List only dotfiles
+alias ls='eza'                 # List directory contents
+alias l='eza -l'               # List files in long format with details
+alias ll='eza -l'              # List files in long format (same as l)
+alias la='eza -la'             # List all files including hidden ones
+alias lt='eza -T --level=2'    # Show directory tree (2 levels deep)
+alias l.='eza -la | grep "^\."' # List only hidden dotfiles
 
 # --------------------------------------------------------------------
-##  Navigation & Zsh
+## Navigation & Zsh
 # --------------------------------------------------------------------
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias zshconfig='nvim ~/.zshrc'
-alias zshsource='source ~/.zshrc'
-alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit and reload in one command
-alias hosts='sudo nvim /etc/hosts'
+alias ..='cd ..' # Go up one directory
+alias ...='cd ../..' # Go up two directories
+alias ....='cd ../../..' # Go up three directories
+alias zshconfig='nvim ~/.zshrc' # Edit zsh configuration file
+alias zshsource='source ~/.zshrc' # Reload zsh configuration
+alias zshrc='nvim ~/.zshrc && source ~/.zshrc'  # Edit and reload zsh config
+alias hosts='sudo nvim /etc/hosts' # Edit system hosts file
 
 # --------------------------------------------------------------------
-## 🌳 Tree & Clipboard
+## Tree & Clipboard
 # --------------------------------------------------------------------
-alias tree='tree -C'
-alias treex='tree -C -I "node_modules|*.pyc|__pycache__"'
-alias c='pbcopy'
-alias p='pbpaste'
-alias copypwd='pwd | pbcopy'
+alias tree='tree -C' # Display directory structure with colors
+alias treex='tree -C -I "node_modules|*.pyc|__pycache__"' # Tree excluding common dev files
+alias c='pbcopy' # Copy to clipboard
+alias p='pbpaste' # Paste from clipboard
+alias copypwd='pwd | pbcopy' # Copy current directory path to clipboard
 
 # --------------------------------------------------------------------
-## 📝 Neovim (nvim)
+## Neovim (nvim)
 # --------------------------------------------------------------------
-alias v='nvim'
-alias vi='nvim'
-alias vim='nvim'
-alias oldvim='/usr/bin/vim'  # Fallback to system vim
+alias v='nvim' # Open Neovim editor
+alias vi='nvim' # Open Neovim (vi shortcut)
+alias vim='nvim' # Open Neovim (vim shortcut)
+alias oldvim='/usr/bin/vim'  # Open original system Vim
 
 # --------------------------------------------------------------------
-## 🐙 Git
+## Git
 # --------------------------------------------------------------------
-alias g='git'
-alias gs='git status -s'
-alias gss='git status'
-alias ga='git add'
-alias gaa='git add --all'
-alias gc='git commit -m'
-alias gca='git commit --amend --no-edit'
-alias gb='git branch'
-alias gco='git checkout'
-alias gcb='git checkout -b'
-alias gp='git push'
-alias gpf='git push --force-with-lease'
-alias gl='git pull'
-alias glog='git log --oneline --decorate --graph --all'
-alias gd='git diff'
-alias gdc='git diff --cached'
-alias lg='lazygit'    # Terminal UI for Git
+alias g='git' # Git command shortcut
+alias gs='git status -s' # Show short git status
+alias gss='git status' # Show full git status
+alias ga='git add' # Stage files for commit
+alias gaa='git add --all' # Stage all changes
+alias gc='git commit -m' # Commit with message
+alias gca='git commit --amend --no-edit' # Amend last commit without editing message
+alias gb='git branch' # List or create branches
+alias gco='git checkout' # Switch branches or restore files
+alias gcb='git checkout -b' # Create and switch to new branch
+alias gp='git push' # Push commits to remote
+alias gpf='git push --force-with-lease' # Force push safely
+alias gl='git pull' # Pull changes from remote
+alias glog='git log --oneline --decorate --graph --all' # Show pretty git log graph
+alias gd='git diff' # Show unstaged changes
+alias gdc='git diff --cached' # Show staged changes
+alias lg='lazygit'    # Open LazyGit terminal UI
 
 # Enhanced Git workflows  
-alias gstat='git status --verbose'
-alias gwip='git add -A && git commit -m "WIP" --no-verify'
-alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1'
-alias gundo='git reset --soft HEAD~1'
-alias gundo-hard='git reset --hard HEAD~1'  # Undo last commit completely
+alias gstat='git status --verbose' # Show detailed git status with diffs
+alias gwip='git add -A && git commit -m "WIP" --no-verify' # Quick work-in-progress commit
+alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1' # Undo last WIP commit
+alias gundo='git reset --soft HEAD~1' # Undo last commit keeping changes staged
+alias gundo-hard='git reset --hard HEAD~1'  # Undo last commit discarding all changes
 
 # Destructive operations with safety prompts
 gpristine() {
-  echo "⚠️  DANGER: This will DELETE all uncommitted changes and untracked files!"
+  echo "  DANGER: This will DELETE all uncommitted changes and untracked files!"
   echo "Press Ctrl+C to cancel, or Enter to continue..."
   read -r
   git reset --hard && git clean -dffx
 }
-alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d'
+alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d' # Delete merged branches
 
 # Advanced Git operations
-alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'
-alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)'
-alias gfix='git commit --fixup'
-alias gsquash='git rebase -i --autosquash'
-alias gstash='git stash push -m'
-alias gpop='git stash pop'
+alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit' # Beautiful colored git log
+alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)' # Sync current branch with origin
+alias gfix='git commit --fixup' # Create fixup commit for later squashing
+alias gsquash='git rebase -i --autosquash' # Interactive rebase with autosquash
+alias gstash='git stash push -m' # Stash changes with message
+alias gpop='git stash pop' # Apply and remove latest stash
 
 # GitHub CLI shortcuts
-alias prc='gh pr create --fill'
-alias prv='gh pr view'
-alias prs='gh pr status' 
-alias prchecks='gh pr checks'
-alias prco='gh pr checkout'
+alias prc='gh pr create --fill' # Create GitHub pull request
+alias prv='gh pr view' # View current pull request
+alias prs='gh pr status' # Show PR status 
+alias prchecks='gh pr checks' # Show PR CI check status
+alias prco='gh pr checkout' # Checkout a pull request locally
 
 # --------------------------------------------------------------------
-## ☸️ Kubernetes (Enhanced with ahmetb-style aliases)
+## Kubernetes (Enhanced with ahmetb-style aliases)
 # --------------------------------------------------------------------
-alias k='kubectl'
+alias k='kubectl' # Kubernetes CLI shortcut
 
 # Get commands (inspired by ahmetb/kubectl-aliases)
-alias kgp='kubectl get pods'
-alias kgpo='kubectl get pods -o wide'
-alias kgpw='kubectl get pods --watch'
-alias kgs='kubectl get services'
-alias kgso='kubectl get services -o wide'
-alias kgd='kubectl get deployments'
-alias kgdo='kubectl get deployments -o wide'
-alias kgn='kubectl get nodes'
-alias kgno='kubectl get nodes -o wide'
-alias kgns='kubectl get namespaces'
-alias kgcm='kubectl get configmaps'
-alias kgsec='kubectl get secrets'
-alias kgall='kubectl get all'
+alias kgp='kubectl get pods' # List all pods
+alias kgpo='kubectl get pods -o wide' # List pods with node info
+alias kgpw='kubectl get pods --watch' # Watch pod changes live
+alias kgs='kubectl get services' # List all services
+alias kgso='kubectl get services -o wide' # List services with details
+alias kgd='kubectl get deployments' # List all deployments
+alias kgdo='kubectl get deployments -o wide' # List deployments with details
+alias kgn='kubectl get nodes' # List cluster nodes
+alias kgno='kubectl get nodes -o wide' # List nodes with details
+alias kgns='kubectl get namespaces' # List all namespaces
+alias kgcm='kubectl get configmaps' # List all configmaps
+alias kgsec='kubectl get secrets' # List all secrets
+alias kgall='kubectl get all' # List all resources
 
 # Describe commands
 alias kdp='kubectl describe pod'
@@ -186,7 +186,7 @@ ktop-mem() {
 }
 
 # --------------------------------------------------------------------
-## 🏗️ Terraform & Infrastructure as Code
+## Terraform & Infrastructure as Code
 # --------------------------------------------------------------------
 alias tf='terraform'
 alias tfi='terraform init'
@@ -242,7 +242,7 @@ alias tflist='tenv list terraform'
 alias tfinstall='tenv install terraform'
 
 # --------------------------------------------------------------------
-## 🐍 Python
+## Python
 # --------------------------------------------------------------------
 # Pyenv is used to manage Python versions.
 # The 'python' and 'pip' commands will automatically point to the
@@ -250,12 +250,11 @@ alias tfinstall='tenv install terraform'
 # No aliases are needed.
 
 # --------------------------------------------------------------------
-## 🚀 Productivity
+## Productivity
 # --------------------------------------------------------------------
 # Quick navigation with zoxide (after it's installed, use 'z' to jump to directories)
 alias zz='z -'              # Go back to previous directory
 alias zi='zi'               # Interactive directory selection
-alias dots='cd ~/mac-dev-setup'  # Quick access to this repo
 
 # Quick file operations
 alias mkd='mkdir -p'        # Create directory with parents
@@ -278,15 +277,14 @@ killport() {
 }
 
 # --------------------------------------------------------------------
-## 🛠️ Utilities
+## Utilities
 # --------------------------------------------------------------------
-alias update='~/mac-dev-setup/update.sh'  # Comprehensive update (brew, pipx, sheldon)
-alias myip='curl ifconfig.me'
-alias localip='ipconfig getifaddr en0'
-alias serve='python3 -m http.server'
-alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
-alias zj='zellij'
-alias help='tldr'           # Use tldr for quick command help
+alias myip='curl ifconfig.me' # Show public IP address
+alias localip='ipconfig getifaddr en0' # Show local network IP
+alias serve='python3 -m http.server' # Start HTTP server in current directory
+alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder' # Clear DNS cache
+alias zj='zellij' # Launch Zellij terminal multiplexer
+alias help='tldr'           # Show command examples with tldr
 alias weather='curl wttr.in'  # Quick weather check
 
 # Modern shell automation with jc (CLI to JSON conversion)
@@ -299,7 +297,7 @@ alias digj='dig +short | jc --dig'         # DNS lookup as JSON
 alias precommit='pre-commit run --all-files'  # Run all pre-commit hooks
 
 # --------------------------------------------------------------------
-## 📊 Data Streaming & Kafka
+## Data Streaming & Kafka
 # --------------------------------------------------------------------
 # kcat (Kafka CLI) - requires KAFKA_BROKERS environment variable
 # Usage: export KAFKA_BROKERS="broker1:9092,broker2:9092"
@@ -307,7 +305,7 @@ alias precommit='pre-commit run --all-files'  # Run all pre-commit hooks
 # Safe Kafka aliases with environment checks
 kcatp() {
   if [[ -z "$KAFKA_BROKERS" ]]; then
-    echo "❌ Error: Set KAFKA_BROKERS environment variable first"
+    echo " Error: Set KAFKA_BROKERS environment variable first"
     echo "Example: export KAFKA_BROKERS='localhost:9092'"
     return 1
   fi
@@ -316,7 +314,7 @@ kcatp() {
 
 kcatc() {
   if [[ -z "$KAFKA_BROKERS" ]]; then
-    echo "❌ Error: Set KAFKA_BROKERS environment variable first"
+    echo " Error: Set KAFKA_BROKERS environment variable first"
     echo "Example: export KAFKA_BROKERS='localhost:9092'"
     return 1
   fi
@@ -325,7 +323,7 @@ kcatc() {
 
 kcatl() {
   if [[ -z "$KAFKA_BROKERS" ]]; then
-    echo "❌ Error: Set KAFKA_BROKERS environment variable first"
+    echo " Error: Set KAFKA_BROKERS environment variable first"
     echo "Example: export KAFKA_BROKERS='localhost:9092'"
     return 1
   fi

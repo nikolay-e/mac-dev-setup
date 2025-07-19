@@ -22,7 +22,6 @@ brew "bat"       # Better cat
 brew "eza"       # Better ls
 brew "fd"        # Better find
 brew "zoxide"    # Smarter cd command
-brew "starship"  # Modern prompt
 brew "zellij"    # Modern multiplexer
 brew "lazygit"   # Terminal UI for Git operations
 brew "dive"      # Docker image layer analysis
@@ -39,6 +38,3 @@ brew "terraform-docs"  # Generate documentation for Terraform modules
 
 # Note: Moved CLI tools back to Brewfile for reliable binary distribution
 # Only shell plugins remain in package.json for Dependabot tracking
-
-# Fonts
-cask "font-hack-nerd-font"

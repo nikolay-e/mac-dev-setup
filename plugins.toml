@@ -2,13 +2,15 @@
 # This file is AUTO-GENERATED from package.json by install.sh
 # DO NOT EDIT MANUALLY - Edit package.json instead
 
+shell = "zsh"
+
 [plugins]
 
-# Autosuggestions
+# autosuggestions
 [plugins.zsh-autosuggestions]
 github = "zsh-users/zsh-autosuggestions"
 
-# Syntax Highlighting
+# syntax highlighting
 [plugins.zsh-syntax-highlighting]
 github = "zsh-users/zsh-syntax-highlighting"
 

@@ -27,7 +27,7 @@ cd mac-dev-setup
 ### 🚀 Modern CLI Tools (10x faster)
 ```bash
 # Before (slow)        # After (blazing fast)
-ls                  →   eza --icons        # Beautiful file listings
+ls                  →   eza                # Fast, modern file listings
 cat file.txt        →   bat file.txt       # Syntax highlighted output  
 find . -name "*.js" →   fd "*.js"          # Instant file search
 grep "TODO"         →   rg "TODO"          # Millisecond text search
@@ -91,7 +91,7 @@ kcat-tail topic # Tail last 10 messages
 # Navigate to project (from anywhere)
 z my-project
 
-# Quick file overview with icons and git status
+# Quick file overview with git status
 eza -la
 
 # Search for configuration files

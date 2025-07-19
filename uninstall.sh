@@ -5,11 +5,11 @@ set -euo pipefail
 
 # --- Helper Functions ---
 info() {
-  printf "\n\033[1;34m%s\033[0m\n" "$1"
+  printf "\n%s\n" "$1"
 }
 
 warn() {
-  printf "\n\033[1;33m⚠️  %s\033[0m\n" "$1"
+  printf "\nWARNING  %s\n" "$1"
 }
 
 # --- Main Functions ---
@@ -26,11 +26,11 @@ remove_shell_config() {
     if sed --version >/dev/null 2>&1; then
       # GNU sed (Linux)
       sed -i "/$ZSHRC_COMMENT/d" ~/.zshrc
-      sed -i "/$ZSHRC_SOURCE_LINE/d" ~/.zshrc
+      sed -i "/source ~\/.zsh_config.sh/d" ~/.zshrc
     else
       # BSD sed (macOS)
       sed -i '' "/$ZSHRC_COMMENT/d" ~/.zshrc
-      sed -i '' "/$ZSHRC_SOURCE_LINE/d" ~/.zshrc
+      sed -i '' "/source ~\/.zsh_config.sh/d" ~/.zshrc
     fi
     echo "Configuration removed from ~/.zshrc (backup created)"
   else
@@ -58,6 +58,7 @@ remove_symlinks() {
     rm ~/.config/sheldon/plugins.toml
     echo "Removed Sheldon config symlink"
   fi
+  
 }
 
 restore_backups() {
@@ -83,7 +84,7 @@ if [[ "$response" =~ ^[Yy]$ ]]; then
   remove_shell_config
   remove_symlinks
   restore_backups
-  info "✅ Uninstall complete! Restart your terminal to apply changes."
+  info "OK Uninstall complete! Restart your terminal to apply changes."
   printf "\nTo remove Homebrew packages, run: brew bundle cleanup --file=./Brewfile\n"
 else
   echo "Uninstall cancelled."

@@ -1,0 +1,9 @@
+README.md
+setup.py
+learn_aliases/__init__.py
+learn_aliases/cli.py
+learn_aliases.egg-info/PKG-INFO
+learn_aliases.egg-info/SOURCES.txt
+learn_aliases.egg-info/dependency_links.txt
+learn_aliases.egg-info/entry_points.txt
+learn_aliases.egg-info/top_level.txt

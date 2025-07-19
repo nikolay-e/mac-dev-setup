@@ -6,3 +6,4 @@ yq
 httpie
 cookiecutter
 pre-commit
+./learn-aliases  # Local package for learning aliases

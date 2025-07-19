@@ -32,19 +32,16 @@ teardown() {
 
 @test "all shell scripts are executable" {
     [ -x "install.sh" ]
-    [ -x "update.sh" ]
     [ -x "uninstall.sh" ]
 }
 
 @test "scripts use proper shebang" {
     head -1 install.sh | grep -q "#!/bin/bash"
-    head -1 update.sh | grep -q "#!/bin/bash"
     head -1 uninstall.sh | grep -q "#!/bin/bash"
 }
 
 @test "shell scripts have no syntax errors" {
     bash -n install.sh
-    bash -n update.sh  
     bash -n uninstall.sh
 }
 
