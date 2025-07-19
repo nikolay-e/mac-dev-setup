@@ -22,7 +22,7 @@ $(brew --prefix)/opt/fzf/install --all
 # Global Python Setup (via pyenv)
 # --------------------------------------------------------------------
 echo "Setting up a global Python environment..."
-PYTHON_VERSION="3.11.4" # Or any other version you prefer
+PYTHON_VERSION="3.12.4" # Or any other version you prefer
 pyenv install $PYTHON_VERSION --skip-existing
 pyenv global $PYTHON_VERSION
 
