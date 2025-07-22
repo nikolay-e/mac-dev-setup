@@ -77,23 +77,6 @@ alias gdc='git diff --cached'                           # Show what's staged for
 alias gba='git branch -a'                               # List all branches including remote ones
 alias gcam='git commit -a -m'                           # Stage and commit all tracked changes at once
 alias gcaa='git commit -a --amend --no-edit'
-
-# Enhanced Git workflows
-alias gwip='git add -A && git commit -m "WIP" --no-verify'         # Quick save work in progress (skip hooks)
-alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1' # Undo work-in-progress save
-alias gundo='git reset --soft HEAD~1'                              # Undo last commit but keep changes ready
-alias gundo-hard='git reset --hard HEAD~1'                         # Undo last commit and destroy all changes
-
-# Destructive operations with safety prompts
-gpristine() {
-  echo "  DANGER: This will DELETE all uncommitted changes and untracked files!"
-  echo "Press Ctrl+C to cancel, or Enter to continue..."
-  read -r
-  git reset --hard && git clean -dffx
-}
-alias gbclean='git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d' # Clean up old branches that were already merged
-
-# Advanced Git operations
 alias glg='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit' # Beautiful commit history with colors and graph
 alias gsync='git fetch origin && git rebase origin/$(git rev-parse --abbrev-ref HEAD)'                                                      # Update branch with latest remote changes
 alias gfix='git commit --fixup'                                                                                                             # Create commit to fix earlier commit (for squashing)
@@ -101,6 +84,18 @@ alias gsquash='git rebase -i --autosquash'                                      
 alias gstash='git stash push -m'                                                                                                            # Temporarily save changes with description
 alias gsh='git stash'                                                                                                                       # Quick temporary save of current changes
 alias gsp='git stash pop'                                                                                                                   # Restore and remove most recent temporary save
+alias gwip='git add -A && git commit -m "WIP" --no-verify'         # Quick save work in progress (skip hooks)
+alias gunwip='git log -n 1 | grep -q -c "WIP" && git reset HEAD~1' # Undo work-in-progress save
+alias gundo='git reset --soft HEAD~1'                              # Undo last commit but keep changes ready
+alias gundo-hard='git reset --hard HEAD~1'                         # Undo last commit and destroy all changes
+
+gclean() {
+  echo "  DANGER: This will DELETE all uncommitted changes and untracked files!"
+  echo "Press Ctrl+C to cancel, or Enter to continue..."
+  read -r
+  git reset --hard && git clean -dffx
+  git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d
+}
 
 # GitHub CLI shortcuts
 alias prc='gh pr create --fill' # Create pull request with auto-filled details

@@ -2,14 +2,20 @@ name: Brew Bundle (dry-run)
 
 on:
   pull_request:
-    paths: ["Brewfile"]
+    paths: ["Brewfile", "config/*/brew.txt"]
 
 jobs:
   brewfile:
     runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [full, local]
     steps:
       - uses: actions/checkout@v4
-      - name: Dry‑run Brew Bundle
+      - name: Dry-run Brew Bundle (${{ matrix.profile }} profile)
         run: |
           brew update
           brew bundle --file=./Brewfile --no-lock --verbose --dry-run
+        env:
+          MAC_DEV_PROFILE: ${{ matrix.profile }}
