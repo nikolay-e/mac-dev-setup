@@ -21,4 +21,4 @@ jobs:
       - name: Dry-run Brew Bundle
         run: |
           brew update
-          brew bundle --file=./Brewfile --no-lock --verbose --dry-run
+          brew bundle --file=./Brewfile --verbose --dry-run

@@ -35,10 +35,10 @@ fi
 
 # Use brew bundle for robust installation
 if (( PRINT )); then
-  echo "brew bundle --file=\"$CONFIG_FILE\" --no-lock"
+  echo "brew bundle --file=\"$CONFIG_FILE\""
 elif (( DRY )); then
-  run_cmd "brew bundle --file=\"$CONFIG_FILE\" --no-lock --dry-run"
+  run_cmd "brew bundle --file=\"$CONFIG_FILE\" --dry-run"
 else
-  run_cmd "brew bundle --file=\"$CONFIG_FILE\" --no-lock"
+  run_cmd "brew bundle --file=\"$CONFIG_FILE\""
   echo "Homebrew packages installation complete!"
 fi
