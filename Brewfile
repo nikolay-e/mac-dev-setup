@@ -38,7 +38,7 @@ brew "kubectx"
 brew "terraform-docs"
 
 # Archive tools
-brew "unrar"
+brew "unar"
 brew "p7zip"
 
 # Essential tools

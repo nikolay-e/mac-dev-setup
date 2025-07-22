@@ -73,6 +73,11 @@ if ! bash "tasks/python.install.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; t
     exit 1
 fi
 
+if ! bash "tasks/symlinks.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; then
+    echo "❌ Error: Symlinks task failed." >&2
+    exit 1
+fi
+
 # Generate sheldon plugins configuration
 if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
     if command -v node >/dev/null 2>&1; then
