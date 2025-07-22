@@ -1,1 +1,0 @@
-full/pipx.txt

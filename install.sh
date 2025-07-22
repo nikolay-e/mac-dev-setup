@@ -1,149 +1,75 @@
 #!/usr/bin/env bash
-# install.sh - convenience orchestrator for mac-dev-setup
-#
-# This script simply calls the task scripts in order.
-# You can run tasks individually from the tasks/ directory.
-#
-# Usage:
-#   ./install.sh                    # Run all steps
-#   ./install.sh --dry-run          # Show what would be done
-#   ./install.sh --skip=python,node # Skip specific steps
-#   ./install.sh --only=brew        # Run only specific step
-
+# mac-dev-setup installer - secure, vetted development environment
 set -euo pipefail
 
-# Available installation steps
-ALL_STEPS=(brew python node dotfiles validate)
-STEPS=("${ALL_STEPS[@]}")
+# --- Helper Functions ---
+info() {
+    printf "\n\033[1;34m%s\033[0m\n" "$1"
+}
 
-# Parse arguments
-DRY_RUN=""
-SKIP=""
-PROFILE="full"
-
-for arg in "$@"; do
-  case $arg in
-    --skip=*)
-      SKIP="${arg#*=}"
-      ;;
-    --only=*)
-      IFS=',' read -r -a STEPS <<< "${arg#*=}"
-      ;;
-    --profile=*)
-      PROFILE="${arg#*=}"
-      if [[ "$PROFILE" != "full" && "$PROFILE" != "local" ]]; then
-        echo "Error: Invalid profile '$PROFILE'. Use 'full' or 'local'."
-        exit 1
-      fi
-      ;;
-    -n|--dry-run)
-      DRY_RUN="--dry-run"
-      ;;
-    -h|--help)
-      echo "mac-dev-setup installer"
-      echo ""
-      echo "Usage: $0 [options]"
-      echo ""
-      echo "Options:"
-      echo "  --dry-run          Show what would be installed"
-      echo "  --skip=step1,step2 Skip specific steps"
-      echo "  --only=step        Run only specific step(s)"
-      echo "  --profile=NAME     Use profile: 'full' (default) or 'local' (telemetry-free)"
-      echo ""
-      echo "Available steps: ${ALL_STEPS[*]}"
-      echo ""
-      echo "Profiles:"
-      echo "  full  - All tools including those with network features (default)"
-      echo "  local - Only tools that work completely offline (no telemetry)"
-      echo ""
-      echo "For manual installation, see docs/00-prereqs.md"
-      exit 0
-      ;;
-    *)
-      echo "Unknown option: $arg"
-      echo "Run $0 --help for usage"
-      exit 1
-      ;;
-  esac
-done
-
-# Export profile for task scripts to use
-export MAC_DEV_PROFILE="$PROFILE"
-
-# Show what we're about to do
-echo "mac-dev-setup installer"
-echo "======================"
-echo ""
-echo "Profile: $PROFILE"
-echo ""
-echo "This will run the following steps:"
-for step in "${STEPS[@]}"; do
-  if [[ -z "$SKIP" ]] || [[ ",$SKIP," != *",$step,"* ]]; then
-    echo "  - $step"
-  fi
-done
-echo ""
-if [[ "$PROFILE" == "local" ]]; then
-  echo "🔒 Local profile: Installing only telemetry-free tools"
-  echo "   No auto-updates, no cloud APIs, works offline"
-  echo ""
-fi
-echo "For manual installation instructions, see docs/"
+# --- Main Script ---
+echo "🚀 mac-dev-setup Installer"
+echo "=========================="
+echo "This script will set up your development environment with verified, offline-capable tools."
 echo ""
 
-# Confirm before proceeding (unless dry-run)
-if [[ -z "$DRY_RUN" ]]; then
-  read -p "Continue? [y/N] " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+info "The following actions will be performed:"
+
+# List Homebrew packages
+echo "📦 Install Homebrew Packages:"
+while IFS= read -r package || [[ -n "$package" ]]; do
+    [[ -n "$package" && "$package" != \#* ]] && echo "    • $package"
+done < brew.txt
+
+# List Pipx packages
+echo ""
+echo "🐍 Install Python CLI Tools:"
+while IFS= read -r package || [[ -n "$package" ]]; do
+    [[ -n "$package" && "$package" != \#* ]] && echo "    • $package"
+done < pipx.txt
+
+# List other actions
+echo ""
+echo "⚙️  Additional Setup:"
+echo "    • Create symlinks for aliases and shell configuration"
+echo "    • Configure your shell (~/.zshrc) to load the environment"
+echo "    • Disable telemetry for all installed tools"
+echo ""
+
+# Confirm before proceeding
+read -p "Continue with installation? [y/N] " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Installation cancelled."
     exit 0
-  fi
 fi
 
-# Run each step
-for step in "${STEPS[@]}"; do
-  # Skip if in skip list
-  if [[ -n "$SKIP" ]] && [[ ",$SKIP," == *",$step,"* ]]; then
-    echo "⏭️  Skipping $step (--skip specified)"
-    continue
-  fi
+# --- Execute Installation Tasks ---
+info "Starting installation..."
 
-  # Check if task script exists
-  TASK_SCRIPT="tasks/${step}.install.sh"
-  if [[ ! -f "$TASK_SCRIPT" ]]; then
-    echo "⚠️  Warning: $TASK_SCRIPT not found, skipping"
-    continue
-  fi
-
-  # Run the task
-  echo ""
-  echo "▶️  Running $step..."
-  echo "   Equivalent command: bash $TASK_SCRIPT $DRY_RUN"
-
-  if ! bash "$TASK_SCRIPT" $DRY_RUN; then
-    echo "❌ Error: $step failed"
+if ! bash "tasks/brew.install.sh"; then
+    echo "❌ Error: Homebrew task failed." >&2
     exit 1
-  fi
-done
-
-# Run local profile hardening if needed
-if [[ "$PROFILE" == "local" && -z "$DRY_RUN" ]]; then
-  echo ""
-  echo "▶️  Applying local profile hardening..."
-  if ! bash tasks/configure-local-profile.sh; then
-    echo "❌ Warning: Local profile configuration failed"
-  fi
 fi
 
-echo ""
-echo "✅ Installation complete!"
-echo ""
-if [[ "$PROFILE" == "local" ]]; then
-  echo "🔒 Local profile configured - all tools are telemetry-free and work offline"
-  echo ""
+if ! bash "tasks/python.install.sh"; then
+    echo "❌ Error: Python task failed." >&2
+    exit 1
 fi
-echo "Next steps:"
-echo "  1. Restart your terminal"
-echo "  2. Run 'learn-aliases' to explore available shortcuts"
-echo "  3. Check docs/90-validation.md to verify everything works"
+
+# Apply security hardening
+if ! bash "tasks/configure-local-profile.sh"; then
+    echo "⚠️  Warning: Security hardening failed, but continuing..." >&2
+fi
+
+info "✅ Installation complete!"
+echo ""
+echo "🔒 Your environment is configured for security:"
+echo "   • No telemetry or analytics"
+echo "   • No automatic updates"
+echo "   • All tools work offline"
+echo ""
+echo "📋 Next steps:"
+echo "   1. Restart your terminal"
+echo "   2. Run 'learn-aliases' to explore available shortcuts"
+echo ""

@@ -32,10 +32,7 @@ done
 
 # Find config file relative to script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Use profile-specific config if MAC_DEV_PROFILE is set
-PROFILE="${MAC_DEV_PROFILE:-full}"
-CONFIG_FILE="$SCRIPT_DIR/../config/$PROFILE/brew.txt"
+CONFIG_FILE="$SCRIPT_DIR/../brew.txt"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
   echo "Error: Config file not found: $CONFIG_FILE"
@@ -84,15 +81,12 @@ if [[ $PRINT -eq 0 ]] && [[ $DRY -eq 0 ]]; then
     brew analytics off 2>/dev/null || true
   fi
 
-  # Configure tools for local profile
-  if [[ "$PROFILE" == "local" ]]; then
-    echo ""
-    echo "🔒 Configuring tools for local profile..."
+  echo ""
+  echo "🔒 Applying security configuration..."
 
-    # Disable git-delta update checks
-    if command -v git &>/dev/null; then
-      git config --global delta.check-for-updates false 2>/dev/null || true
-    fi
-
+  # Disable git-delta update checks if installed
+  if command -v git &>/dev/null; then
+    git config --global delta.check-for-updates false 2>/dev/null || true
+    echo "   - Disabled git-delta update checks"
   fi
 fi

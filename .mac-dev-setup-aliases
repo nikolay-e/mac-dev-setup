@@ -98,11 +98,7 @@ gclean() {
 }
 
 # GitHub CLI shortcuts
-alias prc='gh pr create --fill' # Create pull request with auto-filled details
-alias prv='gh pr view'          # View pull request details in terminal
-alias prs='gh pr status'        # Check status of your pull requests
-alias prchecks='gh pr checks'   # View automated test results
-alias prco='gh pr checkout'     # Download someone else's pull request to test
+# GitHub CLI aliases removed - tool not included in secure environment
 
 # --------------------------------------------------------------------
 ## Kubernetes (Enhanced with ahmetb-style aliases)
@@ -285,11 +281,13 @@ tfwswitch() {
 }
 
 tfsec() {
-  trivy config . --severity HIGH,CRITICAL # Scan infrastructure code for security issues
+  # trivy removed - tool not included in secure environment
+  echo "trivy not available in secure environment"
 }
 
 tfcost() {
-  infracost breakdown --path . --format table
+  # infracost removed - tool not included in secure environment
+  echo "infracost not available in secure environment"
 }
 
 tfdocs() {
@@ -431,12 +429,12 @@ extract() {
 # --------------------------------------------------------------------
 ## Utilities
 # --------------------------------------------------------------------
-alias myip='curl ifconfig.me'                                                  # Show your internet-facing IP address
+# myip removed - uses curl to external service
 alias localip='ipconfig getifaddr en0'                                         # Show your local network IP address
 alias serve='python3 -m http.server'                                           # Start local web server for current folder
 alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder' # Clear DNS cache to fix network issues
 alias zj='zellij'                                                              # Launch terminal multiplexer (multiple terminal sessions)
-alias weather='curl wttr.in'                                                   # Check weather forecast from terminal
+# weather removed - uses curl to external service
 alias copykey='pbcopy < ~/.ssh/id_rsa.pub'                                     # Copy SSH public key for server access
 alias copykey-ed='pbcopy < ~/.ssh/id_ed25519.pub'                              # Copy modern SSH key for secure connections
 

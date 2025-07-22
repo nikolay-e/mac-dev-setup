@@ -1,0 +1,38 @@
+# Vetted tools for secure development environments
+# All tools are offline-capable with no telemetry
+
+# Core CLI tools
+git
+jq
+jc
+tree
+fzf
+shfmt
+
+# Modern CLI replacements
+neovim
+ripgrep
+bat
+eza
+fd
+zoxide
+
+# Terminal tools
+zellij
+
+# Development tools
+pyenv
+pipx
+nvm
+mise
+
+# Container & Infrastructure (user-directed network only)
+docker
+kubectl
+helm
+terraform
+terragrunt
+
+# Essential tools
+wget
+htop

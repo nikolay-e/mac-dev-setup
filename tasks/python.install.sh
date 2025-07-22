@@ -45,10 +45,7 @@ run_cmd() {
 
 # Find config file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Use profile-specific config if MAC_DEV_PROFILE is set
-PROFILE="${MAC_DEV_PROFILE:-full}"
-CONFIG_FILE="$SCRIPT_DIR/../config/$PROFILE/pipx.txt"
+CONFIG_FILE="$SCRIPT_DIR/../pipx.txt"
 
 # Default Python version
 PYTHON_VERSION="${PYTHON_VERSION:-3.12}"
