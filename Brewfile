@@ -1,8 +1,12 @@
-# Brewfile - now reads from config/brew.txt for better maintainability
-# This file is kept for backwards compatibility with existing setups
+# Brewfile - profile-aware package installation
+# Respects MAC_DEV_PROFILE environment variable
 
-# Read packages from config/brew.txt
-File.readlines(File.join(__dir__, 'config/brew.txt')).each do |line|
+# Determine which profile to use
+profile = ENV.fetch('MAC_DEV_PROFILE', 'full')
+config_file = File.join(__dir__, "config/#{profile}/brew.txt")
+
+# Read packages from profile-specific config
+File.readlines(config_file).each do |line|
   line = line.strip
   next if line.empty? || line.start_with?('#')
 

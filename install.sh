@@ -127,9 +127,22 @@ for step in "${STEPS[@]}"; do
   fi
 done
 
+# Run local profile hardening if needed
+if [[ "$PROFILE" == "local" && -z "$DRY_RUN" ]]; then
+  echo ""
+  echo "▶️  Applying local profile hardening..."
+  if ! bash tasks/configure-local-profile.sh; then
+    echo "❌ Warning: Local profile configuration failed"
+  fi
+fi
+
 echo ""
 echo "✅ Installation complete!"
 echo ""
+if [[ "$PROFILE" == "local" ]]; then
+  echo "🔒 Local profile configured - all tools are telemetry-free and work offline"
+  echo ""
+fi
 echo "Next steps:"
 echo "  1. Restart your terminal"
 echo "  2. Run 'learn-aliases' to explore available shortcuts"

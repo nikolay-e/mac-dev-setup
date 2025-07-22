@@ -1,0 +1,48 @@
+name: Test Installation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [full, local]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Test installation (dry-run)
+      run: ./install.sh --profile=${{ matrix.profile }} --dry-run
+
+    - name: Test brew task directly
+      run: bash tasks/brew.install.sh --print
+      env:
+        MAC_DEV_PROFILE: ${{ matrix.profile }}
+
+    - name: Test python task directly
+      run: bash tasks/python.install.sh --print
+      env:
+        MAC_DEV_PROFILE: ${{ matrix.profile }}
+
+    - name: Verify profile-specific configs exist
+      run: |
+        test -f "config/${{ matrix.profile }}/brew.txt"
+        test -f "config/${{ matrix.profile }}/pipx.txt"
+        echo "✅ Config files found for ${{ matrix.profile }} profile"
+
+    - name: Test Brewfile profile resolution
+      run: |
+        export MAC_DEV_PROFILE=${{ matrix.profile }}
+        ruby -e "
+          profile = ENV.fetch('MAC_DEV_PROFILE', 'full')
+          config_file = File.join(__dir__, \"config/#{profile}/brew.txt\")
+          puts \"Using config: #{config_file}\"
+          raise \"Config not found: #{config_file}\" unless File.exist?(config_file)
+          puts \"✅ Brewfile can resolve #{profile} profile\"
+        "
