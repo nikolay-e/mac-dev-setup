@@ -2,8 +2,6 @@
 
 **Modern macOS development environment setup with 40+ CLI tools and 600+ aliases.**
 
-Fast, safe, idempotent installation across Intel and Apple Silicon Macs.
-
 ## Quick Start
 
 ```bash
@@ -12,82 +10,67 @@ cd mac-dev-setup
 ./install.sh
 ```
 
-Restart your terminal when complete.
+## Installation Options
 
-## What You Get
-
-### Modern CLI Replacements
-- `eza` → Better `ls` with icons and git status
-- `bat` → Better `cat` with syntax highlighting
-- `fd` → Better `find` that's faster
-- `rg` → Better `grep` that's extremely fast
-- `z` → Smart directory jumping
-
-### Key Tools Installed
-- **Git**: `git`, `git-delta`, `gh`, `lazygit`
-- **Containers**: `docker`, `kubectl`, `k9s`, `helm`, `stern`
-- **Cloud**: `aws`, `terraform`, `trivy`, `infracost`
-- **Languages**: `pyenv`, `nvm`, `pipx`, `mise`
-- **Terminal**: `zellij`, `fzf`, `neovim`, `tldr`
-
-### Essential Aliases
+### 1. **Automated** (Recommended)
 ```bash
-# Git
-gs              # git status
-gc "message"    # git commit
-gp              # git push
-lg              # lazygit TUI
-
-# Kubernetes
-k               # kubectl
-kgp             # kubectl get pods
-kl              # kubectl logs
-kdel            # kubectl delete
-
-# Docker
-d               # docker
-dps             # docker ps
-dcu             # docker compose up -d
-
-# Terraform
-tf              # terraform
-tfp             # terraform plan
-tfa             # terraform apply
-
-# Utilities
-serve           # HTTP server (current directory)
-myip            # Show public IP
-weather         # Check weather
+./install.sh              # Install everything
+./install.sh --dry-run    # Preview what will be installed
+./install.sh --only=brew  # Install only specific components
 ```
 
-## 🛠️ Complete Tool List
+### 2. **Manual**
+Follow the step-by-step guides in `docs/`:
+1. Start with [docs/00-prereqs.md](docs/00-prereqs.md)
+2. Continue through numbered docs in order
 
-**Core Development**: git, git-delta, gh, neovim, lazygit
-**CLI Replacements**: eza, bat, fd, ripgrep, zoxide, fzf
-**Containers**: docker, dive, kubectl, kubectx, k9s, stern, helm
-**Infrastructure**: terraform, tenv, terraform-docs, trivy, infracost
-**Cloud**: aws, kcat, jq, jc, yq
-**Languages**: pyenv, pipx, nvm, mise
-**Terminal**: zellij, sheldon, tldr, tree, htop, shfmt
-**Quality**: pre-commit, shellcheck, bats
+## What's Included
 
-## Maintenance
+### Modern CLI Tools
+- **Better basics**: `eza` (ls), `bat` (cat), `fd` (find), `rg` (grep)
+- **Git tools**: `git-delta`, `gh`, `lazygit`
+- **Container tools**: `docker`, `kubectl`, `k9s`, `helm`
+- **Dev tools**: `terraform`, `aws`, `neovim`, `fzf`
 
+### 600+ Aliases
 ```bash
-# Update everything
-brew-update     # Update Homebrew packages
-pipx upgrade-all # Update Python tools
+gs          # git status
+k           # kubectl
+tf          # terraform
+serve       # HTTP server in current directory
+```
 
-# Uninstall (keeps tools, removes configs)
-./uninstall.sh
+Run `learn-aliases` after installation to explore all shortcuts.
+
+## Project Structure
+
+```
+mac-dev-setup/
+├── docs/       # Step-by-step installation guides
+├── config/     # Package lists (brew.txt, pipx.txt)
+├── tasks/      # Individual installation scripts
+└── install.sh  # Optional automation script
 ```
 
 ## Requirements
 
-- macOS 10.15+ (Intel or Apple Silicon)
-- Xcode Command Line Tools: `xcode-select --install`
+- macOS 10.15+
+- Xcode Command Line Tools
 - Administrator access
+
+## Maintenance
+
+```bash
+brew update && brew upgrade    # Update Homebrew packages
+pipx upgrade-all              # Update Python tools
+```
+
+## Uninstall
+
+```bash
+./uninstall.sh  # Remove configurations (keeps installed tools)
+```
 
 ---
 
-Created by [Nikolay-E](https://github.com/nikolay-e) • [Issues](https://github.com/nikolay-e/mac-dev-setup/issues) • [Contributing](CONTRIBUTING.md)
+Created by [Nikolay-E](https://github.com/nikolay-e) • [Issues](https://github.com/nikolay-e/mac-dev-setup/issues)

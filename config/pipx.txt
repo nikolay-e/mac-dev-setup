@@ -1,0 +1,8 @@
+# Python CLI tools installed via pipx
+treemapper
+tldr.py
+yq
+httpie
+cookiecutter
+pre-commit
+./learn-aliases
