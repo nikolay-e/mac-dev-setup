@@ -63,3 +63,7 @@ coverage/
 # Local environment overrides
 .env
 .env.local
+
+# Generated documentation/analysis files
+directory_tree.*
+*.tree
