@@ -13,7 +13,7 @@ jobs:
       - name: Dry-run installer
         run: |
           chmod +x install.sh
-          ./install.sh --dry-run
+          ./install.sh --dry-run --yes
 
   install-full:
     name: Install (full)

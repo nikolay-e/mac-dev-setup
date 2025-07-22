@@ -11,6 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.5.0
       - name: Run tests
         run: |
           bats test
