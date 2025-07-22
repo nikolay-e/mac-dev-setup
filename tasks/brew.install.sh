@@ -8,6 +8,11 @@
 
 set -euo pipefail
 
+# Disable telemetry and auto-updates for security-conscious environments
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_NO_AUTO_UPDATE=1
+export GIT_TERMINAL_PROMPT=0
+
 # Parse arguments
 DRY=0
 PRINT=0
@@ -27,7 +32,10 @@ done
 
 # Find config file relative to script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/../config/brew.txt"
+
+# Use profile-specific config if MAC_DEV_PROFILE is set
+PROFILE="${MAC_DEV_PROFILE:-full}"
+CONFIG_FILE="$SCRIPT_DIR/../config/$PROFILE/brew.txt"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
   echo "Error: Config file not found: $CONFIG_FILE"
@@ -69,4 +77,39 @@ done < "$CONFIG_FILE"
 
 if [[ $PRINT -eq 0 ]] && [[ $DRY -eq 0 ]]; then
   echo "Homebrew packages installation complete!"
+
+  # Disable analytics if installing for real
+  if command -v brew &>/dev/null; then
+    echo "Disabling Homebrew analytics..."
+    brew analytics off 2>/dev/null || true
+  fi
+
+  # Configure tools for local profile
+  if [[ "$PROFILE" == "local" ]]; then
+    echo ""
+    echo "🔒 Configuring tools for local profile..."
+
+    # Disable git-delta update checks
+    if command -v git &>/dev/null; then
+      git config --global delta.check-for-updates false 2>/dev/null || true
+    fi
+
+    # Disable lazygit update checks
+    if command -v lazygit &>/dev/null; then
+      mkdir -p ~/.config/lazygit
+      cat > ~/.config/lazygit/config.yml <<'EOF'
+gui:
+  nerdFontsVersion: ""
+  showFileTree: true
+  showCommandLog: false
+  showBottomLine: true
+  showPanelJumps: true
+update:
+  method: never
+reporting: 'off'
+confirmOnQuit: false
+EOF
+      echo "   - Disabled lazygit auto-updates"
+    fi
+  fi
 fi

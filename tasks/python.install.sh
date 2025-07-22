@@ -8,6 +8,11 @@
 
 set -euo pipefail
 
+# Disable telemetry for security-conscious environments
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_NO_AUTO_UPDATE=1
+export GIT_TERMINAL_PROMPT=0
+
 # Parse arguments
 DRY=0
 PRINT=0
@@ -40,7 +45,10 @@ run_cmd() {
 
 # Find config file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/../config/pipx.txt"
+
+# Use profile-specific config if MAC_DEV_PROFILE is set
+PROFILE="${MAC_DEV_PROFILE:-full}"
+CONFIG_FILE="$SCRIPT_DIR/../config/$PROFILE/pipx.txt"
 
 # Default Python version
 PYTHON_VERSION="${PYTHON_VERSION:-3.12}"

@@ -1,0 +1,13 @@
+# Python CLI tools for sensitive environments
+# Only tools that work completely offline
+
+# Local-only tools
+./learn-aliases
+
+# Note: The following are excluded from local profile:
+# - tldr.py: fetches remote pages
+# - yq: while local, often used with remote data
+# - httpie: network tool
+# - cookiecutter: fetches templates
+# - pre-commit: pulls remote repos
+# - treemapper: may check for updates

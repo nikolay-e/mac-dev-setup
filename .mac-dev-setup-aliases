@@ -8,7 +8,7 @@ alias cat='bat --paging=never' # Modern file viewer with syntax highlighting for
 
 # File listing with modern tool (colorized output with icons and git status)
 alias ls='eza'                      # Basic file listing with colors and icons
-alias l='eza'                       # Quick file listing
+alias l='eza -1'                     # Quick file listing
 alias ll='eza -l'                   # Detailed view: permissions, size, date, owner
 alias la='eza -la'                  # Show all files including hidden ones starting with dot
 alias lt='eza -T --level=2'         # Tree view of directory structure (2 levels deep)
@@ -58,13 +58,13 @@ alias oldvim='/usr/bin/vim' # Original system editor (fallback)
 ## Git
 # --------------------------------------------------------------------
 alias g='git'                                           # Version control system command shortcut
-alias gs='git status -s'                                # Quick overview of file changes (compact format)
+alias gs='git status'                                # Quick overview of file changes (compact format)
 alias ga='git add'                                      # Stage specific files for next commit
 alias gaa='git add --all'                               # Stage all changed files for commit
-alias gc='git commit -m'                                # Save changes with descriptive message
+alias gcm='git commit -m'                                # Save changes with descriptive message
 alias gca='git commit --amend --no-edit'                # Fix last commit without changing message
 alias gb='git branch'                                   # List existing branches or create new ones
-alias gco='git checkout'                                # Switch between branches or restore files
+alias gc='git checkout'                                # Switch between branches or restore files
 alias gcb='git checkout -b'                             # Create new branch and switch to it
 alias gp='git push'                                     # Upload local commits to remote repository
 alias gpf='git push --force-with-lease'                 # Force upload with safety check
@@ -74,10 +74,9 @@ alias gl='git pull'                                     # Download latest change
 alias glog='git log --oneline --decorate --graph --all' # Visual commit history with branches
 alias gd='git diff'                                     # Show what changed in files (not staged)
 alias gdc='git diff --cached'                           # Show what's staged for next commit
-alias gst='git status'                                  # Full status of repository changes
 alias gba='git branch -a'                               # List all branches including remote ones
 alias gcam='git commit -a -m'                           # Stage and commit all tracked changes at once
-alias lg='lazygit'                                      # Visual git interface with mouse support
+alias gcaa='git commit -a --amend --no-edit'
 
 # Enhanced Git workflows
 alias gwip='git add -A && git commit -m "WIP" --no-verify'         # Quick save work in progress (skip hooks)

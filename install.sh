@@ -19,6 +19,7 @@ STEPS=("${ALL_STEPS[@]}")
 # Parse arguments
 DRY_RUN=""
 SKIP=""
+PROFILE="full"
 
 for arg in "$@"; do
   case $arg in
@@ -27,6 +28,13 @@ for arg in "$@"; do
       ;;
     --only=*)
       IFS=',' read -r -a STEPS <<< "${arg#*=}"
+      ;;
+    --profile=*)
+      PROFILE="${arg#*=}"
+      if [[ "$PROFILE" != "full" && "$PROFILE" != "local" ]]; then
+        echo "Error: Invalid profile '$PROFILE'. Use 'full' or 'local'."
+        exit 1
+      fi
       ;;
     -n|--dry-run)
       DRY_RUN="--dry-run"
@@ -40,8 +48,13 @@ for arg in "$@"; do
       echo "  --dry-run          Show what would be installed"
       echo "  --skip=step1,step2 Skip specific steps"
       echo "  --only=step        Run only specific step(s)"
+      echo "  --profile=NAME     Use profile: 'full' (default) or 'local' (telemetry-free)"
       echo ""
       echo "Available steps: ${ALL_STEPS[*]}"
+      echo ""
+      echo "Profiles:"
+      echo "  full  - All tools including those with network features (default)"
+      echo "  local - Only tools that work completely offline (no telemetry)"
       echo ""
       echo "For manual installation, see docs/00-prereqs.md"
       exit 0
@@ -54,9 +67,14 @@ for arg in "$@"; do
   esac
 done
 
+# Export profile for task scripts to use
+export MAC_DEV_PROFILE="$PROFILE"
+
 # Show what we're about to do
 echo "mac-dev-setup installer"
 echo "======================"
+echo ""
+echo "Profile: $PROFILE"
 echo ""
 echo "This will run the following steps:"
 for step in "${STEPS[@]}"; do
@@ -65,6 +83,11 @@ for step in "${STEPS[@]}"; do
   fi
 done
 echo ""
+if [[ "$PROFILE" == "local" ]]; then
+  echo "🔒 Local profile: Installing only telemetry-free tools"
+  echo "   No auto-updates, no cloud APIs, works offline"
+  echo ""
+fi
 echo "For manual installation instructions, see docs/"
 echo ""
 
