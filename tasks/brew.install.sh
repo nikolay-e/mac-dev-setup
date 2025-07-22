@@ -94,22 +94,5 @@ if [[ $PRINT -eq 0 ]] && [[ $DRY -eq 0 ]]; then
       git config --global delta.check-for-updates false 2>/dev/null || true
     fi
 
-    # Disable lazygit update checks
-    if command -v lazygit &>/dev/null; then
-      mkdir -p ~/.config/lazygit
-      cat > ~/.config/lazygit/config.yml <<'EOF'
-gui:
-  nerdFontsVersion: ""
-  showFileTree: true
-  showCommandLog: false
-  showBottomLine: true
-  showPanelJumps: true
-update:
-  method: never
-reporting: 'off'
-confirmOnQuit: false
-EOF
-      echo "   - Disabled lazygit auto-updates"
-    fi
   fi
 fi

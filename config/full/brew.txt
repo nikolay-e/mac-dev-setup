@@ -21,7 +21,6 @@ zoxide
 # Terminal tools
 zellij
 sheldon
-lazygit
 tldr
 
 # Container tools

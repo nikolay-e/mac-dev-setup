@@ -29,7 +29,7 @@ mise
 # Note: The following are excluded from local profile:
 # - gh: GitHub API integration
 # - git-delta: checks for updates
-# - lazygit: checks for updates
+# - lazygit: removed from project
 # - sheldon: downloads plugins
 # - tldr: fetches remote pages
 # - trivy: needs vulnerability DB

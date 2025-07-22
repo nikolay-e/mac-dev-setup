@@ -20,23 +20,7 @@ if command -v git &>/dev/null; then
   git config --global delta.check-for-updates false 2>/dev/null || true
 fi
 
-# Configure lazygit to never update
-if command -v lazygit &>/dev/null; then
-  echo "- Disabling lazygit auto-updates..."
-  mkdir -p ~/.config/lazygit
-  cat > ~/.config/lazygit/config.yml <<'EOF'
-gui:
-  nerdFontsVersion: ""
-  showFileTree: true
-  showCommandLog: false
-  showBottomLine: true
-  showPanelJumps: true
-update:
-  method: never
-reporting: 'off'
-confirmOnQuit: false
-EOF
-fi
+# Note: lazygit removed from project
 
 # Set environment variables for current session
 export HOMEBREW_NO_ANALYTICS=1
