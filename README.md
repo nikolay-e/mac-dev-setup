@@ -21,8 +21,8 @@ All tools are carefully vetted for security and work completely offline:
 - **Language environments**: `pyenv`, `nvm`, `mise`
 
 ### Infrastructure & Containers
-- **Container tools**: `docker`, `kubectl`, `helm`
-- **Infrastructure**: `terraform`, `terragrunt`
+- **Container tools**: `docker`, `kubectl`, `helm`, `k9s`
+- **Cloud & Infrastructure**: `tenv` (terraform/terragrunt), `awscli`
 - **Utilities**: `jq`, `jc`, `tree`, `fzf`, `wget`, `htop`
 
 ### 600+ Productivity Aliases
@@ -40,7 +40,9 @@ Run `learn-aliases` after installation to explore all shortcuts.
 🔒 **Zero Telemetry**: No analytics, crash reporting, or usage tracking
 🔒 **No Auto-Updates**: Tools won't check for updates or phone home
 🔒 **Offline Capable**: All tools work without internet connection
-🔒 **User-Controlled Network**: Only you decide when tools connect externally
+🔒 **User-Controlled Network**: Network-capable tools (docker, kubectl, awscli) only connect when you explicitly use them
+
+**Note**: `brew "docker"` installs Docker Desktop, which requires login and has telemetry. For zero-telemetry container usage, consider `colima` + `docker` CLI formula instead.
 
 ## Manual Installation
 

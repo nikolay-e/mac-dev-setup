@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Stop on first error, undefined variables, and pipe failures
 set -euo pipefail
@@ -17,13 +17,15 @@ remove_shell_config() {
     cp ~/.zshrc ~/.zshrc.backup."$(date +%Y%m%d_%H%M%S)"
 
     # Remove the source line and comment (portable sed)
+    # Escape forward slashes in the comment pattern
+    local ESCAPED_COMMENT="${ZSHRC_COMMENT//\//\\/}"
     if sed --version >/dev/null 2>&1; then
       # GNU sed (Linux)
-      sed -i "/$ZSHRC_COMMENT/d" ~/.zshrc
+      sed -i "/$ESCAPED_COMMENT/d" ~/.zshrc
       sed -i "/source ~\/.zsh_config.sh/d" ~/.zshrc
     else
       # BSD sed (macOS)
-      sed -i '' "/$ZSHRC_COMMENT/d" ~/.zshrc
+      sed -i '' "/$ESCAPED_COMMENT/d" ~/.zshrc
       sed -i '' "/source ~\/.zsh_config.sh/d" ~/.zshrc
     fi
     echo "Configuration removed from ~/.zshrc (backup created)"

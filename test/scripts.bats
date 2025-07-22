@@ -52,11 +52,11 @@ teardown() {
 
 @test "install.sh has required safety checks" {
   grep -q "set -euo pipefail" install.sh
-  grep -q "command -v" install.sh
+  grep -q "read -p.*Continue" install.sh
 }
 
 @test "destructive functions have safety prompts" {
-  grep -q "gpristine()" .mac-dev-setup-aliases
+  grep -q "gclean()" .mac-dev-setup-aliases
   grep -q "Press Ctrl+C to cancel" .mac-dev-setup-aliases
 }
 
@@ -75,7 +75,7 @@ teardown() {
   grep -q '"git"' Brewfile
   grep -q '"neovim"' Brewfile
   grep -q '"docker"' Brewfile
-  grep -q '"terraform"' Brewfile
+  grep -q '"tenv"' Brewfile
   # Should NOT have unvetted network tools
   run ! grep -q '"gh"' Brewfile
   run ! grep -q '"trivy"' Brewfile

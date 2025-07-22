@@ -7,9 +7,10 @@
     "zsh-autosuggestions": "git+https://github.com/zsh-users/zsh-autosuggestions.git#v0.7.1",
     "zsh-syntax-highlighting": "git+https://github.com/zsh-users/zsh-syntax-highlighting.git#0.8.0"
   },
-  "devDependencies": {},
   "scripts": {
-    "generate-plugins": "echo 'Run install.sh to generate plugins.toml from this package.json'"
+    "test": "bats test/scripts.bats",
+    "lint": "shellcheck tasks/*.sh *.sh",
+    "generate-plugins": "node scripts/generate-plugins.js"
   },
   "keywords": ["zsh", "shell", "plugins", "dotfiles", "mac", "development"],
   "author": "nikolay-e",

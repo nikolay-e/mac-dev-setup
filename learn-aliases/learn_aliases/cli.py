@@ -19,7 +19,7 @@ from collections import defaultdict
 # Configuration
 ALIAS_FILE = os.path.expanduser("~/.mac-dev-setup-aliases")
 ALIAS_PATTERN = re.compile(r"^\s*alias\s+([\w.\-]+)='([^']+)'(?:\s*#\s*(.*))?")
-FUNCTION_PATTERN = re.compile(r"^([a-z][a-z_]*)\(\)\s*\{")
+FUNCTION_PATTERN = re.compile(r"^([a-z][a-z0-9_-]*)\(\)\s*\{")
 COMMENT_PATTERN = re.compile(r"^##\s*(.+)")
 
 # ANSI color codes for better UI

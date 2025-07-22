@@ -64,6 +64,8 @@ coverage/
 .env
 .env.local
 
-# Generated documentation/analysis files
+# Generated files
 directory_tree.*
 *.tree
+plugins.toml
+node_modules/

@@ -12,7 +12,7 @@ alias l='eza -1'                     # Quick file listing
 alias ll='eza -l'                   # Detailed view: permissions, size, date, owner
 alias la='eza -la'                  # Show all files including hidden ones starting with dot
 alias lt='eza -T --level=2'         # Tree view of directory structure (2 levels deep)
-alias l.='eza -la | grep "^\."'     # Show only dotfiles (.bashrc, .gitconfig, etc)
+alias l.='eza -la --only-dotfiles'  # Show only dotfiles (.bashrc, .gitconfig, etc)
 alias ltr='eza -la --sort=modified' # Sort by modification time (newest first)
 alias lsd='eza -la | grep "^d"'     # Show only directories (folders)
 alias lss='eza -la --sort=size'     # Sort by file size (largest first)
@@ -97,8 +97,7 @@ gclean() {
   git branch --merged | grep -v "\\*\\|main\\|master" | xargs -n 1 git branch -d
 }
 
-# GitHub CLI shortcuts
-# GitHub CLI aliases removed - tool not included in secure environment
+# Note: GitHub CLI (gh) not included in secure environment
 
 # --------------------------------------------------------------------
 ## Kubernetes (Enhanced with ahmetb-style aliases)
@@ -280,15 +279,7 @@ tfwswitch() {
   terraform workspace select "$1" && terraform plan -var-file="workspaces/$1.tfvars"
 }
 
-tfsec() {
-  # trivy removed - tool not included in secure environment
-  echo "trivy not available in secure environment"
-}
-
-tfcost() {
-  # infracost removed - tool not included in secure environment
-  echo "infracost not available in secure environment"
-}
+# Note: tfsec and tfcost functions removed - tools not included in secure environment
 
 tfdocs() {
   terraform-docs markdown table . >README.md
@@ -373,7 +364,7 @@ pm-run() {
 # --------------------------------------------------------------------
 # Quick navigation with zoxide (after it's installed, use 'z' to jump to directories)
 alias zz='z -' # Go back to previous directory
-alias zi='zi'  # Interactive directory selection
+# Note: zi alias removed - redundant (zi command works directly)
 
 # Quick file operations
 alias mkd='mkdir -p' # Create directory and any missing parent directories

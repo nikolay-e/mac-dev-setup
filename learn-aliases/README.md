@@ -4,6 +4,14 @@ Interactive quiz tool to help memorize mac-dev-setup aliases.
 
 ## Installation
 
+### From mac-dev-setup project (recommended)
+
+```bash
+pipx install ./learn-aliases
+```
+
+### From GitHub (standalone)
+
 ```bash
 pipx install git+https://github.com/nikolay-e/mac-dev-setup.git#subdirectory=learn-aliases
 ```

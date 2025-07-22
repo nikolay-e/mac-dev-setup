@@ -3,6 +3,8 @@
 
 # Standardized argument parsing for task scripts
 parse_common_args() {
+  local usage="${1:-"Usage: $0 [--dry-run] [--print]"}"
+  shift || true
   DRY=0
   PRINT=0
   while [[ $# -gt 0 ]]; do
@@ -10,8 +12,7 @@ parse_common_args() {
       -n|--dry-run) DRY=1 ;;
       --print) PRINT=1 ;;
       -h|--help)
-        echo "$2"
-        echo "Usage: $0 [--dry-run] [--print]"
+        echo "$usage"
         exit 0
         ;;
       *) echo "Unknown option: $1"; exit 1 ;;
@@ -35,7 +36,7 @@ run_cmd() {
     if ! eval "$cmd"; then
       if [[ "$continue_on_error" == "true" ]]; then
         echo "Warning: Command failed but continuing: $cmd" >&2
-        return 1
+        return 0  # prevent set -e from aborting
       else
         echo "Error: Command failed: $cmd" >&2
         exit 1

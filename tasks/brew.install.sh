@@ -17,7 +17,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 # Parse arguments
-parse_common_args "$@" "Install Homebrew packages from Brewfile"
+parse_common_args "Install Homebrew packages from Brewfile" "$@"
 
 # Find config file relative to script location
 CONFIG_FILE="$SCRIPT_DIR/../Brewfile"
@@ -27,32 +27,18 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
   exit 1
 fi
 
-# Check if Homebrew is installed
-if ! command -v brew &>/dev/null && [[ $PRINT -eq 0 ]]; then
+# Check if Homebrew is installed (skip for dry-run and print modes)
+if ! command -v brew &>/dev/null && [[ $PRINT -eq 0 && $DRY -eq 0 ]]; then
   echo "Error: Homebrew is not installed. See docs/10-homebrew.md"
   exit 1
 fi
 
-# Process each line in the Brewfile
-while IFS= read -r line || [[ -n "$line" ]]; do
-  # Skip empty lines and comments
-  [[ -z "$line" || "$line" == \#* ]] && continue
-
-  # Extract package name from brew "package" format
-  if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
-    formula="${BASH_REMATCH[1]}"
-  else
-    # Skip non-brew lines
-    continue
-  fi
-
-  # Build command
-  cmd="brew install $formula"
-
-  # Use common run_cmd function with continue_on_error=true
-  run_cmd "$cmd" true
-done < "$CONFIG_FILE"
-
-if [[ $PRINT -eq 0 ]] && [[ $DRY -eq 0 ]]; then
+# Use brew bundle for robust installation
+if (( PRINT )); then
+  echo "brew bundle --file=\"$CONFIG_FILE\" --no-lock"
+elif (( DRY )); then
+  run_cmd "brew bundle --file=\"$CONFIG_FILE\" --no-lock --dry-run"
+else
+  run_cmd "brew bundle --file=\"$CONFIG_FILE\" --no-lock"
   echo "Homebrew packages installation complete!"
 fi

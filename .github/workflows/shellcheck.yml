@@ -14,6 +14,9 @@ jobs:
       - name: Verify chmod
         run: |
           test -x install.sh && test -x uninstall.sh
-      - uses: ludeeus/action-shellcheck@2.0.0
+      - name: Run ShellCheck
+        uses: reviewdog/action-shellcheck@v1
         with:
-          severity: warning
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning

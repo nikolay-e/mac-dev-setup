@@ -23,22 +23,28 @@ jobs:
       - name: Full install test
         run: |
           chmod +x install.sh
-          ./install.sh
+          yes | ./install.sh
       - name: Verify installation
         run: |
           # Check if key tools were installed
-          command -v eza || echo "❌ eza not found"
-          command -v bat || echo "❌ bat not found"
-          command -v fd || echo "❌ fd not found"
-          command -v rg || echo "❌ rg not found"
-          command -v jq || echo "❌ jq not found"
+          echo "Verifying tool installation..."
+          command -v eza
+          command -v bat
+          command -v fd
+          command -v rg
+          command -v jq
+          command -v sheldon
+          command -v k9s
 
           # Check if aliases file was created
-          [ -f ~/.mac-dev-setup-aliases ] || echo "❌ aliases file not found"
-
-          # Check if zsh config was created
-          [ -f ~/.zsh_config.sh ] || echo "❌ zsh config not found"
+          echo "Verifying configuration files..."
+          [ -f ~/.mac-dev-setup-aliases ]
+          [ -f ~/.zsh_config.sh ]
+          [ -f ~/.config/sheldon/plugins.toml ]
 
           # Verify alias file contains expected aliases (without sourcing)
-          grep -q "alias gs=" ~/.mac-dev-setup-aliases || echo "❌ gs alias not found in file"
-          grep -q "alias k=" ~/.mac-dev-setup-aliases || echo "❌ k alias not found in file"
+          echo "Verifying alias content..."
+          grep -q "alias gs=" ~/.mac-dev-setup-aliases
+          grep -q "alias k=" ~/.mac-dev-setup-aliases
+
+          echo "✅ All verification checks passed!"

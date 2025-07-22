@@ -59,10 +59,13 @@ brew bundle --file=./Brewfile
 ### Option C: Individual packages
 ```bash
 # Core tools
-brew install git git-delta gh wget htop
+brew install git jq jc wget htop
 
 # Modern CLI replacements
 brew install bat eza fd ripgrep zoxide
+
+# Container & Infrastructure
+brew install docker kubectl helm tenv k9s awscli
 
 # ... etc (see Brewfile for full list)
 ```

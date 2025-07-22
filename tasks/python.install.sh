@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 # Parse arguments
-parse_common_args "$@" "Setup Python environment with pyenv and install pipx packages"
+parse_common_args "Setup Python environment with pyenv and install pipx packages" "$@"
 
 # Find config file
 CONFIG_FILE="$SCRIPT_DIR/../pipx.txt"
@@ -32,7 +32,15 @@ if (( PRINT )); then
   echo "LATEST_PYTHON=\$(pyenv install --list | grep -E \"^  ${PYTHON_VERSION}\\.[0-9]+\$\" | tail -1 | xargs)"
   echo "pyenv install \"\$LATEST_PYTHON\""
   echo "pyenv global \"\$LATEST_PYTHON\""
-elif [[ $DRY -eq 0 ]] && command -v pyenv &>/dev/null; then
+elif (( DRY )); then
+  echo "+ pyenv install $PYTHON_VERSION.x (latest patch version)"
+  echo "+ pyenv global $PYTHON_VERSION.x"
+elif [[ $DRY -eq 0 ]]; then
+  # Check if pyenv is available
+  if ! command -v pyenv &>/dev/null; then
+    echo "Warning: pyenv not found. Install it first with 'brew install pyenv'"
+    return 0
+  fi
   # Initialize pyenv
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
@@ -55,6 +63,8 @@ if (( PRINT )); then
   echo ""
   echo "# Add pipx to PATH"
   echo "export PATH=\"\$HOME/.local/bin:\$PATH\""
+elif (( DRY )); then
+  echo "+ export PATH=\"\$HOME/.local/bin:\$PATH\""
 else
   export PATH="$HOME/.local/bin:$PATH"
 fi

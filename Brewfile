@@ -19,6 +19,7 @@ brew "zoxide"
 
 # Terminal tools
 brew "zellij"
+brew "sheldon"
 
 # Development tools
 brew "pyenv"
@@ -30,8 +31,15 @@ brew "mise"
 brew "docker"
 brew "kubectl"
 brew "helm"
-brew "terraform"
-brew "terragrunt"
+brew "tenv"
+brew "k9s"
+brew "awscli"
+brew "kubectx"
+brew "terraform-docs"
+
+# Archive tools
+brew "unrar"
+brew "p7zip"
 
 # Essential tools
 brew "wget"
