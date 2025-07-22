@@ -38,6 +38,7 @@ mise
 
 # Infrastructure tools
 tenv
+terragrunt
 trivy
 infracost
 terraform-docs
