@@ -12,23 +12,14 @@ cd mac-dev-setup
 
 ## Installation Options
 
-### 1. **Automated** (Recommended)
-```bash
-./install.sh              # Install everything
-./install.sh --dry-run    # Preview what will be installed
-./install.sh --only=brew  # Install only specific components
-```
-
-### 2. **Manual**
-Follow the step-by-step guides in `docs/`:
-1. Start with [docs/00-prereqs.md](docs/00-prereqs.md)
-2. Continue through numbered docs in order
+**Automated**: `./install.sh` or `./install.sh --profile=local` (telemetry-free)
+**Manual**: Follow guides in `docs/` starting with [00-prereqs.md](docs/00-prereqs.md)
 
 ## What's Included
 
 ### Modern CLI Tools
 - **Better basics**: `eza` (ls), `bat` (cat), `fd` (find), `rg` (grep)
-- **Git tools**: `git-delta`, `gh`, `lazygit`
+- **Git tools**: `git-delta`, `gh`
 - **Container tools**: `docker`, `kubectl`, `k9s`, `helm`
 - **Dev tools**: `terraform`, `aws`, `neovim`, `fzf`
 
@@ -46,10 +37,11 @@ Run `learn-aliases` after installation to explore all shortcuts.
 
 ```
 mac-dev-setup/
-├── docs/       # Step-by-step installation guides
-├── config/     # Package lists (brew.txt, pipx.txt)
-├── tasks/      # Individual installation scripts
-└── install.sh  # Optional automation script
+├── docs/           # Installation guides
+├── config/full/    # All tools (default)
+├── config/local/   # Telemetry-free subset
+├── tasks/          # Installation scripts
+└── install.sh      # Orchestrator
 ```
 
 ## Requirements
@@ -61,14 +53,7 @@ mac-dev-setup/
 ## Maintenance
 
 ```bash
-brew update && brew upgrade    # Update Homebrew packages
-pipx upgrade-all              # Update Python tools
-```
-
-## Uninstall
-
-```bash
-./uninstall.sh  # Remove configurations (keeps installed tools)
+brew update && brew upgrade && pipx upgrade-all
 ```
 
 ---

@@ -38,8 +38,8 @@ teardown() {
 }
 
 @test "scripts use proper shebang" {
-  head -1 install.sh | grep -q "#!/bin/bash"
-  head -1 uninstall.sh | grep -q "#!/bin/bash"
+  head -1 install.sh | grep -Eq '#!/usr/bin/env bash|#!/bin/bash'
+  head -1 uninstall.sh | grep -Eq '#!/usr/bin/env bash|#!/bin/bash'
 }
 
 @test "shell scripts have no syntax errors" {

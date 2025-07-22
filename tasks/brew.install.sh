@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tasks/brew.install.sh - install packages listed in config/brew.txt
+# tasks/brew.install.sh - install packages listed in config/<profile>/brew.txt
 #
 # Usage:
 #   bash tasks/brew.install.sh           # Install all packages

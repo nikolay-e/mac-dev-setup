@@ -9,23 +9,12 @@ bash tasks/brew.install.sh
 
 ## Why Homebrew?
 
-Homebrew is macOS's missing package manager. It:
-- Installs tools in isolated directories (no sudo mess)
-- Handles dependencies automatically
-- Updates everything with one command
-- Works identically on Intel and Apple Silicon Macs
+Homebrew manages packages without sudo, handles dependencies automatically, and works on both Intel and Apple Silicon.
 
 > **🔒 Sensitive Environment?**
 >
-> Use `--profile=local` to install only telemetry-free tools:
-> ```bash
-> ./install.sh --profile=local
-> ```
-> This installs a curated subset of tools that:
-> - Never phone home or check for updates
-> - Work completely offline
-> - Don't send any telemetry or analytics
-> - Are safe for air-gapped or high-security environments
+> Use `./install.sh --profile=local` for telemetry-free tools only.
+> Safe for air-gapped environments.
 
 ## Step 1: Install Homebrew
 
