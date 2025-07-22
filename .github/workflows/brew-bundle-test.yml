@@ -9,6 +9,15 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Homebrew
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /opt/homebrew/var/homebrew/linked
+          key: ${{ runner.os }}-homebrew-${{ hashFiles('Brewfile') }}
+          restore-keys: |
+            ${{ runner.os }}-homebrew-
       - name: Dry-run Brew Bundle
         run: |
           brew update

@@ -13,13 +13,23 @@ jobs:
       - name: Dry-run installer
         run: |
           chmod +x install.sh
-          ./install.sh -n   # -n == dry-run
+          ./install.sh --dry-run
 
   install-full:
     name: Install (full)
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Homebrew
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /opt/homebrew/var/homebrew/linked
+          key: ${{ runner.os }}-homebrew-${{ hashFiles('Brewfile') }}
+          restore-keys: |
+            ${{ runner.os }}-homebrew-
       - name: Full install test
         run: |
           chmod +x install.sh

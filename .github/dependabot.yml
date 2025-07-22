@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # GitHub Actions dependencies
+  # GitHub Actions dependencies - prioritize security updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -10,9 +10,22 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "nikolay-e"
+    assignees:
+      - "nikolay-e"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "security"
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Group security updates for faster review
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
 
   # NPM dependencies (shell plugins as Git dependencies only)
   - package-ecosystem: "npm"
@@ -24,13 +37,22 @@ updates:
     open-pull-requests-limit: 5
     reviewers:
       - "nikolay-e"
+    assignees:
+      - "nikolay-e"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "zsh-plugins"
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Only track Git dependencies (zsh plugins)
+    allow:
+      - dependency-type: "direct"
 
-  # Python dependencies
+  # Python dependencies for learn-aliases tool
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/learn-aliases"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -38,6 +60,20 @@ updates:
     open-pull-requests-limit: 5
     reviewers:
       - "nikolay-e"
+    assignees:
+      - "nikolay-e"
+    labels:
+      - "dependencies"
+      - "python"
+      - "learn-aliases"
     commit-message:
       prefix: "chore"
       include: "scope"
+    # Security and patch updates only for stability
+    groups:
+      python-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
+          - "patch"
