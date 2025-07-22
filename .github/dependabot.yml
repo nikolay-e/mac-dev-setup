@@ -19,13 +19,11 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    # Group security updates for faster review
+    # Group all updates for streamlined review
     groups:
-      security-updates:
+      github-actions-updates:
         patterns:
           - "*"
-        update-types:
-          - "security"
 
   # NPM dependencies (shell plugins as Git dependencies only)
   - package-ecosystem: "npm"
@@ -69,11 +67,10 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    # Security and patch updates only for stability
+    # Group Python updates for stability
     groups:
       python-updates:
         patterns:
           - "*"
         update-types:
-          - "security"
           - "patch"
