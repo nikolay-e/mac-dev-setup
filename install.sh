@@ -63,12 +63,12 @@ SCRIPT_FLAGS=()
 [[ $DRY -eq 1 ]] && SCRIPT_FLAGS+=("--dry-run")
 [[ $PRINT -eq 1 ]] && SCRIPT_FLAGS+=("--print")
 
-if ! bash "tasks/brew.install.sh" "${SCRIPT_FLAGS[@]}"; then
+if ! bash "tasks/brew.install.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; then
     echo "❌ Error: Homebrew task failed." >&2
     exit 1
 fi
 
-if ! bash "tasks/python.install.sh" "${SCRIPT_FLAGS[@]}"; then
+if ! bash "tasks/python.install.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; then
     echo "❌ Error: Python task failed." >&2
     exit 1
 fi
