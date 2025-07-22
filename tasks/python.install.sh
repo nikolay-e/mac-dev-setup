@@ -8,43 +8,14 @@
 
 set -euo pipefail
 
-# Disable telemetry for security-conscious environments
-export HOMEBREW_NO_ANALYTICS=1
-export HOMEBREW_NO_AUTO_UPDATE=1
-export GIT_TERMINAL_PROMPT=0
+# Load common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/common.sh"
 
 # Parse arguments
-DRY=0
-PRINT=0
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -n|--dry-run) DRY=1 ;;
-    --print) PRINT=1 ;;
-    -h|--help)
-      echo "Setup Python environment with pyenv and install pipx packages"
-      echo "Usage: $0 [--dry-run] [--print]"
-      exit 0
-      ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
-  esac
-  shift
-done
-
-# Helper function for command execution
-run_cmd() {
-  local cmd="$1"
-  if (( PRINT )); then
-    echo "$cmd"
-  elif (( DRY )); then
-    echo "+ $cmd"
-  else
-    echo "Running: $cmd"
-    eval "$cmd"
-  fi
-}
+parse_common_args "$@" "Setup Python environment with pyenv and install pipx packages"
 
 # Find config file
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="$SCRIPT_DIR/../pipx.txt"
 
 # Default Python version

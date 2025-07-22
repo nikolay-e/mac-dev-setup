@@ -1,6 +1,6 @@
 # mac-dev-setup 🚀
 
-**Modern macOS development environment setup with 40+ CLI tools and 600+ aliases.**
+**Secure, offline-first macOS development environment with vetted tools and no telemetry.**
 
 ## Quick Start
 
@@ -10,20 +10,22 @@ cd mac-dev-setup
 ./install.sh
 ```
 
-## Installation Options
-
-**Automated**: `./install.sh` or `./install.sh --profile=local` (telemetry-free)
-**Manual**: Follow guides in `docs/` starting with [00-prereqs.md](docs/00-prereqs.md)
-
 ## What's Included
 
-### Modern CLI Tools
-- **Better basics**: `eza` (ls), `bat` (cat), `fd` (find), `rg` (grep)
-- **Git tools**: `git-delta`, `gh`
-- **Container tools**: `docker`, `kubectl`, `k9s`, `helm`
-- **Dev tools**: `terraform`, `aws`, `neovim`, `fzf`
+All tools are carefully vetted for security and work completely offline:
 
-### 600+ Aliases
+### Core Development Tools
+- **Git ecosystem**: `git`, modern diffs, terminal workflows
+- **Modern CLI**: `eza` (ls), `bat` (cat), `fd` (find), `rg` (grep), `zoxide` (cd)
+- **Editors & Terminal**: `neovim`, `zellij` multiplexer
+- **Language environments**: `pyenv`, `nvm`, `mise`
+
+### Infrastructure & Containers
+- **Container tools**: `docker`, `kubectl`, `helm`
+- **Infrastructure**: `terraform`, `terragrunt`
+- **Utilities**: `jq`, `jc`, `tree`, `fzf`, `wget`, `htop`
+
+### 600+ Productivity Aliases
 ```bash
 gs          # git status
 k           # kubectl
@@ -33,16 +35,16 @@ serve       # HTTP server in current directory
 
 Run `learn-aliases` after installation to explore all shortcuts.
 
-## Project Structure
+## Security Features
 
-```
-mac-dev-setup/
-├── docs/           # Installation guides
-├── config/full/    # All tools (default)
-├── config/local/   # Telemetry-free subset
-├── tasks/          # Installation scripts
-└── install.sh      # Orchestrator
-```
+🔒 **Zero Telemetry**: No analytics, crash reporting, or usage tracking
+🔒 **No Auto-Updates**: Tools won't check for updates or phone home
+🔒 **Offline Capable**: All tools work without internet connection
+🔒 **User-Controlled Network**: Only you decide when tools connect externally
+
+## Manual Installation
+
+For step-by-step setup, see `docs/10-homebrew.md`.
 
 ## Requirements
 

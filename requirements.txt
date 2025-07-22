@@ -1,9 +1,0 @@
-# Python CLI tools installed via pipx
-# These are tracked for dependabot version updates
-treemapper
-tldr.py
-yq
-httpie
-cookiecutter
-pre-commit
-./learn-aliases  # Local package for learning aliases

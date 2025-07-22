@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tasks/brew.install.sh - install packages listed in config/<profile>/brew.txt
+# tasks/brew.install.sh - install packages listed in Brewfile
 #
 # Usage:
 #   bash tasks/brew.install.sh           # Install all packages
@@ -8,31 +8,19 @@
 
 set -euo pipefail
 
-# Disable telemetry and auto-updates for security-conscious environments
+# Environment variables for current session only
 export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_NO_AUTO_UPDATE=1
-export GIT_TERMINAL_PROMPT=0
+
+# Load common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/common.sh"
 
 # Parse arguments
-DRY=0
-PRINT=0
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -n|--dry-run) DRY=1 ;;
-    --print) PRINT=1 ;;
-    -h|--help)
-      echo "Install Homebrew packages from config/brew.txt"
-      echo "Usage: $0 [--dry-run] [--print]"
-      exit 0
-      ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
-  esac
-  shift
-done
+parse_common_args "$@" "Install Homebrew packages from Brewfile"
 
 # Find config file relative to script location
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/../brew.txt"
+CONFIG_FILE="$SCRIPT_DIR/../Brewfile"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
   echo "Error: Config file not found: $CONFIG_FILE"
@@ -45,48 +33,26 @@ if ! command -v brew &>/dev/null && [[ $PRINT -eq 0 ]]; then
   exit 1
 fi
 
-# Process each line in the config file
-while IFS= read -r formula || [[ -n "$formula" ]]; do
+# Process each line in the Brewfile
+while IFS= read -r line || [[ -n "$line" ]]; do
   # Skip empty lines and comments
-  [[ -z "$formula" || "$formula" == \#* ]] && continue
+  [[ -z "$line" || "$line" == \#* ]] && continue
 
-  # Trim whitespace
-  formula="${formula#"${formula%%[![:space:]]*}"}"
-  formula="${formula%"${formula##*[![:space:]]}"}"
+  # Extract package name from brew "package" format
+  if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
+    formula="${BASH_REMATCH[1]}"
+  else
+    # Skip non-brew lines
+    continue
+  fi
 
   # Build command
   cmd="brew install $formula"
 
-  if (( PRINT )); then
-    # Print mode: output raw commands
-    echo "$cmd"
-  elif (( DRY )); then
-    # Dry run mode: show what would be executed
-    echo "+ $cmd"
-  else
-    # Execute mode: run the command
-    echo "Installing: $formula"
-    if ! $cmd; then
-      echo "Warning: Failed to install $formula, continuing..."
-    fi
-  fi
+  # Use common run_cmd function with continue_on_error=true
+  run_cmd "$cmd" true
 done < "$CONFIG_FILE"
 
 if [[ $PRINT -eq 0 ]] && [[ $DRY -eq 0 ]]; then
   echo "Homebrew packages installation complete!"
-
-  # Disable analytics if installing for real
-  if command -v brew &>/dev/null; then
-    echo "Disabling Homebrew analytics..."
-    brew analytics off 2>/dev/null || true
-  fi
-
-  echo ""
-  echo "🔒 Applying security configuration..."
-
-  # Disable git-delta update checks if installed
-  if command -v git &>/dev/null; then
-    git config --global delta.check-for-updates false 2>/dev/null || true
-    echo "   - Disabled git-delta update checks"
-  fi
 fi

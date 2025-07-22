@@ -18,11 +18,10 @@ teardown() {
   [ -r "zsh_config.sh" ]
 }
 
-@test "Brewfile exists and supports profiles" {
+@test "Brewfile exists and has valid syntax" {
   [ -f "Brewfile" ]
-  # Test profile resolution in Brewfile
-  MAC_DEV_PROFILE=full ruby -e "load 'Brewfile'" 2>/dev/null || true
-  MAC_DEV_PROFILE=local ruby -e "load 'Brewfile'" 2>/dev/null || true
+  # Test Brewfile syntax
+  ruby -c Brewfile
 }
 
 @test "alias file has required aliases" {
@@ -47,7 +46,8 @@ teardown() {
   bash -n uninstall.sh
   bash -n tasks/brew.install.sh
   bash -n tasks/python.install.sh
-  bash -n tasks/configure-local-profile.sh
+  bash -n tasks/apply-security-settings.sh
+  bash -n tasks/common.sh
 }
 
 @test "install.sh has required safety checks" {
@@ -65,28 +65,18 @@ teardown() {
   grep -q "Error: Set KAFKA_BROKERS" .mac-dev-setup-aliases
 }
 
-@test "profile configs exist for both profiles" {
-  [ -f "config/full/brew.txt" ]
-  [ -f "config/full/pipx.txt" ]
-  [ -f "config/local/brew.txt" ]
-  [ -f "config/local/pipx.txt" ]
+@test "config files exist" {
+  [ -f "Brewfile" ]
+  [ -f "pipx.txt" ]
 }
 
-@test "local profile excludes network tools" {
-  # Local profile should NOT have these tools
-  run ! grep -q "gh" config/local/brew.txt
-  run ! grep -q "git-delta" config/local/brew.txt
-  run ! grep -q "sheldon" config/local/brew.txt
-  run ! grep -q "tldr" config/local/brew.txt
-  run ! grep -q "trivy" config/local/brew.txt
-  run ! grep -q "infracost" config/local/brew.txt
-}
-
-@test "full profile has all tools" {
-  # Full profile should have network tools
-  grep -q "gh" config/full/brew.txt
-  grep -q "git-delta" config/full/brew.txt
-  grep -q "sheldon" config/full/brew.txt
-  grep -q "trivy" config/full/brew.txt
-  grep -q "infracost" config/full/brew.txt
+@test "secure configuration includes vetted tools" {
+  # Secure configuration should have core development tools
+  grep -q '"git"' Brewfile
+  grep -q '"neovim"' Brewfile
+  grep -q '"docker"' Brewfile
+  grep -q '"terraform"' Brewfile
+  # Should NOT have unvetted network tools
+  run ! grep -q '"gh"' Brewfile
+  run ! grep -q '"trivy"' Brewfile
 }

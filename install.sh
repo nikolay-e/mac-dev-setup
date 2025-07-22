@@ -3,9 +3,7 @@
 set -euo pipefail
 
 # --- Helper Functions ---
-info() {
-    printf "\n\033[1;34m%s\033[0m\n" "$1"
-}
+source "$(dirname "$0")/tasks/common.sh"
 
 # --- Main Script ---
 echo "🚀 mac-dev-setup Installer"
@@ -17,9 +15,11 @@ info "The following actions will be performed:"
 
 # List Homebrew packages
 echo "📦 Install Homebrew Packages:"
-while IFS= read -r package || [[ -n "$package" ]]; do
-    [[ -n "$package" && "$package" != \#* ]] && echo "    • $package"
-done < brew.txt
+while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
+        echo "    • ${BASH_REMATCH[1]}"
+    fi
+done < Brewfile
 
 # List Pipx packages
 echo ""
@@ -58,7 +58,7 @@ if ! bash "tasks/python.install.sh"; then
 fi
 
 # Apply security hardening
-if ! bash "tasks/configure-local-profile.sh"; then
+if ! bash "tasks/apply-security-settings.sh"; then
     echo "⚠️  Warning: Security hardening failed, but continuing..." >&2
 fi
 

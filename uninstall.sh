@@ -4,13 +4,7 @@
 set -euo pipefail
 
 # --- Helper Functions ---
-info() {
-  printf "\n%s\n" "$1"
-}
-
-warn() {
-  printf "\nWARNING  %s\n" "$1"
-}
+source "$(dirname "$0")/tasks/common.sh"
 
 # --- Main Functions ---
 remove_shell_config() {

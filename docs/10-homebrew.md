@@ -4,17 +4,14 @@
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"  # Apple Silicon
-bash tasks/brew.install.sh
+brew bundle --file=./Brewfile
 ```
 
 ## Why Homebrew?
 
 Homebrew manages packages without sudo, handles dependencies automatically, and works on both Intel and Apple Silicon.
 
-> **🔒 Sensitive Environment?**
->
-> Use `./install.sh --profile=local` for telemetry-free tools only.
-> Safe for air-gapped environments.
+All tools are vetted for security and work offline without telemetry.
 
 ## Step 1: Install Homebrew
 
@@ -55,8 +52,8 @@ bash tasks/brew.install.sh
 
 ### Option B: Manual installation
 ```bash
-# Install all packages from config file
-brew install $(grep -v '^#' config/brew.txt | grep -v '^$')
+# Install all packages using Brewfile
+brew bundle --file=./Brewfile
 ```
 
 ### Option C: Individual packages
@@ -67,7 +64,7 @@ brew install git git-delta gh wget htop
 # Modern CLI replacements
 brew install bat eza fd ripgrep zoxide
 
-# ... etc (see config/brew.txt for full list)
+# ... etc (see Brewfile for full list)
 ```
 
 ## Step 3: Post-Installation Setup
@@ -118,4 +115,4 @@ brew cleanup
 
 ## Next Steps
 
-✅ Homebrew installed? Continue to [20-python.md](20-python.md)
+✅ Homebrew installed? Continue with `pipx install ./learn-aliases` to set up productivity aliases.

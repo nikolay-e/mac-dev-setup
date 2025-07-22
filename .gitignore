@@ -8,25 +8,24 @@
 Thumbs.db
 __MACOSX
 
-# Project Specific
-# Ignore the output from the TreeMapper tool
-directory_tree.*
-
-# Backups
-# Ignore the backup directory created by the install script
+# Backup directories
 .dotfiles_backup/
+backup/
 
-# Editor & IDE Directories
+# Editor & IDE directories
 .vscode/
 .idea/
+*.sublime-*
 
-# Swap & Temporary Files
+# Shell history and temporary files
 *.swp
 *.swo
 *.tmp
 *.log
+.bash_history
+.zsh_history
 
-# Python Cache & Build Artifacts
+# Python development artifacts
 __pycache__/
 *.pyc
 *.pyo
@@ -47,9 +46,20 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
 
-# Node Cache
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# learn-aliases build artifacts
+learn-aliases/build/
+learn-aliases/*.egg-info/
+
+# Homebrew lock files (we use static Brewfile)
+Brewfile.lock.json
+
+# Test outputs
+test_output/
+coverage/
+.coverage
+
+# Local environment overrides
+.env
+.env.local

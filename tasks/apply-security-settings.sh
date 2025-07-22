@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# tasks/configure-local-profile.sh - Configure tools for telemetry-free operation
+# tasks/apply-security-settings.sh - Configure tools for secure, telemetry-free operation
 #
 # Usage:
-#   bash tasks/configure-local-profile.sh
+#   bash tasks/apply-security-settings.sh
 
 set -euo pipefail
 
