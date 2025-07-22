@@ -28,6 +28,7 @@ brew "nvm"
 brew "mise"
 
 # Container & Infrastructure (user-directed network only)
+brew "colima"
 brew "docker"
 brew "kubectl"
 brew "helm"
@@ -40,7 +41,11 @@ brew "terraform-docs"
 # Archive tools
 brew "unar"
 brew "p7zip"
+brew "zstd"
 
 # Essential tools
 brew "wget"
 brew "htop"
+
+# Data streaming tools
+brew "kcat"

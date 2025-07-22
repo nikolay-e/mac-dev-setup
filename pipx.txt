@@ -1,2 +1,3 @@
 # Vetted Python CLI tools for secure environments
 ./learn-aliases
+pre-commit

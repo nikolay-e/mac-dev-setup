@@ -21,9 +21,9 @@ All tools are carefully vetted for security and work completely offline:
 - **Language environments**: `pyenv`, `nvm`, `mise`
 
 ### Infrastructure & Containers
-- **Container tools**: `docker`, `kubectl`, `helm`, `k9s`
+- **Container tools**: `colima` (Docker alternative), `docker` (CLI), `kubectl`, `helm`, `k9s`
 - **Cloud & Infrastructure**: `tenv` (terraform/terragrunt), `awscli`
-- **Utilities**: `jq`, `jc`, `tree`, `fzf`, `wget`, `htop`
+- **Utilities**: `jq`, `jc`, `tree`, `fzf`, `wget`, `htop`, `kcat`
 
 ### 600+ Productivity Aliases
 ```bash
@@ -42,7 +42,9 @@ Run `learn-aliases` after installation to explore all shortcuts.
 🔒 **Offline Capable**: All tools work without internet connection
 🔒 **User-Controlled Network**: Network-capable tools (docker, kubectl, awscli) only connect when you explicitly use them
 
-**Note**: `brew "docker"` installs Docker Desktop, which requires login and has telemetry. For zero-telemetry container usage, consider `colima` + `docker` CLI formula instead.
+**Note**: We use `colima` + `docker` CLI for zero-telemetry container usage. No Docker Desktop required!
+
+**Colima Note**: If Colima freezes or becomes unresponsive, restart it with `colima restart`. This is a known upstream issue that's being worked on.
 
 ## Manual Installation
 
@@ -51,7 +53,8 @@ For step-by-step setup, see `docs/10-homebrew.md`.
 ## Requirements
 
 - macOS 10.15+
-- Xcode Command Line Tools
+- Zsh as default shell (run `chsh -s /bin/zsh` if needed)
+- Xcode Command Line Tools (run `xcode-select --install`)
 - Administrator access
 
 ## Maintenance

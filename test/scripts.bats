@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+bats_require_minimum_version 1.5.0
+
 setup() {
   # Create temp directory for testing
   TEST_DIR=$(mktemp -d)
@@ -34,11 +36,21 @@ teardown() {
 @test "all shell scripts are executable" {
   [ -x "install.sh" ]
   [ -x "uninstall.sh" ]
+
+  # Check tasks directory scripts
+  for script in tasks/*.sh; do
+    [ -x "$script" ]
+  done
 }
 
 @test "scripts use proper shebang" {
   head -1 install.sh | grep -Eq '#!/usr/bin/env bash|#!/bin/bash'
   head -1 uninstall.sh | grep -Eq '#!/usr/bin/env bash|#!/bin/bash'
+
+  # Check tasks directory scripts
+  for script in tasks/*.sh; do
+    head -1 "$script" | grep -Eq '#!/usr/bin/env bash|#!/bin/bash'
+  done
 }
 
 @test "shell scripts have no syntax errors" {

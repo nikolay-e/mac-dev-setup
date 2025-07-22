@@ -3,14 +3,16 @@
 
 # Standardized argument parsing for task scripts
 parse_common_args() {
-  local usage="${1:-"Usage: $0 [--dry-run] [--print]"}"
+  local usage="${1:-"Usage: $0 [--dry-run] [--print] [--yes]"}"
   shift || true
   DRY=0
   PRINT=0
+  YES=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       -n|--dry-run) DRY=1 ;;
       --print) PRINT=1 ;;
+      -y|--yes) YES=1 ;;
       -h|--help)
         echo "$usage"
         exit 0
@@ -19,7 +21,7 @@ parse_common_args() {
     esac
     shift
   done
-  export DRY PRINT
+  export DRY PRINT YES
 }
 
 # Standardized command execution with consistent error handling

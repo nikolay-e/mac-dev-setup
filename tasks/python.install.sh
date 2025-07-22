@@ -46,16 +46,42 @@ elif [[ $DRY -eq 0 ]]; then
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 
-  # Find latest patch version
-  LATEST_VERSION=$(pyenv install --list | grep -E "^  ${PYTHON_VERSION}\.[0-9]+$" | tail -1 | xargs || echo "${PYTHON_VERSION}.0")
+  # Try to install latest patch version - let pyenv handle version resolution
+  echo "Installing/updating Python ${PYTHON_VERSION}..."
 
-  if ! pyenv versions --bare | grep -q "^$LATEST_VERSION$"; then
-    run_cmd "pyenv install $LATEST_VERSION"
+  # First, try the simple approach - let pyenv resolve the latest patch version
+  if pyenv install "${PYTHON_VERSION}" --skip-existing 2>/dev/null; then
+    # Get the actual installed version
+    INSTALLED_VERSION=$(pyenv versions --bare | grep -E "^${PYTHON_VERSION}\.[0-9]+$" | tail -1)
+    if [[ -n "$INSTALLED_VERSION" ]]; then
+      echo "✅ Using Python $INSTALLED_VERSION"
+      LATEST_VERSION="$INSTALLED_VERSION"
+    else
+      echo "⚠️  Warning: Could not determine installed Python version, using ${PYTHON_VERSION}.0"
+      LATEST_VERSION="${PYTHON_VERSION}.0"
+    fi
   else
-    echo "Python $LATEST_VERSION already installed"
+    # Fallback to manual version parsing if pyenv doesn't support simple version format
+    echo "Falling back to manual version detection..."
+    LATEST_VERSION=$(pyenv install --list 2>/dev/null | grep -E "^[[:space:]]*${PYTHON_VERSION}\.[0-9]+$" | tail -1 | tr -d '[:space:]' || echo "${PYTHON_VERSION}.0")
+
+    if ! pyenv versions --bare | grep -q "^$LATEST_VERSION$"; then
+      echo "Installing Python $LATEST_VERSION..."
+      if ! pyenv install "$LATEST_VERSION"; then
+        echo "❌ Error: Python installation failed. This may be due to missing Xcode Command Line Tools."
+        echo "Please run: xcode-select --install"
+        echo "Then re-run this script."
+        exit 1
+      fi
+    else
+      echo "Python $LATEST_VERSION already installed"
+    fi
   fi
 
-  run_cmd "pyenv global $LATEST_VERSION"
+  if ! pyenv global "$LATEST_VERSION"; then
+    echo "❌ Error: Failed to set Python $LATEST_VERSION as global version"
+    exit 1
+  fi
 fi
 
 # Step 2: Ensure pipx is in PATH

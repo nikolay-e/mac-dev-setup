@@ -69,3 +69,6 @@ directory_tree.*
 *.tree
 plugins.toml
 node_modules/
+
+# Claude AI settings
+.claude/settings.local.json

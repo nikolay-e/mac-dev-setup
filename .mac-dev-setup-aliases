@@ -291,6 +291,34 @@ alias tfuse='tenv use terraform'
 alias tflist='tenv list terraform'
 alias tfinstall='tenv install terraform'
 
+# Terragrunt aliases (Terraform wrapper for DRY configurations)
+alias tg='terragrunt'                    # Terraform wrapper for managing multiple environments
+alias tgi='terragrunt init'              # Initialize with automatic backend configuration
+alias tgp='terragrunt plan'              # Plan across all modules with dependency handling
+alias tga='terragrunt apply'             # Apply with automatic dependency resolution
+alias tgd='terragrunt destroy'           # Destroy resources in dependency order
+alias tgv='terragrunt validate'          # Validate all modules in the stack
+alias tgf='terragrunt hclfmt'            # Format Terragrunt HCL files
+alias tgr='terragrunt refresh'           # Refresh state across all modules
+alias tgo='terragrunt output'            # Show outputs from all modules
+alias tgaa='terragrunt run-all apply'    # Apply all modules in dependency order
+alias tgap='terragrunt run-all plan'     # Plan all modules in dependency order
+alias tgad='terragrunt run-all destroy'  # Destroy all modules in reverse dependency order
+
+# Terragrunt workflow functions
+tgapply() {
+  terragrunt plan -out=tgplan && terragrunt apply tgplan
+}
+
+tgplan() {
+  terragrunt plan -out=tgplan "$@"
+}
+
+# Version management with tenv for Terragrunt
+alias tguse='tenv use terragrunt'
+alias tglist='tenv list terragrunt'
+alias tginstall='tenv install terragrunt'
+
 # --------------------------------------------------------------------
 ## AWS CLI
 # --------------------------------------------------------------------
@@ -401,8 +429,10 @@ extract() {
     case "$1" in
       *.tar.bz2) tar xjf "$1" ;;
       *.tar.gz) tar xzf "$1" ;;
+      *.tar.xz) tar xJf "$1" ;;
+      *.tar.zst) tar --use-compress-program=unzstd -xf "$1" ;;
       *.bz2) bunzip2 "$1" ;;
-      *.rar) unrar x "$1" ;;
+      *.rar) unar "$1" ;;
       *.gz) gunzip "$1" ;;
       *.tar) tar xf "$1" ;;
       *.tbz2) tar xjf "$1" ;;
@@ -410,18 +440,21 @@ extract() {
       *.zip) unzip "$1" ;;
       *.Z) uncompress "$1" ;;
       *.7z) 7z x "$1" ;;
+      *.zst) unzstd "$1" ;;
       *) echo "'$1' cannot be extracted via extract()" ;;
     esac
   else
     echo "'$1' is not a valid file"
-  fi # Universal archive extractor - handles zip, tar, rar, 7z, etc.
+  fi # Universal archive extractor - handles zip, tar, rar, 7z, xz, zstd, etc.
 }
 
 # --------------------------------------------------------------------
 ## Utilities
 # --------------------------------------------------------------------
 # myip removed - uses curl to external service
-alias localip='ipconfig getifaddr en0'                                         # Show your local network IP address
+localip() {
+  ipconfig getifaddr "$(route get default | grep interface | awk '{print $2}')"
+} # Show your local network IP address
 alias serve='python3 -m http.server'                                           # Start local web server for current folder
 alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder' # Clear DNS cache to fix network issues
 alias zj='zellij'                                                              # Launch terminal multiplexer (multiple terminal sessions)

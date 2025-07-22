@@ -33,7 +33,7 @@ jobs:
       - name: Full install test
         run: |
           chmod +x install.sh
-          yes | ./install.sh
+          ./install.sh --yes
       - name: Verify installation
         run: |
           # Check if key tools were installed

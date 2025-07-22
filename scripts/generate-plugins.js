@@ -17,6 +17,8 @@ if (!fs.existsSync(sheldonConfigDir)) {
 // Generate plugins.toml content
 let tomlContent = '# Generated from package.json by mac-dev-setup\n';
 tomlContent += '# This file configures Zsh plugins managed by sheldon\n\n';
+tomlContent += '# Shell configuration\n';
+tomlContent += 'shell = "zsh"\n\n';
 
 const dependencies = packageJson.dependencies || {};
 

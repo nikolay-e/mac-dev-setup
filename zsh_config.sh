@@ -11,7 +11,7 @@ export NVM_DIR="$HOME/.nvm"
 # Tool Initializations
 if command -v pyenv 1>/dev/null 2>&1; then eval "$(pyenv init -)"; fi
 # shellcheck disable=SC1091
-BREW_PREFIX=$(uname -m | grep -q arm64 && echo /opt/homebrew || echo /usr/local)
+BREW_PREFIX=$(brew --prefix)
 # shellcheck disable=SC1091
 [ -s "$BREW_PREFIX/opt/nvm/nvm.sh" ] && \. "$BREW_PREFIX/opt/nvm/nvm.sh"
 # shellcheck disable=SC1090

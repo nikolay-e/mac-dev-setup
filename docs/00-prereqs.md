@@ -39,8 +39,16 @@ softwareupdate --install-rosetta --agree-to-license
 For GitHub/GitLab authentication without passwords.
 
 ```bash
-# Generate key (replace with your email)
-ssh-keygen -t ed25519 -C "your.email@example.com"
+# Check if key already exists
+if [ -f ~/.ssh/id_ed25519 ]; then
+    echo "SSH key already exists at ~/.ssh/id_ed25519"
+    echo "Skip generation or backup existing key first"
+else
+    # Generate key (replace with your email)
+    ssh-keygen -t ed25519 -C "your.email@example.com"
+    # Press Enter to use default location
+    # Enter a passphrase for better security (or press Enter for no passphrase)
+fi
 
 # Start SSH agent
 eval "$(ssh-agent -s)"
@@ -51,6 +59,8 @@ ssh-add ~/.ssh/id_ed25519
 # Copy public key to clipboard
 pbcopy < ~/.ssh/id_ed25519.pub
 ```
+
+**Security Note**: Using a passphrase adds an extra layer of security. You'll be prompted once per session.
 
 Then add to GitHub: Settings → SSH and GPG keys → New SSH key
 
