@@ -9,7 +9,7 @@ jobs:
         os: [macos-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: mig4/setup-bats@v1
         with:
           bats-version: 1.5.0

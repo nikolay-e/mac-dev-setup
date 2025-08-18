@@ -8,7 +8,7 @@ jobs:
   brewfile:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Cache Homebrew
         uses: actions/cache@v4
         with:
