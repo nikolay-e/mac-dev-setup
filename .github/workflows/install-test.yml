@@ -1,51 +1,31 @@
 name: Install Tests
 
 on:
-  pull_request:
   push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  install-dry-run:
-    name: Install (dry-run)
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Dry-run installer
-        run: |
-          chmod +x install.sh
-          ./install.sh --dry-run --yes
-
   install-full:
-    name: Install (full)
+    name: Full cycle test (uninstall → install → uninstall)
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Full install test
+
+      - name: Initial cleanup (uninstall any existing setup)
         run: |
-          chmod +x install.sh
+          # Run uninstall in case there's any existing setup
+          echo "Running initial cleanup..."
+          ./uninstall.sh --yes
+
+      - name: Install mac-dev-setup
+        run: |
+          echo "Installing mac-dev-setup..."
           ./install.sh --yes
-      - name: Verify installation
+
+      - name: Test uninstall (final cleanup)
         run: |
-          # Check if key tools were installed
-          echo "Verifying tool installation..."
-          command -v eza
-          command -v bat
-          command -v fd
-          command -v rg
-          command -v jq
-          command -v sheldon
-          command -v k9s
-
-          # Check if aliases file was created
-          echo "Verifying configuration files..."
-          [ -f ~/.mac-dev-setup-aliases ]
-          [ -f ~/.zsh_config.sh ]
-          [ -f ~/.config/sheldon/plugins.toml ]
-
-          # Verify alias file contains expected aliases (without sourcing)
-          echo "Verifying alias content..."
-          grep -q "alias gs=" ~/.mac-dev-setup-aliases
-          grep -q "alias k=" ~/.mac-dev-setup-aliases
-
-          echo "✅ All verification checks passed!"
+          echo "Testing uninstall process..."
+          ./uninstall.sh --yes

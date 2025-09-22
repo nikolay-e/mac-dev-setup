@@ -16,16 +16,13 @@ Before submitting changes:
 
 ```bash
 # Run shell linting
-shellcheck *.sh
-
-# Run tests
-bats test/
+shellcheck *.sh tasks/*.sh scripts/*.sh
 
 # Test Brewfile
 brew bundle --dry-run
 
 # Test install script (in a safe environment)
-./install.sh
+./install.sh --dry-run
 ```
 
 ## Code Standards

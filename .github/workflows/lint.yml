@@ -1,0 +1,22 @@
+name: Lint and Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install pre-commit and shellcheck
+        run: |
+          brew install pre-commit
+          brew install shellcheck
+
+      - name: Run all pre-commit checks
+        run: pre-commit run --all-files

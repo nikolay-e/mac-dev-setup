@@ -8,6 +8,7 @@ brew "jc"
 brew "tree"
 brew "fzf"
 brew "shfmt"
+brew "coreutils"
 
 # Modern CLI replacements
 brew "neovim"
@@ -22,9 +23,7 @@ brew "zellij"
 brew "sheldon"
 
 # Development tools
-brew "pyenv"
 brew "pipx"
-brew "nvm"
 brew "mise"
 
 # Container & Infrastructure (user-directed network only)

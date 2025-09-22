@@ -11,10 +11,13 @@ repos:
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
 
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+  - repo: local
     hooks:
       - id: shellcheck
+        name: ShellCheck
+        entry: shellcheck
+        language: system
+        files: \.(sh|bash|zsh)$
         args: ["--severity=warning"]
 
   - repo: https://github.com/scop/pre-commit-shfmt
@@ -22,3 +25,26 @@ repos:
     hooks:
       - id: shfmt
         args: ["-i", "2", "-ci"]
+
+  - repo: local
+    hooks:
+      - id: install-dry-run
+        name: Test installer dry-run
+        entry: ./install.sh --dry-run --yes
+        language: system
+        files: ^(install\.sh|Brewfile|zsh_config\.sh|plugins\.toml|modules/.*)$
+        pass_filenames: false
+
+      - id: uninstall-dry-run
+        name: Test uninstaller dry-run
+        entry: bash -c './uninstall.sh --help >/dev/null && echo "✓ Uninstaller help works"'
+        language: system
+        files: ^uninstall\.sh$
+        pass_filenames: false
+
+      - id: brewfile-validity
+        name: Validate Brewfile syntax
+        entry: bash -c 'brew bundle list --file=./Brewfile >/dev/null && echo "✓ Brewfile syntax is valid"'
+        language: system
+        files: ^Brewfile$
+        pass_filenames: false

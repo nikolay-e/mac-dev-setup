@@ -80,11 +80,9 @@ Some tools need additional configuration:
 $(brew --prefix)/opt/fzf/install --no-update-rc --key-bindings --completion
 ```
 
-### 2. Node Version Manager
-```bash
-# Create NVM directory
-mkdir -p ~/.nvm
-```
+### 2. Language Version Management
+The setup uses `mise` for managing language versions (Node.js, Python, etc.).
+No additional configuration needed - `mise` is installed via Homebrew.
 
 ## Common Issues
 
@@ -118,4 +116,4 @@ brew cleanup
 
 ## Next Steps
 
-✅ Homebrew installed? Continue with `pipx install ./learn-aliases` to set up productivity aliases.
+✅ Homebrew installed? Run `learn-aliases` (installed by the setup) to explore productivity aliases.

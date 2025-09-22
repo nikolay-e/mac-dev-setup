@@ -1,0 +1,23 @@
+# Sheldon configuration for Zsh plugins
+# This file defines shell plugins managed by sheldon
+# Provides enhanced shell experience with completions, highlighting, suggestions, and helpful tips
+
+shell = "zsh"
+
+# Zsh Completions - Enhanced tab completion
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+
+# Syntax Highlighting - Real-time command syntax highlighting
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+tag = "0.8.0"
+
+# Autosuggestions - Fish-style autosuggestions for Zsh
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+tag = "v0.7.1"
+
+# Alias Tips - Reminds you when you could have used an alias
+[plugins.alias-tips]
+github = "djui/alias-tips"
