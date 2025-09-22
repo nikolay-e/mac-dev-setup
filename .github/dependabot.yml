@@ -8,8 +8,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 10
-    reviewers:
-      - "nikolay-e"
     assignees:
       - "nikolay-e"
     labels:
@@ -19,58 +17,6 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-    # Group all updates for streamlined review
     groups:
       github-actions-updates:
-        patterns:
-          - "*"
-
-  # NPM dependencies (shell plugins as Git dependencies only)
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "nikolay-e"
-    assignees:
-      - "nikolay-e"
-    labels:
-      - "dependencies"
-      - "npm"
-      - "zsh-plugins"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    # Only track Git dependencies (zsh plugins)
-    allow:
-      - dependency-type: "direct"
-
-  # Python dependencies for learn-aliases tool
-  - package-ecosystem: "pip"
-    directory: "/learn-aliases"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "nikolay-e"
-    assignees:
-      - "nikolay-e"
-    labels:
-      - "dependencies"
-      - "python"
-      - "learn-aliases"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    # Group Python updates for stability
-    groups:
-      python-updates:
-        patterns:
-          - "*"
-        update-types:
-          - "patch"
+        patterns: ["*"]

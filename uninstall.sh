@@ -4,7 +4,57 @@
 set -euo pipefail
 
 # --- Helper Functions ---
-source "$(dirname "$0")/tasks/common.sh"
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Helper functions for consistent output
+info() {
+    printf "${BLUE}ℹ${NC} %s\n" "$1"
+}
+
+warn() {
+    printf "${YELLOW}⚠${NC} %s\n" "$1"
+}
+
+success() {
+    printf "${GREEN}✓${NC} %s\n" "$1"
+}
+
+error() {
+    printf "${RED}✗${NC} %s\n" "$1"
+}
+
+# Get the repository root
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+# Default flag values
+YES=0
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        --yes)
+            YES=1
+            shift
+            ;;
+        --help)
+            echo "mac-dev-setup uninstaller"
+            echo ""
+            echo "Usage: $0 [--yes]"
+            echo "  --yes        Skip interactive prompts and proceed automatically"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
 
 # --- Main Functions ---
 remove_shell_config() {
@@ -53,12 +103,12 @@ remove_shell_config() {
 }
 
 remove_symlinks() {
-  info "Removing symlinks..."
+  info "Removing symlinks and configuration files..."
 
-  # Remove alias symlink
+  # Remove legacy alias symlink (backwards compatibility)
   if [ -h ~/.mac-dev-setup-aliases ]; then
     rm ~/.mac-dev-setup-aliases
-    echo "Removed ~/.mac-dev-setup-aliases symlink"
+    echo "Removed legacy ~/.mac-dev-setup-aliases symlink"
   fi
 
   # Remove zsh_config symlink
@@ -73,17 +123,78 @@ remove_symlinks() {
     echo "Removed Sheldon config file"
   fi
 
+  # Clean up old npm-based plugin installations (backwards compatibility)
+  remove_old_npm_plugins
+
+}
+
+remove_old_npm_plugins() {
+  info "Checking for old npm-based plugin installations..."
+
+  local old_npm_found=0
+
+  # Check for old node_modules directory in the project
+  if [ -d "$HOME/.config/sheldon/node_modules" ]; then
+    rm -rf "$HOME/.config/sheldon/node_modules"
+    echo "Removed old node_modules from Sheldon config"
+    old_npm_found=1
+  fi
+
+  # Check for manually installed Zsh plugins (from old npm setup)
+  local old_plugin_dirs=(
+    "$HOME/.config/sheldon/repos"
+    "$HOME/.local/share/sheldon/repos"
+    "$HOME/.cache/sheldon"
+  )
+
+  for dir in "${old_plugin_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+      # Look for zsh plugin repositories
+      find "$dir" -maxdepth 2 -type d \( -name "*zsh-autosuggestions*" -o -name "*zsh-syntax-highlighting*" -o -name "*zsh-completions*" \) -exec rm -rf {} + 2>/dev/null || true
+      old_npm_found=1
+    fi
+  done
+
+  # Remove any old package.json or package-lock.json that might be lying around
+  if [ -f "$HOME/.config/sheldon/package.json" ]; then
+    rm "$HOME/.config/sheldon/package.json"
+    echo "Removed old package.json from Sheldon config"
+    old_npm_found=1
+  fi
+
+  if [ -f "$HOME/.config/sheldon/package-lock.json" ]; then
+    rm "$HOME/.config/sheldon/package-lock.json"
+    echo "Removed old package-lock.json from Sheldon config"
+    old_npm_found=1
+  fi
+
+  # Check for .npmrc in home directory that might have been created
+  if [ -f "$HOME/.npmrc" ] && grep -q "mac-dev-setup\|sheldon" "$HOME/.npmrc" 2>/dev/null; then
+    echo "Warning: Found .npmrc with potential mac-dev-setup configuration"
+    echo "  You may want to review and clean up ~/.npmrc manually"
+  fi
+
+  if [ $old_npm_found -eq 0 ]; then
+    echo "No old npm-based installations found"
+  fi
 }
 
 cleanup_data_directories() {
   info "Optional cleanup of data directories..."
 
   local data_dirs=(
-    "$HOME/.nvm"
-    "$HOME/.pyenv"
-    "$HOME/.aws"
+    "$HOME/.nvm"         # Legacy (remove if found)
+    "$HOME/.pyenv"       # Legacy (remove if found)
+    # "$HOME/.aws".      # Never remove this folder as this may contain credentials
     "$HOME/.config/sheldon"
     "$HOME/.local/share/sheldon"
+    "$HOME/.cache/sheldon"
+    "$HOME/.config/mise"
+    "$HOME/.local/share/mise"
+    "$HOME/.cache/mise"
+    "$HOME/.fzf"
+    "$HOME/.local/share/zoxide"
+    "$HOME/.config/mac-dev-setup"
   )
 
   local found_dirs=()
@@ -99,18 +210,47 @@ cleanup_data_directories() {
     echo ""
     echo "The following data directories were created by mac-dev-setup:"
     for dir in "${found_dirs[@]}"; do
-      echo "  - $dir"
+      if [[ "$dir" == "$HOME/.config/mac-dev-setup" ]]; then
+        echo "  - $dir (includes your local customizations)"
+      else
+        echo "  - $dir"
+      fi
     done
     echo ""
-    echo -n "Remove these directories? This will delete all data including Node versions, Python versions, etc. (y/N): "
-    read -r response
+    if [[ $YES -eq 1 ]]; then
+      echo "Auto-confirming data directory removal (--yes flag provided)"
+      response="y"
+    else
+      echo -n "Remove these directories? This will delete all data including Node versions, Python versions, and your local customizations (y/N): "
+      read -r response
+    fi
 
     if [[ "$response" =~ ^[Yy]$ ]]; then
       for dir in "${found_dirs[@]}"; do
-        if rm -rf "$dir" 2>/dev/null; then
-          echo "Removed: $dir"
+        if [[ "$dir" == "$HOME/.config/mac-dev-setup" ]]; then
+          echo "💡 Tip: Consider backing up $dir/local.sh before removal"
+          if [[ $YES -eq 1 ]]; then
+            echo "Auto-confirming removal of $dir (--yes flag provided)"
+            confirm="y"
+          else
+            echo -n "Really remove $dir? (y/N): "
+            read -r confirm
+          fi
+          if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            if rm -rf "$dir" 2>/dev/null; then
+              echo "Removed: $dir"
+            else
+              echo "Failed to remove: $dir (may require sudo)"
+            fi
+          else
+            echo "Preserved: $dir"
+          fi
         else
-          echo "Failed to remove: $dir (may require sudo)"
+          if rm -rf "$dir" 2>/dev/null; then
+            echo "Removed: $dir"
+          else
+            echo "Failed to remove: $dir (may require sudo)"
+          fi
         fi
       done
     else
@@ -119,6 +259,103 @@ cleanup_data_directories() {
   else
     echo "No mac-dev-setup data directories found."
   fi
+}
+
+cleanup_shell_integrations() {
+  info "Cleaning up shell integrations..."
+
+  # Remove fzf shell integrations
+  if [ -f ~/.fzf.zsh ]; then
+    rm ~/.fzf.zsh
+    echo "Removed fzf Zsh integration file"
+  fi
+
+  if [ -f ~/.fzf.bash ]; then
+    rm ~/.fzf.bash
+    echo "Removed fzf Bash integration file"
+  fi
+
+  # Check for pipx installations that might be from mac-dev-setup
+  local pipx_packages
+  if command -v pipx >/dev/null 2>&1; then
+    pipx_packages=$(pipx list --short 2>/dev/null | grep -E "^(learn-aliases|pre-commit)" || true)
+    if [ -n "$pipx_packages" ]; then
+      echo ""
+      echo "Found mac-dev-setup pipx packages:"
+      echo "$pipx_packages"
+      if [[ $YES -eq 1 ]]; then
+        echo "Auto-confirming pipx package removal (--yes flag provided)"
+        response="y"
+      else
+        echo -n "Remove these pipx packages? (y/N): "
+        read -r response
+      fi
+      if [[ "$response" =~ ^[Yy]$ ]]; then
+        echo "$pipx_packages" | while read -r package; do
+          if [ -n "$package" ]; then
+            pipx uninstall "$package" 2>/dev/null && echo "Removed pipx package: $package" || echo "Failed to remove: $package"
+          fi
+        done
+      fi
+    fi
+  fi
+
+  # Clean up Homebrew packages (interactive removal)
+  echo ""
+  warn "Homebrew packages installed by mac-dev-setup are still present."
+  echo "These packages include: bat, eza, ripgrep, fd, zoxide, sheldon, mise, pipx,"
+  echo "colima, docker, kubectl, helm, tenv, k9s, kubectx, terraform-docs, and others."
+  echo ""
+
+  # List currently installed packages from Brewfile
+  local installed_packages=()
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
+      local package="${BASH_REMATCH[1]}"
+      if brew list "$package" &>/dev/null; then
+        installed_packages+=("$package")
+      fi
+    fi
+  done < "$REPO_ROOT/Brewfile"
+
+  if [ ${#installed_packages[@]} -eq 0 ]; then
+    info "No mac-dev-setup packages found to remove."
+  else
+    echo "Currently installed packages from mac-dev-setup:"
+    printf "  • %s\n" "${installed_packages[@]}"
+    echo ""
+
+    if [[ $YES -eq 1 ]]; then
+      echo "Auto-confirming package removal (--yes flag provided)"
+      REPLY="y"
+    else
+      read -p "Do you want to uninstall these packages? (y/N) " -n 1 -r
+      echo
+    fi
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      info "Uninstalling Homebrew packages..."
+      for package in "${installed_packages[@]}"; do
+        echo "Removing $package..."
+        # Temporarily disable errexit for this command
+        set +e
+        brew uninstall "$package" 2>/dev/null
+        local exit_code=$?
+        set -e
+
+        if [ $exit_code -eq 0 ]; then
+          echo "✓ Removed $package"
+        else
+          echo "⚠ Failed to remove $package (may have dependencies)"
+        fi
+      done
+      echo ""
+      info "Package removal complete."
+    else
+      info "Homebrew packages left installed."
+      echo "To manually remove them later, use: brew uninstall <package-name>"
+    fi
+  fi
+  echo ""
 }
 
 restore_backups() {
@@ -136,17 +373,28 @@ restore_backups() {
 # --- Main Execution ---
 warn "This will remove mac-dev-setup configuration from your system."
 echo "Your installed tools (via Homebrew) will NOT be removed."
-echo -n "Continue? (y/N): "
-read -r response
+
+if [[ $YES -eq 1 ]]; then
+  echo "Auto-confirming uninstall (--yes flag provided)"
+  response="y"
+else
+  echo -n "Continue? (y/N): "
+  read -r response
+fi
 
 if [[ "$response" =~ ^[Yy]$ ]]; then
   info "Starting uninstall process..."
   remove_shell_config
   remove_symlinks
+  cleanup_shell_integrations
   cleanup_data_directories
   restore_backups
-  info "OK Uninstall complete! Restart your terminal to apply changes."
-  printf "\nTo remove Homebrew packages, run: brew bundle cleanup --file=./Brewfile\n"
+  info "✅ Uninstall complete! Restart your terminal to apply changes."
+  echo ""
+  echo "📋 Additional cleanup available:"
+  echo "   • To remove Homebrew packages: brew bundle cleanup --file=./Brewfile"
+  echo "   • To completely remove Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
+  echo ""
 else
   echo "Uninstall cancelled."
 fi

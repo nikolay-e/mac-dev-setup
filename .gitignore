@@ -48,9 +48,6 @@ wheels/
 *.egg
 .pytest_cache/
 
-# learn-aliases build artifacts
-learn-aliases/build/
-learn-aliases/*.egg-info/
 
 # Homebrew lock files (we use static Brewfile)
 Brewfile.lock.json
@@ -67,8 +64,10 @@ coverage/
 # Generated files
 directory_tree.*
 *.tree
-plugins.toml
-node_modules/
+
+# User-specific local overrides
+*.local.sh
+local.sh
 
 # Claude AI settings
 .claude/settings.local.json

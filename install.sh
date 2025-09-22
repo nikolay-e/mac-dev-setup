@@ -3,15 +3,86 @@
 set -euo pipefail
 
 # --- Helper Functions ---
-source "$(dirname "$0")/tasks/common.sh"
+# Default flag values
+DRY=0
+PRINT=0
+YES=0
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Helper functions for consistent output
+info() {
+    printf "${BLUE}ℹ${NC} %s\n" "$1"
+}
+
+msg_ok() {
+    printf "${GREEN}✓${NC} %s\n" "$1"
+}
+
+msg_err() {
+    printf "${RED}✗${NC} %s\n" "$1"
+}
+
+msg_warn() {
+    printf "${YELLOW}⚠${NC} %s\n" "$1"
+}
+
+msg_info() {
+    printf "${BLUE}ℹ${NC} %s\n" "$1"
+}
+
+# Check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Execute commands with dry-run and print support
+run_cmd() {
+    if (( DRY )); then
+        echo "+ $*"
+    elif (( PRINT )); then
+        echo "$*"
+    else
+        "$@"
+    fi
+}
 
 # --- Parse Arguments ---
-parse_common_args "mac-dev-setup installer - secure, vetted development environment
-
-Usage: $0 [--dry-run] [--print] [--yes]
-  --dry-run    Show what would be installed without making changes
-  --print      Print commands that would be executed
-  --yes        Skip interactive prompts and proceed automatically" "$@"
+for arg in "$@"; do
+    case $arg in
+        --dry-run)
+            DRY=1
+            shift
+            ;;
+        --print)
+            PRINT=1
+            shift
+            ;;
+        --yes)
+            YES=1
+            shift
+            ;;
+        --help)
+            echo "mac-dev-setup installer - secure, vetted development environment"
+            echo ""
+            echo "Usage: $0 [--dry-run] [--print] [--yes]"
+            echo "  --dry-run    Show what would be installed without making changes"
+            echo "  --print      Print commands that would be executed"
+            echo "  --yes        Skip interactive prompts and proceed automatically"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
 
 # --- Main Script ---
 echo "🚀 mac-dev-setup Installer"
@@ -64,9 +135,7 @@ done < Brewfile
 # List Pipx packages
 echo ""
 echo "🐍 Install Python CLI Tools:"
-while IFS= read -r package || [[ -n "$package" ]]; do
-    [[ -n "$package" && "$package" != \#* ]] && echo "    • $package"
-done < pipx.txt
+echo "    • pre-commit"
 
 # List other actions
 echo ""
@@ -97,48 +166,88 @@ else
     info "Starting installation..."
 fi
 
-# Pass flags to sub-scripts
-SCRIPT_FLAGS=()
-[[ $DRY -eq 1 ]] && SCRIPT_FLAGS+=("--dry-run")
-[[ $PRINT -eq 1 ]] && SCRIPT_FLAGS+=("--print")
+# --- Install Homebrew Packages ---
+install_homebrew_packages() {
+    # Environment variables for current session only
+    export HOMEBREW_NO_ANALYTICS=1
+    export HOMEBREW_NO_AUTO_UPDATE=1
 
-if ! bash "tasks/brew.install.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; then
-    echo "❌ Error: Homebrew task failed." >&2
-    exit 1
-fi
+    if (( PRINT )); then
+        echo "brew bundle --file=\"./Brewfile\""
+    elif (( DRY )); then
+        run_cmd brew bundle --file="./Brewfile" --dry-run
+    else
+        run_cmd brew bundle --file="./Brewfile"
+        info "Homebrew packages installation complete!"
+    fi
+}
 
-if ! bash "tasks/python.install.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; then
-    echo "❌ Error: Python task failed." >&2
-    exit 1
-fi
+# --- Install Python CLI Tools ---
+install_pipx_packages() {
+    # Ensure pipx is in PATH
+    if (( PRINT )); then
+        echo "# Add pipx to PATH"
+        echo "export PATH=\"\$HOME/.local/bin:\$PATH\""
+    elif (( DRY )); then
+        echo "+ export PATH=\"\$HOME/.local/bin:\$PATH\""
+    else
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
 
-if ! bash "tasks/symlinks.sh" "${SCRIPT_FLAGS[@]+"${SCRIPT_FLAGS[@]}"}"; then
-    echo "❌ Error: Symlinks task failed." >&2
-    exit 1
-fi
+    # Check if pipx is available
+    if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
+        if ! command_exists pipx; then
+            msg_err "pipx not found. Install it with 'brew install pipx'"
+            exit 1
+        fi
+        msg_info "Installing Python CLI tools with pipx..."
+    fi
+
+    # Install pre-commit directly (only package we need)
+    if (( PRINT )); then
+        echo "pipx install pre-commit"
+    elif (( DRY )); then
+        echo "+ pipx install pre-commit"
+    else
+        run_cmd pipx install pre-commit
+        msg_ok "Python CLI tools installed successfully"
+    fi
+}
+
+# --- Create Configuration Symlinks ---
+create_symlinks() {
+    local source="$PWD/zsh_config.sh"
+    local target="$HOME/.zsh_config.sh"
+
+    if [[ ! -f "$source" ]]; then
+        echo "Warning: Source file not found: $source" >&2
+        return 1
+    fi
+
+    if (( PRINT )); then
+        echo "ln -sf \"$source\" \"$target\""
+    elif (( DRY )); then
+        echo "+ Create symlink: $target -> $source"
+    else
+        # Remove existing file/symlink if it exists
+        if [[ -e "$target" || -L "$target" ]]; then
+            rm "$target"
+        fi
+
+        # Create symlink
+        ln -sf "$source" "$target"
+        echo "Created symlink: $target -> $source"
+    fi
+}
+
+# Execute installation tasks
+install_homebrew_packages
+install_pipx_packages
+create_symlinks
 
 # Configure shell to source zsh_config.sh
 if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
     info "Configuring shell profile..."
-
-    # Check for potential alias conflicts
-    COMMON_ALIASES=("ls" "ll" "la" "cat" "grep")
-    CONFLICTS_FOUND=0
-
-    for alias_name in "${COMMON_ALIASES[@]}"; do
-        if grep -q "alias $alias_name=" ~/.zshrc 2>/dev/null; then
-            if [[ $CONFLICTS_FOUND -eq 0 ]]; then
-                echo "⚠️  Warning: Potential alias conflicts detected in ~/.zshrc:"
-                CONFLICTS_FOUND=1
-            fi
-            echo "   - '$alias_name' alias already defined"
-        fi
-    done
-
-    if [[ $CONFLICTS_FOUND -eq 1 ]]; then
-        echo "   💡 Tip: Move your custom aliases to ~/.my_aliases to preserve them"
-        echo ""
-    fi
 
     # Define markers
     BEGIN_MARKER="# BEGIN mac-dev-setup configuration"
@@ -162,12 +271,6 @@ EOF
 
     echo "Added configuration to ~/.zshrc"
 
-    # Create ~/.nvm directory for Node Version Manager
-    if [[ ! -d ~/.nvm ]]; then
-        mkdir -p ~/.nvm
-        echo "Created ~/.nvm directory"
-    fi
-
     # Install fzf keybindings
     FZF_INSTALL_SCRIPT="$(brew --prefix)/opt/fzf/install"
     if [[ -x "$FZF_INSTALL_SCRIPT" ]]; then
@@ -181,53 +284,117 @@ EOF
     fi
 elif [[ $DRY -eq 1 ]]; then
     echo "+ Add 'source ~/.zsh_config.sh' to ~/.zshrc"
-    echo "+ Create ~/.nvm directory"
     echo "+ Install fzf keybindings"
 fi
 
-# Install Node.js via nvm for plugin generation
+# Configure Sheldon for Zsh plugins
 if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
-    if ! command -v node >/dev/null 2>&1; then
-        info "Installing Node.js LTS via nvm..."
-        # Source nvm to make it available
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
+    info "Configuring Zsh plugins with Sheldon..."
 
-        if command -v nvm >/dev/null 2>&1; then
-            echo "Installing Node.js LTS..."
-            if nvm install --lts && nvm use --lts; then
-                echo "✅ Installed Node.js $(node --version)"
-            else
-                echo "⚠️  Warning: Node.js installation failed"
-                echo "   You can manually install it later with: nvm install --lts"
-            fi
+    # Create Sheldon config directory
+    SHELDON_CONFIG_DIR="$HOME/.config/sheldon"
+    mkdir -p "$SHELDON_CONFIG_DIR"
+
+    # Check if plugins.toml already exists and is current
+    if [ -f "$SHELDON_CONFIG_DIR/plugins.toml" ] && diff -q ./plugins.toml "$SHELDON_CONFIG_DIR/plugins.toml" >/dev/null 2>&1; then
+        msg_info "Sheldon plugins.toml is already up to date"
+    else
+        # Copy plugins.toml to Sheldon config directory
+        if cp ./plugins.toml "$SHELDON_CONFIG_DIR/plugins.toml"; then
+            msg_ok "Updated Sheldon configuration"
         else
-            echo "⚠️  Warning: nvm not available, skipping Node.js installation"
+            msg_err "Failed to copy plugins.toml"
+            exit 1
         fi
     fi
-elif [[ $DRY -eq 1 ]]; then
-    echo "+ Install Node.js LTS via nvm (if not present)"
-fi
 
-# Generate sheldon plugins configuration
-if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
-    if command -v node >/dev/null 2>&1; then
-        info "Configuring Zsh plugins..."
-        node scripts/generate-plugins.js
+    # Install plugins with Sheldon
+    if command_exists sheldon; then
+        msg_info "Installing Zsh plugins..."
+        if sheldon lock; then
+            msg_ok "Installed Zsh plugins successfully"
+        else
+            msg_warn "Sheldon plugin installation failed"
+            echo "   You can manually install them later with: sheldon lock"
+        fi
     else
-        echo "⚠️  Warning: Node.js not found, skipping sheldon plugin configuration"
-        echo "💡 Tip: Install Node LTS with 'nvm install --lts' then run 'npm run generate-plugins'"
+        msg_warn "Sheldon not found, skipping plugin installation"
+        echo "   Make sure Sheldon is installed via Homebrew"
     fi
 elif [[ $DRY -eq 1 ]]; then
-    echo "+ Generate sheldon plugins.toml from package.json"
+    echo "+ Copy plugins.toml to ~/.config/sheldon/"
+    echo "+ Install Zsh plugins with 'sheldon lock'"
 fi
 
-# Apply security hardening (skip in dry-run and print modes)
+# Setup modular alias system
 if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
-    if ! bash "tasks/apply-security-settings.sh"; then
-        echo "⚠️  Warning: Security hardening failed, but continuing..." >&2
+    info "Setting up modular alias system..."
+
+    # Create modular config directory
+    MODULES_CONFIG_DIR="$HOME/.config/mac-dev-setup/modules"
+    mkdir -p "$MODULES_CONFIG_DIR"
+
+    # Copy modules to user config directory
+    if cp -r ./modules/* "$MODULES_CONFIG_DIR/"; then
+        msg_ok "Installed modular alias system"
+    else
+        msg_err "Failed to copy modules"
+        exit 1
     fi
-else
+
+    # Set proper permissions
+    chmod +x "$MODULES_CONFIG_DIR"/*.sh
+
+    # Install learn-aliases script
+    mkdir -p "$HOME/.local/bin"
+    if cp ./scripts/learn-aliases.sh "$HOME/.local/bin/learn-aliases" 2>/dev/null; then
+        chmod +x "$HOME/.local/bin/learn-aliases"
+        msg_ok "Installed learn-aliases command"
+    else
+        msg_warn "Failed to install learn-aliases to ~/.local/bin/"
+        echo "   You can run it directly from: ./scripts/learn-aliases.sh"
+    fi
+
+    # Create local customization template if it doesn't exist
+    LOCAL_CONFIG="$HOME/.config/mac-dev-setup/local.sh"
+    if [ ! -f "$LOCAL_CONFIG" ]; then
+        cat > "$LOCAL_CONFIG" << 'EOF'
+#!/bin/bash
+# shellcheck shell=bash
+# --------------------------------------------------------------------
+## Local Customizations
+# --------------------------------------------------------------------
+# This file is for your personal aliases and overrides.
+# It's loaded after all modules, so you can override anything.
+# This file is ignored by git, so your customizations won't conflict.
+
+# Example: Override a default alias
+# alias gs='git status -sb'
+
+# Example: Add your own aliases
+# alias myproject='cd ~/code/my-important-project'
+
+# Example: Add environment variables
+# export MY_API_KEY="your-key-here"
+
+# Example: Override function behavior
+# gp() {
+#     git push "$@" && echo "✅ Push completed successfully!"
+# }
+EOF
+        msg_ok "Created local customization template"
+        msg_info "Edit ~/.config/mac-dev-setup/local.sh to add your personal aliases"
+    else
+        msg_info "Local customization file already exists"
+    fi
+elif [[ $DRY -eq 1 ]]; then
+    echo "+ Create ~/.config/mac-dev-setup/modules/"
+    echo "+ Copy modular alias files"
+    echo "+ Create local customization template"
+fi
+
+# Security settings are handled by environment variables set during installation
+if [[ $DRY -eq 1 ]]; then
     echo "+ Configure security settings (telemetry disabled, offline mode)"
 fi
 
@@ -238,7 +405,13 @@ echo "   • No telemetry or analytics"
 echo "   • No automatic updates"
 echo "   • All tools work offline"
 echo ""
+echo "🧩 Modular alias system installed:"
+echo "   • Aliases organized by topic in ~/.config/mac-dev-setup/modules/"
+echo "   • Personal customizations: ~/.config/mac-dev-setup/local.sh"
+echo "   • Version management: Use 'mise' for all languages"
+echo ""
 echo "📋 Next steps:"
 echo "   1. Restart your terminal"
-echo "   2. Run 'learn-aliases' to explore available shortcuts"
+echo "   2. Run 'learn-aliases' to browse your new shortcuts"
+echo "   3. Edit ~/.config/mac-dev-setup/local.sh for personal aliases"
 echo ""

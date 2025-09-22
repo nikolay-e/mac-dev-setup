@@ -18,12 +18,18 @@ All tools are carefully vetted for security and work completely offline:
 - **Git ecosystem**: `git`, modern diffs, terminal workflows
 - **Modern CLI**: `eza` (ls), `bat` (cat), `fd` (find), `rg` (grep), `zoxide` (cd)
 - **Editors & Terminal**: `neovim`, `zellij` multiplexer
-- **Language environments**: `pyenv`, `nvm`, `mise`
+- **Language environments**: `mise` (polyglot version manager)
 
 ### Infrastructure & Containers
 - **Container tools**: `colima` (Docker alternative), `docker` (CLI), `kubectl`, `helm`, `k9s`
 - **Cloud & Infrastructure**: `tenv` (terraform/terragrunt), `awscli`
 - **Utilities**: `jq`, `jc`, `tree`, `fzf`, `wget`, `htop`, `kcat`
+
+### Optional kubectl plugins
+```bash
+brew install krew
+kubectl krew install tree neat access-matrix
+```
 
 ### 600+ Productivity Aliases
 ```bash
@@ -52,7 +58,7 @@ For step-by-step setup, see `docs/10-homebrew.md`.
 
 ## Requirements
 
-- macOS 10.15+
+- macOS 12+ (Monterey or newer)
 - Zsh as default shell (run `chsh -s /bin/zsh` if needed)
 - Xcode Command Line Tools (run `xcode-select --install`)
 - Administrator access

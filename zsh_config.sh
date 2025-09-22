@@ -3,30 +3,32 @@
 # This file is sourced by ~/.zshrc and managed by mac-dev-setup.
 
 # Environment Variables
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH" # pipx tools
-export NVM_DIR="$HOME/.nvm"
 
 # Tool Initializations
-if command -v pyenv 1>/dev/null 2>&1; then eval "$(pyenv init -)"; fi
-# shellcheck disable=SC1091
-BREW_PREFIX=$(brew --prefix)
-# shellcheck disable=SC1091
-[ -s "$BREW_PREFIX/opt/nvm/nvm.sh" ] && \. "$BREW_PREFIX/opt/nvm/nvm.sh"
 # shellcheck disable=SC1090
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Simple prompt
-export PS1='%1~ %# '
+# Simple prompt (only if none is set)
+if [ -z "${PS1:-}" ]; then export PS1='%1~ %# '; fi
 if command -v sheldon 1>/dev/null 2>&1; then eval "$(sheldon source)"; fi
 if command -v zoxide 1>/dev/null 2>&1; then eval "$(zoxide init zsh)"; fi
 if command -v mise 1>/dev/null 2>&1; then eval "$(mise activate zsh)"; fi
 
-# Source Aliases
+# Source Modular Aliases
 # shellcheck disable=SC1090
-if [ -f ~/.mac-dev-setup-aliases ]; then source ~/.mac-dev-setup-aliases; fi
+if [ -d ~/.config/mac-dev-setup/modules ]; then
+  for module_file in ~/.config/mac-dev-setup/modules/*.sh; do
+    [ -r "$module_file" ] && source "$module_file"
+  done
+fi
 
-# Source Personal Overrides (loaded last to override defaults)
+# Source Local Customizations (loaded last to override defaults)
+# shellcheck disable=SC1090
+if [ -f ~/.config/mac-dev-setup/local.sh ]; then
+  source ~/.config/mac-dev-setup/local.sh
+fi
+
+# Personal overrides (legacy support)
 # shellcheck disable=SC1090
 if [ -f ~/.my_aliases ]; then source ~/.my_aliases; fi
