@@ -1,4 +1,0 @@
-# Auto‑request reviews on PRs touching critical files
-Brewfile           @nikolay-e
-install.sh         @nikolay-e
-.github/workflows/ @nikolay-e

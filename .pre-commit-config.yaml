@@ -11,13 +11,10 @@ repos:
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
 
-  - repo: local
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
     hooks:
       - id: shellcheck
-        name: ShellCheck
-        entry: shellcheck
-        language: system
-        files: \.(sh|bash|zsh)$
         args: ["--severity=warning"]
 
   - repo: https://github.com/scop/pre-commit-shfmt
@@ -32,11 +29,11 @@ repos:
         name: Test installer dry-run
         entry: ./install.sh --dry-run --yes
         language: system
-        files: ^(install\.sh|Brewfile|zsh_config\.sh|plugins\.toml|modules/.*)$
+        files: ^(install\.sh|Brewfile|zsh_config\.sh|plugins\.toml)$
         pass_filenames: false
 
-      - id: uninstall-dry-run
-        name: Test uninstaller dry-run
+      - id: uninstall-help
+        name: Test uninstaller help
         entry: bash -c './uninstall.sh --help >/dev/null && echo "✓ Uninstaller help works"'
         language: system
         files: ^uninstall\.sh$
