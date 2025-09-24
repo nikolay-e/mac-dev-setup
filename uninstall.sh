@@ -35,11 +35,10 @@ REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 YES=0
 
 # Parse arguments
-for arg in "$@"; do
-    case $arg in
+while (( "$#" )); do
+    case $1 in
         --yes)
             YES=1
-            shift
             ;;
         --help)
             echo "mac-dev-setup uninstaller"
@@ -49,11 +48,12 @@ for arg in "$@"; do
             exit 0
             ;;
         *)
-            echo "Unknown option: $arg"
+            echo "Unknown option: $1"
             echo "Use --help for usage information"
             exit 1
             ;;
     esac
+    shift
 done
 
 # --- Main Functions ---
@@ -117,10 +117,27 @@ remove_symlinks() {
     echo "Removed ~/.zsh_config.sh symlink"
   fi
 
-  # Remove Sheldon config file (generated, not symlinked)
+  # Remove Sheldon config file and lock file (generated, not symlinked)
   if [ -f ~/.config/sheldon/plugins.toml ]; then
     rm ~/.config/sheldon/plugins.toml
     echo "Removed Sheldon config file"
+  fi
+
+  if [ -f ~/.config/sheldon/plugins.lock ]; then
+    rm ~/.config/sheldon/plugins.lock
+    echo "Removed Sheldon lock file"
+  fi
+
+  # Remove Sheldon downloaded plugins
+  if [ -d ~/.local/share/sheldon ]; then
+    rm -rf ~/.local/share/sheldon
+    echo "Removed Sheldon plugin cache"
+  fi
+
+  # Remove Starship config file
+  if [ -f ~/.config/starship.toml ]; then
+    rm ~/.config/starship.toml
+    echo "Removed Starship configuration"
   fi
 
   # Clean up old npm-based plugin installations (backwards compatibility)
@@ -278,7 +295,7 @@ cleanup_shell_integrations() {
   # Check for pipx installations that might be from mac-dev-setup
   local pipx_packages
   if command -v pipx >/dev/null 2>&1; then
-    pipx_packages=$(pipx list --short 2>/dev/null | grep -E "^(learn-aliases|pre-commit)" || true)
+    pipx_packages=$(pipx list --short 2>/dev/null | grep -E "^(learn-aliases)" || true)
     if [ -n "$pipx_packages" ]; then
       echo ""
       echo "Found mac-dev-setup pipx packages:"
@@ -291,9 +308,11 @@ cleanup_shell_integrations() {
         read -r response
       fi
       if [[ "$response" =~ ^[Yy]$ ]]; then
-        echo "$pipx_packages" | while read -r package; do
-          if [ -n "$package" ]; then
-            pipx uninstall "$package" 2>/dev/null && echo "Removed pipx package: $package" || echo "Failed to remove: $package"
+        echo "$pipx_packages" | while read -r package_line; do
+          if [ -n "$package_line" ]; then
+            # Extract just the package name (first word before space/version)
+            package_name=$(echo "$package_line" | cut -d' ' -f1)
+            pipx uninstall "$package_name" 2>/dev/null && echo "Removed pipx package: $package_name" || echo "Failed to remove: $package_name"
           fi
         done
       fi
@@ -304,7 +323,7 @@ cleanup_shell_integrations() {
   echo ""
   warn "Homebrew packages installed by mac-dev-setup are still present."
   echo "These packages include: bat, eza, ripgrep, fd, zoxide, sheldon, mise, pipx,"
-  echo "colima, docker, kubectl, helm, tenv, k9s, kubectx, terraform-docs, and others."
+  echo "pre-commit, colima, docker, kubectl, helm, tenv, k9s, kubectx, terraform-docs, and others."
   echo ""
 
   # List currently installed packages from Brewfile

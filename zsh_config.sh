@@ -9,8 +9,8 @@ export PATH="$HOME/.local/bin:$PATH" # pipx tools
 # shellcheck disable=SC1090
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# Simple prompt (only if none is set)
-if [ -z "${PS1:-}" ]; then export PS1='%1~ %# '; fi
+# Initialize Starship prompt
+if command -v starship 1>/dev/null 2>&1; then eval "$(starship init zsh)"; fi
 if command -v sheldon 1>/dev/null 2>&1; then eval "$(sheldon source)"; fi
 if command -v zoxide 1>/dev/null 2>&1; then eval "$(zoxide init zsh)"; fi
 if command -v mise 1>/dev/null 2>&1; then eval "$(mise activate zsh)"; fi
