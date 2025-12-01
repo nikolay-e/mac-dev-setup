@@ -21,10 +21,12 @@ brew "zoxide"
 # Terminal tools
 brew "zellij"
 brew "sheldon"
+brew "starship"
 
 # Development tools
 brew "pipx"
 brew "mise"
+brew "pre-commit"
 
 # Container & Infrastructure (user-directed network only)
 brew "colima"

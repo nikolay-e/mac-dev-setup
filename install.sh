@@ -5,7 +5,6 @@ set -euo pipefail
 # --- Helper Functions ---
 # Default flag values
 DRY=0
-PRINT=0
 YES=0
 
 # Color codes for output
@@ -41,47 +40,39 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Execute commands with dry-run and print support
+# Execute commands with dry-run support
 run_cmd() {
     if (( DRY )); then
         echo "+ $*"
-    elif (( PRINT )); then
-        echo "$*"
     else
         "$@"
     fi
 }
 
 # --- Parse Arguments ---
-for arg in "$@"; do
-    case $arg in
+while (( "$#" )); do
+    case $1 in
         --dry-run)
             DRY=1
-            shift
-            ;;
-        --print)
-            PRINT=1
-            shift
             ;;
         --yes)
             YES=1
-            shift
             ;;
         --help)
             echo "mac-dev-setup installer - secure, vetted development environment"
             echo ""
-            echo "Usage: $0 [--dry-run] [--print] [--yes]"
+            echo "Usage: $0 [--dry-run] [--yes]"
             echo "  --dry-run    Show what would be installed without making changes"
-            echo "  --print      Print commands that would be executed"
             echo "  --yes        Skip interactive prompts and proceed automatically"
             exit 0
             ;;
         *)
-            echo "Unknown option: $arg"
+            echo "Unknown option: $1"
             echo "Use --help for usage information"
             exit 1
             ;;
     esac
+    shift
 done
 
 # --- Main Script ---
@@ -89,6 +80,17 @@ echo "🚀 mac-dev-setup Installer"
 echo "=========================="
 echo "This script will set up your development environment with verified, offline-capable tools."
 echo ""
+
+# Check if Xcode Command Line Tools are installed
+if ! xcode-select -p &>/dev/null; then
+    msg_err "Xcode Command Line Tools are not installed."
+    echo ""
+    echo "Please install them first by running:"
+    echo "  xcode-select --install"
+    echo ""
+    echo "After installation completes, run this installer again."
+    exit 1
+fi
 
 # Check if Homebrew is installed
 if ! command -v brew &> /dev/null; then
@@ -132,10 +134,6 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     fi
 done < Brewfile
 
-# List Pipx packages
-echo ""
-echo "🐍 Install Python CLI Tools:"
-echo "    • pre-commit"
 
 # List other actions
 echo ""
@@ -145,8 +143,8 @@ echo "    • Configure your shell (~/.zshrc) to load the environment"
 echo "    • Disable telemetry for all installed tools"
 echo ""
 
-# Confirm before proceeding (skip in dry-run, print, and yes modes)
-if [[ $DRY -eq 0 && $PRINT -eq 0 && $YES -eq 0 ]]; then
+# Confirm before proceeding (skip in dry-run and yes modes)
+if [[ $DRY -eq 0 && $YES -eq 0 ]]; then
     read -p "Continue with installation? [y/N] " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -160,8 +158,6 @@ fi
 # --- Execute Installation Tasks ---
 if [[ $DRY -eq 1 ]]; then
     info "Dry run mode - showing what would be installed..."
-elif [[ $PRINT -eq 1 ]]; then
-    info "Print mode - showing commands..."
 else
     info "Starting installation..."
 fi
@@ -172,9 +168,7 @@ install_homebrew_packages() {
     export HOMEBREW_NO_ANALYTICS=1
     export HOMEBREW_NO_AUTO_UPDATE=1
 
-    if (( PRINT )); then
-        echo "brew bundle --file=\"./Brewfile\""
-    elif (( DRY )); then
+    if (( DRY )); then
         run_cmd brew bundle --file="./Brewfile" --dry-run
     else
         run_cmd brew bundle --file="./Brewfile"
@@ -182,37 +176,6 @@ install_homebrew_packages() {
     fi
 }
 
-# --- Install Python CLI Tools ---
-install_pipx_packages() {
-    # Ensure pipx is in PATH
-    if (( PRINT )); then
-        echo "# Add pipx to PATH"
-        echo "export PATH=\"\$HOME/.local/bin:\$PATH\""
-    elif (( DRY )); then
-        echo "+ export PATH=\"\$HOME/.local/bin:\$PATH\""
-    else
-        export PATH="$HOME/.local/bin:$PATH"
-    fi
-
-    # Check if pipx is available
-    if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
-        if ! command_exists pipx; then
-            msg_err "pipx not found. Install it with 'brew install pipx'"
-            exit 1
-        fi
-        msg_info "Installing Python CLI tools with pipx..."
-    fi
-
-    # Install pre-commit directly (only package we need)
-    if (( PRINT )); then
-        echo "pipx install pre-commit"
-    elif (( DRY )); then
-        echo "+ pipx install pre-commit"
-    else
-        run_cmd pipx install pre-commit
-        msg_ok "Python CLI tools installed successfully"
-    fi
-}
 
 # --- Create Configuration Symlinks ---
 create_symlinks() {
@@ -224,9 +187,7 @@ create_symlinks() {
         return 1
     fi
 
-    if (( PRINT )); then
-        echo "ln -sf \"$source\" \"$target\""
-    elif (( DRY )); then
+    if (( DRY )); then
         echo "+ Create symlink: $target -> $source"
     else
         # Remove existing file/symlink if it exists
@@ -242,11 +203,10 @@ create_symlinks() {
 
 # Execute installation tasks
 install_homebrew_packages
-install_pipx_packages
 create_symlinks
 
 # Configure shell to source zsh_config.sh
-if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
+if [[ $DRY -eq 0 ]]; then
     info "Configuring shell profile..."
 
     # Define markers
@@ -288,7 +248,7 @@ elif [[ $DRY -eq 1 ]]; then
 fi
 
 # Configure Sheldon for Zsh plugins
-if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
+if [[ $DRY -eq 0 ]]; then
     info "Configuring Zsh plugins with Sheldon..."
 
     # Create Sheldon config directory
@@ -326,8 +286,26 @@ elif [[ $DRY -eq 1 ]]; then
     echo "+ Install Zsh plugins with 'sheldon lock'"
 fi
 
+# Configure Starship prompt
+if [[ $DRY -eq 0 ]]; then
+    info "Configuring Starship prompt..."
+
+    # Create starship config directory
+    mkdir -p "$HOME/.config"
+
+    # Copy starship.toml to user config directory
+    if cp ./starship.toml "$HOME/.config/starship.toml"; then
+        msg_ok "Installed Starship configuration"
+    else
+        msg_err "Failed to copy starship.toml"
+        exit 1
+    fi
+elif [[ $DRY -eq 1 ]]; then
+    echo "+ Copy starship.toml to ~/.config/"
+fi
+
 # Setup modular alias system
-if [[ $DRY -eq 0 && $PRINT -eq 0 ]]; then
+if [[ $DRY -eq 0 ]]; then
     info "Setting up modular alias system..."
 
     # Create modular config directory
