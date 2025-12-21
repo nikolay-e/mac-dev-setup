@@ -11,11 +11,14 @@ repos:
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
 
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.10.0
+  - repo: local
     hooks:
       - id: shellcheck
+        name: ShellCheck v0.10.0
+        entry: shellcheck
         args: ["--severity=warning"]
+        language: system
+        types: [shell]
 
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.8.0-1

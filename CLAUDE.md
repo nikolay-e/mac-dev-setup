@@ -1,5 +1,7 @@
 # mac-dev-setup
 
+> Extends [../CLAUDE.md](../CLAUDE.md)
+
 Secure, offline-first macOS development environment automation.
 
 ## Quick Start
