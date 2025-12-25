@@ -1,5 +1,10 @@
 # Pre-commit hooks configuration
 repos:
+  - repo: https://github.com/nikolay-e/pre-commit-hooks
+    rev: v2.0.1
+    hooks:
+      - id: no-emoji
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -37,14 +42,14 @@ repos:
 
       - id: uninstall-help
         name: Test uninstaller help
-        entry: bash -c './uninstall.sh --help >/dev/null && echo "✓ Uninstaller help works"'
+        entry: bash -c './uninstall.sh --help >/dev/null && echo "Uninstaller help works"'
         language: system
         files: ^uninstall\.sh$
         pass_filenames: false
 
       - id: brewfile-validity
         name: Validate Brewfile syntax
-        entry: bash -c 'brew bundle list --file=./Brewfile >/dev/null && echo "✓ Brewfile syntax is valid"'
+        entry: bash -c 'brew bundle list --file=./Brewfile >/dev/null && echo "Brewfile syntax is valid"'
         language: system
         files: ^Brewfile$
         pass_filenames: false

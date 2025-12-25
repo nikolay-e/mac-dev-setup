@@ -16,23 +16,23 @@ NC='\033[0m' # No Color
 
 # Helper functions for consistent output
 info() {
-    printf "${BLUE}ℹ${NC} %s\n" "$1"
+    printf "${BLUE}[*]${NC} %s\n" "$1"
 }
 
 msg_ok() {
-    printf "${GREEN}✓${NC} %s\n" "$1"
+    printf "${GREEN}[+]${NC} %s\n" "$1"
 }
 
 msg_err() {
-    printf "${RED}✗${NC} %s\n" "$1"
+    printf "${RED}[-]${NC} %s\n" "$1"
 }
 
 msg_warn() {
-    printf "${YELLOW}⚠${NC} %s\n" "$1"
+    printf "${YELLOW}[!]${NC} %s\n" "$1"
 }
 
 msg_info() {
-    printf "${BLUE}ℹ${NC} %s\n" "$1"
+    printf "${BLUE}[*]${NC} %s\n" "$1"
 }
 
 # Check if command exists
@@ -76,7 +76,7 @@ while (( "$#" )); do
 done
 
 # --- Main Script ---
-echo "🚀 mac-dev-setup Installer"
+echo "mac-dev-setup Installer"
 echo "=========================="
 echo "This script will set up your development environment with verified, offline-capable tools."
 echo ""
@@ -94,7 +94,7 @@ fi
 
 # Check if Homebrew is installed
 if ! command -v brew &> /dev/null; then
-    echo "❌ Error: Homebrew is not installed."
+    echo "Error: Homebrew is not installed."
     echo ""
     echo "Please install Homebrew first by running:"
     echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
@@ -105,7 +105,7 @@ fi
 
 # Check if Zsh is the default shell
 if [[ "$SHELL" != */zsh ]]; then
-    echo "⚠️  Warning: Your default shell is not Zsh (currently: $SHELL)"
+    echo "Warning: Your default shell is not Zsh (currently: $SHELL)"
     echo "   This setup is optimized for Zsh. Some features may not work correctly."
     echo ""
     echo "   To switch to Zsh, run:"
@@ -127,7 +127,7 @@ fi
 info "The following actions will be performed:"
 
 # List Homebrew packages
-echo "📦 Install Homebrew Packages:"
+echo "Install Homebrew Packages:"
 while IFS= read -r line || [[ -n "$line" ]]; do
     if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
         echo "    • ${BASH_REMATCH[1]}"
@@ -137,7 +137,8 @@ done < Brewfile
 
 # List other actions
 echo ""
-echo "⚙️  Additional Setup:"
+echo "Additional Setup:"
+echo "    • Install pre-commit via pipx"
 echo "    • Create symlinks for aliases and shell configuration"
 echo "    • Configure your shell (~/.zshrc) to load the environment"
 echo "    • Disable telemetry for all installed tools"
@@ -177,6 +178,24 @@ install_homebrew_packages() {
 }
 
 
+# --- Install pipx packages ---
+install_pipx_packages() {
+    if (( DRY )); then
+        echo "+ pipx install pre-commit"
+    else
+        if command_exists pipx; then
+            if pipx list | grep -q "pre-commit"; then
+                msg_info "pre-commit already installed via pipx"
+            else
+                pipx install pre-commit
+                msg_ok "Installed pre-commit via pipx"
+            fi
+        else
+            msg_warn "pipx not found, skipping pre-commit installation"
+        fi
+    fi
+}
+
 # --- Create Configuration Symlinks ---
 create_symlinks() {
     local source="$PWD/zsh_config.sh"
@@ -203,6 +222,7 @@ create_symlinks() {
 
 # Execute installation tasks
 install_homebrew_packages
+install_pipx_packages
 create_symlinks
 
 # Configure shell to source zsh_config.sh
@@ -236,11 +256,11 @@ EOF
     if [[ -x "$FZF_INSTALL_SCRIPT" ]]; then
         info "Installing fzf keybindings..."
         if ! "$FZF_INSTALL_SCRIPT" --key-bindings --completion --no-update-rc --no-bash --no-fish; then
-            echo "⚠️  Warning: fzf keybindings installation failed"
+            echo "Warning: fzf keybindings installation failed"
             echo "   You can manually install them later by running: $FZF_INSTALL_SCRIPT"
         fi
     else
-        echo "⚠️  Warning: fzf install script not found. Make sure fzf is installed via Homebrew."
+        echo "Warning: fzf install script not found. Make sure fzf is installed via Homebrew."
     fi
 elif [[ $DRY -eq 1 ]]; then
     echo "+ Add 'source ~/.zsh_config.sh' to ~/.zshrc"
@@ -357,7 +377,7 @@ if [[ $DRY -eq 0 ]]; then
 
 # Example: Override function behavior
 # gp() {
-#     git push "$@" && echo "✅ Push completed successfully!"
+#     git push "$@" && echo "Push completed successfully!"
 # }
 EOF
         msg_ok "Created local customization template"
@@ -376,19 +396,19 @@ if [[ $DRY -eq 1 ]]; then
     echo "+ Configure security settings (telemetry disabled, offline mode)"
 fi
 
-info "✅ Installation complete!"
+info "Installation complete!"
 echo ""
-echo "🔒 Your environment is configured for security:"
+echo "Your environment is configured for security:"
 echo "   • No telemetry or analytics"
 echo "   • No automatic updates"
 echo "   • All tools work offline"
 echo ""
-echo "🧩 Modular alias system installed:"
+echo "Modular alias system installed:"
 echo "   • Aliases organized by topic in ~/.config/mac-dev-setup/modules/"
 echo "   • Personal customizations: ~/.config/mac-dev-setup/local.sh"
 echo "   • Version management: Use 'mise' for all languages"
 echo ""
-echo "📋 Next steps:"
+echo "Next steps:"
 echo "   1. Restart your terminal"
 echo "   2. Run 'learn-aliases' to browse your new shortcuts"
 echo "   3. Edit ~/.config/mac-dev-setup/local.sh for personal aliases"

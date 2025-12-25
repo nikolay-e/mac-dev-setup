@@ -26,7 +26,7 @@ brew "starship"
 # Development tools
 brew "pipx"
 brew "mise"
-brew "pre-commit"
+# pre-commit installed via pipx (Python tool, better managed there)
 
 # Container & Infrastructure (user-directed network only)
 brew "colima"

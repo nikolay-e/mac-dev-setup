@@ -13,19 +13,19 @@ NC='\033[0m' # No Color
 
 # Helper functions for consistent output
 info() {
-    printf "${BLUE}ℹ${NC} %s\n" "$1"
+    printf "${BLUE}[*]${NC} %s\n" "$1"
 }
 
 warn() {
-    printf "${YELLOW}⚠${NC} %s\n" "$1"
+    printf "${YELLOW}[!]${NC} %s\n" "$1"
 }
 
 success() {
-    printf "${GREEN}✓${NC} %s\n" "$1"
+    printf "${GREEN}[+]${NC} %s\n" "$1"
 }
 
 error() {
-    printf "${RED}✗${NC} %s\n" "$1"
+    printf "${RED}[-]${NC} %s\n" "$1"
 }
 
 # Get the repository root
@@ -245,7 +245,7 @@ cleanup_data_directories() {
     if [[ "$response" =~ ^[Yy]$ ]]; then
       for dir in "${found_dirs[@]}"; do
         if [[ "$dir" == "$HOME/.config/mac-dev-setup" ]]; then
-          echo "💡 Tip: Consider backing up $dir/local.sh before removal"
+          echo "Tip: Consider backing up $dir/local.sh before removal"
           if [[ $YES -eq 1 ]]; then
             echo "Auto-confirming removal of $dir (--yes flag provided)"
             confirm="y"
@@ -362,9 +362,9 @@ cleanup_shell_integrations() {
         set -e
 
         if [ $exit_code -eq 0 ]; then
-          echo "✓ Removed $package"
+          echo "[+] Removed $package"
         else
-          echo "⚠ Failed to remove $package (may have dependencies)"
+          echo "Failed to remove $package (may have dependencies)"
         fi
       done
       echo ""
@@ -408,9 +408,9 @@ if [[ "$response" =~ ^[Yy]$ ]]; then
   cleanup_shell_integrations
   cleanup_data_directories
   restore_backups
-  info "✅ Uninstall complete! Restart your terminal to apply changes."
+  info "Uninstall complete! Restart your terminal to apply changes."
   echo ""
-  echo "📋 Additional cleanup available:"
+  echo "Additional cleanup available:"
   echo "   • To remove Homebrew packages: brew bundle cleanup --file=./Brewfile"
   echo "   • To completely remove Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
   echo ""

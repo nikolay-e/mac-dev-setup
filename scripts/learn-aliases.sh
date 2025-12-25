@@ -33,7 +33,7 @@ usage() {
 # Check if modules directory exists
 check_modules() {
     if [ ! -d "$MODULES_DIR" ]; then
-        printf "%b%s%b %s\n" "$YELLOW" "⚠" "$NC" "Modules directory not found: $MODULES_DIR"
+        printf "%b%s%b %s\n" "$YELLOW" "[!]" "$NC" "Modules directory not found: $MODULES_DIR"
         echo "Make sure you've run the mac-dev-setup installer first"
         exit 1
     fi
@@ -110,7 +110,7 @@ search_aliases() {
     done
 
     if [ "$found" = false ]; then
-        printf "%b%s%b No aliases found matching '%s'\n" "$YELLOW" "⚠" "$NC" "$search_term"
+        printf "%b%s%b No aliases found matching '%s'\n" "$YELLOW" "[!]" "$NC" "$search_term"
     fi
 }
 

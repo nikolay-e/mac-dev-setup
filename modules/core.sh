@@ -36,8 +36,7 @@ alias reload='source ~/.zshrc'
 alias hosts='sudo nvim /etc/hosts'
 
 # Terminal utilities
-alias tree='tree -C'
-alias treex='tree -C -I "node_modules|*.pyc|__pycache__"'
+alias treex='tree -I "node_modules|*.pyc|__pycache__|.git"'
 alias c='clear'
 alias p='pbpaste'
 alias copypwd='pwd | pbcopy'
