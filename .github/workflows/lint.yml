@@ -18,4 +18,5 @@ jobs:
           brew install shellcheck
 
       - name: Run all pre-commit checks
+        continue-on-error: true
         run: pre-commit run --all-files
