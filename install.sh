@@ -22,15 +22,15 @@ info() {
     printf "${BLUE}[*]${NC} %s\n" "$1"
 }
 
-msg_ok() {
+success() {
     printf "${GREEN}[+]${NC} %s\n" "$1"
 }
 
-msg_err() {
+error() {
     printf "${RED}[-]${NC} %s\n" "$1"
 }
 
-msg_warn() {
+warn() {
     printf "${YELLOW}[!]${NC} %s\n" "$1"
 }
 
@@ -82,7 +82,7 @@ echo ""
 
 # Check if Xcode Command Line Tools are installed
 if ! xcode-select -p &>/dev/null; then
-    msg_err "Xcode Command Line Tools are not installed."
+    error "Xcode Command Line Tools are not installed."
     echo ""
     echo "Please install them first by running:"
     echo "  xcode-select --install"
@@ -93,7 +93,7 @@ fi
 
 # Check if Homebrew is installed
 if ! command -v brew &> /dev/null; then
-    echo "Error: Homebrew is not installed."
+    error "Homebrew is not installed."
     echo ""
     echo "Please install Homebrew first by running:"
     echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
@@ -104,7 +104,7 @@ fi
 
 # Check if Zsh is the default shell
 if [[ "$SHELL" != */zsh ]]; then
-    echo "Warning: Your default shell is not Zsh (currently: $SHELL)"
+    warn "Your default shell is not Zsh (currently: $SHELL)"
     echo "   This setup is optimized for Zsh. Some features may not work correctly."
     echo ""
     echo "   To switch to Zsh, run:"
@@ -187,10 +187,10 @@ install_pipx_packages() {
                 info "pre-commit already installed via pipx"
             else
                 pipx install pre-commit
-                msg_ok "Installed pre-commit via pipx"
+                success "Installed pre-commit via pipx"
             fi
         else
-            msg_warn "pipx not found, skipping pre-commit installation"
+            warn "pipx not found, skipping pre-commit installation"
         fi
     fi
 }
@@ -280,9 +280,9 @@ if [[ $DRY -eq 0 ]]; then
     else
         # Copy plugins.toml to Sheldon config directory
         if cp "$REPO_ROOT/plugins.toml" "$SHELDON_CONFIG_DIR/plugins.toml"; then
-            msg_ok "Updated Sheldon configuration"
+            success "Updated Sheldon configuration"
         else
-            msg_err "Failed to copy plugins.toml"
+            error "Failed to copy plugins.toml"
             exit 1
         fi
     fi
@@ -291,13 +291,13 @@ if [[ $DRY -eq 0 ]]; then
     if command_exists sheldon; then
         info "Installing Zsh plugins..."
         if sheldon lock; then
-            msg_ok "Installed Zsh plugins successfully"
+            success "Installed Zsh plugins successfully"
         else
-            msg_warn "Sheldon plugin installation failed"
+            warn "Sheldon plugin installation failed"
             echo "   You can manually install them later with: sheldon lock"
         fi
     else
-        msg_warn "Sheldon not found, skipping plugin installation"
+        warn "Sheldon not found, skipping plugin installation"
         echo "   Make sure Sheldon is installed via Homebrew"
     fi
 elif [[ $DRY -eq 1 ]]; then
@@ -317,9 +317,9 @@ if [[ $DRY -eq 0 ]]; then
         info "Starship configuration is already up to date"
     else
         if cp "$REPO_ROOT/starship.toml" "$HOME/.config/starship.toml"; then
-            msg_ok "Installed Starship configuration"
+            success "Installed Starship configuration"
         else
-            msg_err "Failed to copy starship.toml"
+            error "Failed to copy starship.toml"
             exit 1
         fi
     fi
@@ -337,9 +337,9 @@ if [[ $DRY -eq 0 ]]; then
 
     # Copy modules to user config directory
     if cp -r "$REPO_ROOT"/modules/* "$MODULES_CONFIG_DIR/"; then
-        msg_ok "Installed modular alias system"
+        success "Installed modular alias system"
     else
-        msg_err "Failed to copy modules"
+        error "Failed to copy modules"
         exit 1
     fi
 
@@ -350,9 +350,9 @@ if [[ $DRY -eq 0 ]]; then
     mkdir -p "$HOME/.local/bin"
     if cp "$REPO_ROOT/scripts/learn-aliases.sh" "$HOME/.local/bin/learn-aliases" 2>/dev/null; then
         chmod +x "$HOME/.local/bin/learn-aliases"
-        msg_ok "Installed learn-aliases command"
+        success "Installed learn-aliases command"
     else
-        msg_warn "Failed to install learn-aliases to ~/.local/bin/"
+        warn "Failed to install learn-aliases to ~/.local/bin/"
         echo "   You can run it directly from: ./scripts/learn-aliases.sh"
     fi
 
@@ -383,7 +383,7 @@ if [[ $DRY -eq 0 ]]; then
 #     git push "$@" && echo "Push completed successfully!"
 # }
 EOF
-        msg_ok "Created local customization template"
+        success "Created local customization template"
         info "Edit ~/.config/mac-dev-setup/local.sh to add your personal aliases"
     else
         info "Local customization file already exists"

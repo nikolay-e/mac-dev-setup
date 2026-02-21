@@ -416,7 +416,7 @@ if [[ "$response" =~ ^[Yy]$ ]]; then
   info "Uninstall complete! Restart your terminal to apply changes."
   echo ""
   echo "Additional cleanup available:"
-  echo "   • To remove Homebrew packages: brew bundle cleanup --file=./Brewfile"
+  echo "   • To remove Homebrew packages: cd $REPO_ROOT && brew bundle cleanup"
   echo "   • To completely remove Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
   echo ""
 else
