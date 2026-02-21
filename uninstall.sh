@@ -292,10 +292,16 @@ cleanup_shell_integrations() {
     echo "Removed fzf Bash integration file"
   fi
 
+  # Remove learn-aliases script
+  if [ -f "$HOME/.local/bin/learn-aliases" ]; then
+    rm "$HOME/.local/bin/learn-aliases"
+    echo "Removed learn-aliases script"
+  fi
+
   # Check for pipx installations that might be from mac-dev-setup
   local pipx_packages
   if command -v pipx >/dev/null 2>&1; then
-    pipx_packages=$(pipx list --short 2>/dev/null | grep -E "^(learn-aliases)" || true)
+    pipx_packages=$(pipx list --short 2>/dev/null | grep -E "^pre-commit " || true)
     if [ -n "$pipx_packages" ]; then
       echo ""
       echo "Found mac-dev-setup pipx packages:"
@@ -310,7 +316,6 @@ cleanup_shell_integrations() {
       if [[ "$response" =~ ^[Yy]$ ]]; then
         echo "$pipx_packages" | while read -r package_line; do
           if [ -n "$package_line" ]; then
-            # Extract just the package name (first word before space/version)
             package_name=$(echo "$package_line" | cut -d' ' -f1)
             pipx uninstall "$package_name" 2>/dev/null && echo "Removed pipx package: $package_name" || echo "Failed to remove: $package_name"
           fi
@@ -323,7 +328,7 @@ cleanup_shell_integrations() {
   echo ""
   warn "Homebrew packages installed by mac-dev-setup are still present."
   echo "These packages include: bat, eza, ripgrep, fd, zoxide, sheldon, mise, pipx,"
-  echo "pre-commit, colima, docker, kubectl, helm, tenv, k9s, kubectx, terraform-docs, and others."
+  echo "colima, docker, kubectl, helm, tenv, k9s, kubectx, terraform-docs, and others."
   echo ""
 
   # List currently installed packages from Brewfile

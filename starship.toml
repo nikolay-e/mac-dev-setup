@@ -1,7 +1,7 @@
 # Minimal Starship configuration
-# Show only directory and git branch
+# Only modules listed in format are rendered; others are excluded automatically
 
-format = "$directory$git_branch$character"
+format = "$directory$git_branch$git_state$character"
 
 [directory]
 truncation_length = 1
@@ -11,61 +11,9 @@ style = "bold blue"
 [git_branch]
 format = "\\[[$branch](bold green)\\] "
 
+[git_state]
+format = "\\([$state( $progress_current/$progress_total)](bold yellow)\\) "
+
 [character]
 success_symbol = "[%](bold white)"
 error_symbol = "[%](bold red)"
-
-# Disable all other modules
-[aws]
-disabled = true
-
-[azure]
-disabled = true
-
-[gcloud]
-disabled = true
-
-[git_commit]
-disabled = true
-
-[git_state]
-disabled = true
-
-[git_status]
-disabled = true
-
-[package]
-disabled = true
-
-[nodejs]
-disabled = true
-
-[python]
-disabled = true
-
-[rust]
-disabled = true
-
-[docker_context]
-disabled = true
-
-[kubernetes]
-disabled = true
-
-[terraform]
-disabled = true
-
-[cmd_duration]
-disabled = true
-
-[line_break]
-disabled = true
-
-[username]
-disabled = true
-
-[hostname]
-disabled = true
-
-[time]
-disabled = true

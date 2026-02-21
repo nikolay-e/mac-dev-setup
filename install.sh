@@ -2,6 +2,9 @@
 # mac-dev-setup installer - secure, vetted development environment
 set -euo pipefail
 
+# Get the repository root
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+
 # --- Helper Functions ---
 # Default flag values
 DRY=0
@@ -29,10 +32,6 @@ msg_err() {
 
 msg_warn() {
     printf "${YELLOW}[!]${NC} %s\n" "$1"
-}
-
-msg_info() {
-    printf "${BLUE}[*]${NC} %s\n" "$1"
 }
 
 # Check if command exists
@@ -132,7 +131,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
         echo "    • ${BASH_REMATCH[1]}"
     fi
-done < Brewfile
+done < "$REPO_ROOT/Brewfile"
 
 
 # List other actions
@@ -170,9 +169,9 @@ install_homebrew_packages() {
     export HOMEBREW_NO_AUTO_UPDATE=1
 
     if (( DRY )); then
-        run_cmd brew bundle --file="./Brewfile" --dry-run
+        run_cmd brew bundle --file="$REPO_ROOT/Brewfile" --dry-run
     else
-        run_cmd brew bundle --file="./Brewfile"
+        run_cmd brew bundle --file="$REPO_ROOT/Brewfile"
         info "Homebrew packages installation complete!"
     fi
 }
@@ -185,7 +184,7 @@ install_pipx_packages() {
     else
         if command_exists pipx; then
             if pipx list | grep -q "pre-commit"; then
-                msg_info "pre-commit already installed via pipx"
+                info "pre-commit already installed via pipx"
             else
                 pipx install pre-commit
                 msg_ok "Installed pre-commit via pipx"
@@ -198,7 +197,7 @@ install_pipx_packages() {
 
 # --- Create Configuration Symlinks ---
 create_symlinks() {
-    local source="$PWD/zsh_config.sh"
+    local source="$REPO_ROOT/zsh_config.sh"
     local target="$HOME/.zsh_config.sh"
 
     if [[ ! -f "$source" ]]; then
@@ -276,11 +275,11 @@ if [[ $DRY -eq 0 ]]; then
     mkdir -p "$SHELDON_CONFIG_DIR"
 
     # Check if plugins.toml already exists and is current
-    if [ -f "$SHELDON_CONFIG_DIR/plugins.toml" ] && diff -q ./plugins.toml "$SHELDON_CONFIG_DIR/plugins.toml" >/dev/null 2>&1; then
-        msg_info "Sheldon plugins.toml is already up to date"
+    if [ -f "$SHELDON_CONFIG_DIR/plugins.toml" ] && diff -q "$REPO_ROOT/plugins.toml" "$SHELDON_CONFIG_DIR/plugins.toml" >/dev/null 2>&1; then
+        info "Sheldon plugins.toml is already up to date"
     else
         # Copy plugins.toml to Sheldon config directory
-        if cp ./plugins.toml "$SHELDON_CONFIG_DIR/plugins.toml"; then
+        if cp "$REPO_ROOT/plugins.toml" "$SHELDON_CONFIG_DIR/plugins.toml"; then
             msg_ok "Updated Sheldon configuration"
         else
             msg_err "Failed to copy plugins.toml"
@@ -290,7 +289,7 @@ if [[ $DRY -eq 0 ]]; then
 
     # Install plugins with Sheldon
     if command_exists sheldon; then
-        msg_info "Installing Zsh plugins..."
+        info "Installing Zsh plugins..."
         if sheldon lock; then
             msg_ok "Installed Zsh plugins successfully"
         else
@@ -313,12 +312,16 @@ if [[ $DRY -eq 0 ]]; then
     # Create starship config directory
     mkdir -p "$HOME/.config"
 
-    # Copy starship.toml to user config directory
-    if cp ./starship.toml "$HOME/.config/starship.toml"; then
-        msg_ok "Installed Starship configuration"
+    # Check if starship.toml already exists and is current
+    if [ -f "$HOME/.config/starship.toml" ] && diff -q "$REPO_ROOT/starship.toml" "$HOME/.config/starship.toml" >/dev/null 2>&1; then
+        info "Starship configuration is already up to date"
     else
-        msg_err "Failed to copy starship.toml"
-        exit 1
+        if cp "$REPO_ROOT/starship.toml" "$HOME/.config/starship.toml"; then
+            msg_ok "Installed Starship configuration"
+        else
+            msg_err "Failed to copy starship.toml"
+            exit 1
+        fi
     fi
 elif [[ $DRY -eq 1 ]]; then
     echo "+ Copy starship.toml to ~/.config/"
@@ -333,7 +336,7 @@ if [[ $DRY -eq 0 ]]; then
     mkdir -p "$MODULES_CONFIG_DIR"
 
     # Copy modules to user config directory
-    if cp -r ./modules/* "$MODULES_CONFIG_DIR/"; then
+    if cp -r "$REPO_ROOT"/modules/* "$MODULES_CONFIG_DIR/"; then
         msg_ok "Installed modular alias system"
     else
         msg_err "Failed to copy modules"
@@ -345,7 +348,7 @@ if [[ $DRY -eq 0 ]]; then
 
     # Install learn-aliases script
     mkdir -p "$HOME/.local/bin"
-    if cp ./scripts/learn-aliases.sh "$HOME/.local/bin/learn-aliases" 2>/dev/null; then
+    if cp "$REPO_ROOT/scripts/learn-aliases.sh" "$HOME/.local/bin/learn-aliases" 2>/dev/null; then
         chmod +x "$HOME/.local/bin/learn-aliases"
         msg_ok "Installed learn-aliases command"
     else
@@ -381,9 +384,9 @@ if [[ $DRY -eq 0 ]]; then
 # }
 EOF
         msg_ok "Created local customization template"
-        msg_info "Edit ~/.config/mac-dev-setup/local.sh to add your personal aliases"
+        info "Edit ~/.config/mac-dev-setup/local.sh to add your personal aliases"
     else
-        msg_info "Local customization file already exists"
+        info "Local customization file already exists"
     fi
 elif [[ $DRY -eq 1 ]]; then
     echo "+ Create ~/.config/mac-dev-setup/modules/"

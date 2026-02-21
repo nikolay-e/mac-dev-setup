@@ -19,7 +19,7 @@ repos:
   - repo: local
     hooks:
       - id: shellcheck
-        name: ShellCheck v0.10.0
+        name: ShellCheck
         entry: shellcheck
         args: ["--severity=warning"]
         language: system
@@ -37,7 +37,7 @@ repos:
         name: Test installer dry-run
         entry: ./install.sh --dry-run --yes
         language: system
-        files: ^(install\.sh|Brewfile|zsh_config\.sh|plugins\.toml)$
+        files: ^(install\.sh|Brewfile|zsh_config\.sh|plugins\.toml|starship\.toml|modules/.*)$
         pass_filenames: false
 
       - id: uninstall-help

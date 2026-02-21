@@ -2,11 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    ":dependencyDashboard",
-    ":semanticCommits",
-    ":automergeDigest",
-    ":automergePatch",
-    ":automergeMinor"
+    ":semanticCommits"
   ],
   "timezone": "Europe/Berlin",
   "schedule": ["before 6am on monday"],
@@ -16,20 +12,15 @@
   "packageRules": [
     {
       "description": "Auto-merge patch and minor updates",
-      "matchUpdateTypes": ["patch", "minor"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
       "automerge": true,
       "automergeType": "pr",
       "automergeStrategy": "squash"
     },
     {
-      "description": "Auto-merge GitHub Actions updates",
+      "description": "Auto-merge GitHub Actions patch and minor updates",
       "matchManagers": ["github-actions"],
-      "automerge": true
-    },
-    {
-      "description": "Auto-merge Docker image updates",
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["patch", "minor"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
       "automerge": true
     },
     {
@@ -45,17 +36,5 @@
       "automerge": false,
       "labels": ["major-update", "review-required"]
     }
-  ],
-  "docker": {
-    "enabled": true
-  },
-  "npm": {
-    "enabled": true
-  },
-  "pip_requirements": {
-    "enabled": true
-  },
-  "github-actions": {
-    "enabled": true
-  }
+  ]
 }

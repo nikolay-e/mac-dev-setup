@@ -10,7 +10,7 @@ Secure, offline-first macOS development environment automation.
 git clone https://github.com/nikolay-e/mac-dev-setup.git
 cd mac-dev-setup
 ./install.sh          # Full installation
-./install.sh --dry    # Preview changes
+./install.sh --dry-run # Preview changes
 ./uninstall.sh        # Remove everything
 ```
 
