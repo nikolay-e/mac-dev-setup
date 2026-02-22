@@ -1,9 +1,11 @@
 # Pre-commit hooks configuration
 repos:
   - repo: https://github.com/nikolay-e/pre-commit-hooks
-    rev: v2.0.1
+    rev: v2.1.0
     hooks:
       - id: no-emoji
+      - id: shift-commit-time
+        stages: [post-commit]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
