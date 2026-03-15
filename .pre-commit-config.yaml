@@ -4,8 +4,6 @@ repos:
     rev: v2.1.0
     hooks:
       - id: no-emoji
-      - id: shift-commit-time
-        stages: [post-commit]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
